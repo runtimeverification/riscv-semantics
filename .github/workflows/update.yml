@@ -1,0 +1,39 @@
+name: 'Update Version'
+on:
+  push:
+    branches:
+      - '_update-deps/runtimeverification/k'
+      - 'project-setup'
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-deps:
+    name: 'Update Dependecies'
+    runs-on: [self-hosted, linux, flyweight]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      - name: 'Configure GitHub user'
+        run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
+      - name: 'Install Python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v9
+      - name: 'Update Poetry files'
+        run: |
+          K_VERSION="$(cat deps/k_release)"
+          sed -i 's!pyk = { git = "https://github.com/runtimeverification/k.git", tag = "[v0-9\.]*", subdirectory = "pyk" }!pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v'${K_VERSION}'", subdirectory = "pyk" }!' pyproject.toml
+          poetry update
+          git add . && git commit -m "Sync Poetry files ${K_VERSION}" || true
+      - name: 'Push updates'
+        run: git push
