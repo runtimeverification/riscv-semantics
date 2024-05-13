@@ -10,6 +10,9 @@ authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
 ]
 
+[tool.poetry.plugins.kdist]
+riscv-semantics = "kriscv.kdist.plugin"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v7.0.56", subdirectory = "pyk" }
