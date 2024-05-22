@@ -15,7 +15,7 @@ riscv-semantics = "kriscv.kdist.plugin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v7.0.80", subdirectory = "pyk" }
+pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v7.0.81", subdirectory = "pyk" }
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"
