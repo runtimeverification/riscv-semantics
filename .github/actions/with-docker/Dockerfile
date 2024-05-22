@@ -41,6 +41,9 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 
 RUN pip3 install git+https://github.com/riscv/riscof.git
 
+RUN mkdir /opt/riscv && \
+    chown root /opt/riscv
+
 ENV RISCV=/opt/riscv
 ENV PATH=$PATH:$RISCV/bin
 
