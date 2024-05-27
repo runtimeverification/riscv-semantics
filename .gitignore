@@ -1,3 +1,5 @@
 /dist/
 __pycache__/
 .coverage
+tests/riscof/work.lock
+tests/riscof/work
