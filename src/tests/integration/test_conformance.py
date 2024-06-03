@@ -26,6 +26,7 @@ def _skipped_tests() -> set[Path]:
     return {REPO_ROOT / test_path for test_path in (RISCOF / 'failing.txt').read_text().splitlines()}
 
 
+# Failing tests pulled from tests/riscof/failing.txt
 SKIPPED_TESTS: Final = _skipped_tests()
 
 ARCH_SUITE_DIR: Final = RISCOF / 'riscv-arch-test' / 'riscv-test-suite'
@@ -43,6 +44,7 @@ def _mod_time(path: Path) -> float:
 
 
 def _test_list() -> Path:
+    """Get the path to test_list.yaml, regenerating if needed."""
     work_dir = RISCOF / 'work'
     test_list = work_dir / 'test_list.yaml'
     config = RISCOF / 'config.ini'
@@ -94,6 +96,10 @@ def _mabi() -> str:
 
 
 def _compile_test(test: dict[str, Any]) -> Path:
+    """Compile the test for the given test entry from test_list.yaml.
+
+    Produces the compiled <test>.elf file and returns the path to its disassembly <test>.diss."
+    """
     test_file = Path(test['test_path'])
     _LOGGER.info(f'Running test: {test_file}')
     march = test['isa'].lower()
@@ -136,7 +142,7 @@ def _compile_test(test: dict[str, Any]) -> Path:
 
 
 def _test(diss_file: Path) -> None:
-    pass
+    """Execute a compiled test given its disassembled ELF file."""
 
 
 @pytest.mark.parametrize(
