@@ -1,3 +1,6 @@
+ARG K_VERSION
+ARG TOOLCHAIN_VERSION
+
 ARG TOOLCHAIN_VERSION
 FROM runtimeverificationinc/riscv-gnu-toolchain:ubuntu-jammy-${TOOLCHAIN_VERSION} as TOOLCHAIN
 
