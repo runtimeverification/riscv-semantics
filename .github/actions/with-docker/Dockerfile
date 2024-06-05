@@ -1,9 +1,8 @@
-ARG K_VERSION
-FROM runtimeverificationinc/kframework-k:ubuntu-jammy-${K_VERSION}
-
 ARG TOOLCHAIN_VERSION
 FROM runtimeverificationinc/riscv-gnu-toolchain:ubuntu-jammy-${TOOLCHAIN_VERSION} as TOOLCHAIN
-COPY --from=TOOLCHAIN /opt/riscv/bin /home/user/riscv/bin
+
+ARG K_VERSION
+FROM runtimeverificationinc/kframework-k:ubuntu-jammy-${K_VERSION}
 
 ARG PYTHON_VERSION=3.10
 
@@ -25,6 +24,7 @@ WORKDIR /home/user
 ENV PATH=/home/user/.local/bin:${PATH}
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
+COPY --from=TOOLCHAIN /opt/riscv/bin /home/user/riscv/bin
 ENV PATH=/home/user/riscv/bin:${PATH}
 
 RUN pip3 install git+https://github.com/riscv/riscof.git
