@@ -15,10 +15,12 @@ runs:
       CONTAINER_NAME=${{ inputs.container-name }}
       TAG=runtimeverificationinc/${CONTAINER_NAME}
       K_VERSION=$(cat deps/k_release)
+      TOOLCHAIN_VERSION=$(cat deps/riscv-gnu-toolchain_release)
       docker build .                                  \
         --file .github/actions/with-docker/Dockerfile \
         --tag ${TAG}                                  \
-        --build-arg K_VERSION=${K_VERSION}
+        --build-arg K_VERSION=${K_VERSION}            \
+        --build-arg TOOLCHAIN_VERSION=${TOOLCHAIN_VERSION}
       docker run                          \
         --name ${CONTAINER_NAME}          \
         --rm                              \
