@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kriscv"
-version = "0.1.6"
+version = "0.1.7"
 description = "K tooling for the RISC-V architecture"
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -15,7 +15,7 @@ riscv-semantics = "kriscv.kdist.plugin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v7.0.110", subdirectory = "pyk" }
+pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v7.0.120", subdirectory = "pyk" }
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"
