@@ -19,7 +19,7 @@ The [DUT plugin](https://riscof.readthedocs.io/en/1.24.0/plugins.html) for our R
      - Unmodified from the riscof model template.
    - model_test.h
      - Definition of macros used in the test suite.
-     - Unmodified form the riscof model template, except that `RVMODEL_HALT` uses `t2` rather than `t5` because `t5` does not exist for the `rv32e` and `rv64e` ISAs.
+     - Unmodified from the riscof model template, except that `RVMODEL_HALT` uses `t2` rather than `t5` because `t5` does not exist for the `rv32e` and `rv64e` ISAs.
 - kriscv_isa.yaml
   - Specification of the supported ISA and extensions as described in [https://riscv-config.readthedocs.io/en/3.3.1/yaml-specs.html#isa-yaml-spec](https://riscv-config.readthedocs.io/en/3.3.1/yaml-specs.html#isa-yaml-spec)
 - kriscv_platform.yaml
