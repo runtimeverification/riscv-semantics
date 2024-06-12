@@ -29,5 +29,3 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 
 COPY --from=TOOLCHAIN /opt/riscv /home/user/riscv
 ENV PATH=/home/user/riscv/bin:${PATH}
-
-RUN pip3 install git+https://github.com/riscv/riscof.git

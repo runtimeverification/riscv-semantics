@@ -19,6 +19,7 @@ pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v7.0.120", 
 pyyaml = "^6.0.1"
 types-pyyaml = "^6.0.12.20240311"
 filelock = "^3.14.0"
+riscof = "^1.25.3"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"
