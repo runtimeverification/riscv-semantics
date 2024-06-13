@@ -28,6 +28,7 @@ jobs:
           ./package/version.sh bump ${og_version}
           ./package/version.sh sub
           new_version=$(cat package/version)
+          sed -i 's!__version__ = "[0-9\.]*"!__version__ = "'${new_version}'"!' tests/riscof/kriscv/riscof_kriscv.py
           git add --update && git commit --message "Set Version: ${new_version}" || true
       - name: 'Push updates'
         run: git push origin HEAD:${GITHUB_HEAD_REF}
