@@ -17,7 +17,7 @@ logger = logging.getLogger()
 
 class kriscv(pluginTemplate):
     __model__ = "kriscv"
-    __version__ = "XXX"
+    __version__ = "0.1.8"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
