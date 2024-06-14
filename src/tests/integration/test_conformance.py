@@ -19,17 +19,17 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
-RISCOF: Final = REPO_ROOT / 'tests' / 'riscof'
+RISCOF: Final = Path(__file__).parent / 'riscof'
 
 
 def _skipped_tests() -> set[Path]:
-    return {REPO_ROOT / test_path for test_path in (RISCOF / 'failing.txt').read_text().splitlines()}
+    return {REPO_ROOT / test_path for test_path in (REPO_ROOT / 'tests' / 'failing.txt').read_text().splitlines()}
 
 
 # Failing tests pulled from tests/riscof/failing.txt
 SKIPPED_TESTS: Final = _skipped_tests()
 
-ARCH_SUITE_DIR: Final = RISCOF / 'riscv-arch-test' / 'riscv-test-suite'
+ARCH_SUITE_DIR: Final = REPO_ROOT / 'tests' / 'riscv-arch-test' / 'riscv-test-suite'
 
 
 def _mod_time(path: Path) -> float:

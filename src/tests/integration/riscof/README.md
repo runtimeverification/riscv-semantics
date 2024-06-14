@@ -2,12 +2,6 @@
 This directory contains the RISC-V Architectural Test Suite and associated configuration.
 
 ## Contents
-### riscv-arch-test
-The submodule containing the actual test files under `riscv-arch-test/riscv-test-suite`.
-
-### failing.txt
-A list of tests that are known to fail with the current implementation. Each line gives the path to a failing test file relative to the `riscv-semantics` repo root.
-
 ### config.ini
 The [riscof configuration file](https://riscof.readthedocs.io/en/1.24.0/inputs.html?highlight=config.ini#config-ini-syntax) specifying the paths to our DUT and golden reference plugins. 
 
@@ -27,9 +21,6 @@ The [DUT plugin](https://riscof.readthedocs.io/en/1.24.0/plugins.html) for our R
 - riscof_kriscv.py
    - The actual plugin implementation for initializing, building, and running the test suite  with riscof.
    - Currently under construction.
-
-### sail_cSim
-Analogous to `kriscv`, but for the golden reference [Sail RISC-V model](https://github.com/riscv/sail-riscv). Taken from [https://gitlab.com/incoresemi/riscof-plugins/-/tree/master/sail_cSim](https://gitlab.com/incoresemi/riscof-plugins/-/tree/master/sail_cSim)
 
 ### work
 The test working directory generated during a test run. After a test run, this will contain:
