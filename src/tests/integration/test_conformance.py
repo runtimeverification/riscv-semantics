@@ -32,8 +32,14 @@ ARCH_TESTS: Final = tuple(test for test in ALL_ARCH_TESTS if test['test_path'] n
 REST_ARCH_TESTS: Final = tuple(test for test in ALL_ARCH_TESTS if test['test_path'] in SKIPPED_TESTS)
 
 
-def _test(test_dir: Path, isa: str) -> None:
-    pass
+def _test(test_dir: Path, name: str, isa: str) -> None:
+    asm = test_dir / f'{name}.s'
+    elf = test_dir / f'{name}.elf'
+    disass = test_dir / f'{name}.disass'
+
+    assert asm.exists()
+    assert elf.exists()
+    assert disass.exists()
 
 
 @pytest.mark.parametrize(
@@ -42,7 +48,11 @@ def _test(test_dir: Path, isa: str) -> None:
     ids=[str(Path(test['test_path']).relative_to(ARCH_SUITE_DIR)) for test in ARCH_TESTS],
 )
 def test_arch(test_entry: dict[str, Any]) -> None:
-    _test(Path(test_entry['work_dir']), test_entry['isa'].lower())
+    _test(
+        Path(test_entry['work_dir']) / 'dut',
+        Path(test_entry['test_path']).relative_to(ARCH_SUITE_DIR).stem,
+        test_entry['isa'].lower(),
+    )
 
 
 @pytest.mark.skip(reason='failing arch tests')
@@ -52,4 +62,8 @@ def test_arch(test_entry: dict[str, Any]) -> None:
     ids=[str(Path(test['test_path']).relative_to(ARCH_SUITE_DIR)) for test in REST_ARCH_TESTS],
 )
 def test_rest_arch(test_entry: dict[str, Any]) -> None:
-    _test(Path(test_entry['work_dir']), test_entry['isa'].lower())
+    _test(
+        Path(test_entry['work_dir']) / 'dut',
+        Path(test_entry['test_path']).relative_to(ARCH_SUITE_DIR).stem,
+        test_entry['isa'].lower(),
+    )
