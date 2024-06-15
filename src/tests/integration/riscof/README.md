@@ -20,24 +20,7 @@ The [DUT plugin](https://riscof.readthedocs.io/en/1.24.0/plugins.html) for our R
    - Specification of the platform as described in [https://riscv-config.readthedocs.io/en/3.3.1/yaml-specs.html#platform-yaml-spec](https://riscv-config.readthedocs.io/en/3.3.1/yaml-specs.html#platform-yaml-spec)
 - riscof_kriscv.py
    - The actual plugin implementation for initializing, building, and running the test suite  with riscof.
-   - Currently under construction.
-
-### work
-The test working directory generated during a test run. After a test run, this will contain:
- - kriscv_isa_checked.yaml
-   - Completion of `kriscv_isa.yaml` with all defaults made explicit.
- - kriscv_platform_checked.yaml
-   - Completion of `kriscv_platform.yaml` with all defaults made explicit.  
- - database.yaml
-    -  A database of all tests in the test suite and their associated info pulled from the various `RVTEST` macros.
-- test_list.yaml
-   - The list of supported tests to run based on the `kriscv` ISA and platform specs.
-- rv(32|64)_(i|e)...
-   - The working directory for each individual test.
-   - Follows the same directory structure as the tests in `riscv-arch-test/riscv-test-suite`, but each `.S` file is replaced by a directory of the same name containing the compiled `.elf` and disassembled `.diss` files.
-
-### work.lock
-A lock file used to control concurrent accesses to the `work` directory by different test workers.
+   - Currently only supports compiling but not executing the tests.
 
 ## Running the Tests
 ### PyTest
@@ -45,4 +28,3 @@ These tests are run as part of `make test-integration` under `src/tests/integrat
 
 ### riscof
 The full riscof DUT plugin is still under construction, so execution with riscof is currently unsupported.
-
