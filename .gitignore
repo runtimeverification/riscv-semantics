@@ -3,3 +3,4 @@ __pycache__/
 .coverage
 src/tests/integration/riscof/work.lock
 src/tests/integration/riscof/work
+tests/riscv-arch-test-compiled

@@ -44,6 +44,11 @@ test-unit: poetry-install
 test-integration: poetry-install
 	$(POETRY_RUN) pytest src/tests/integration --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
 
+RISCOF_DIRS = $(shell find src/tests/integration/riscof -type d)
+RISCOF_FILES = $(shell find src/tests/integration/riscof -type f -name '*')
+
+tests/riscv-arch-test-compiled: tests/riscv-arch-test $(RISCOF_DIRS) $(RISCOF_FILES)
+	$(POETRY_RUN) riscof run --suite tests/riscv-arch-test/riscv-test-suite --env tests/riscv-arch-test/riscv-test-suite/env --config src/tests/integration/riscof/config.ini --work-dir tests/riscv-arch-test-compiled --no-ref-run
 
 # Coverage
 
