@@ -31,7 +31,7 @@ jobs:
       - name: 'Update Poetry files'
         run: |
           K_VERSION="$(cat deps/k_release)"
-          sed -i 's!pyk = { git = "https://github.com/runtimeverification/k.git", tag = "[v0-9\.]*", subdirectory = "pyk" }!pyk = { git = "https://github.com/runtimeverification/k.git", tag = "v'${K_VERSION}'", subdirectory = "pyk" }!' pyproject.toml
+          sed -i 's!kframework = { git = "https://github.com/runtimeverification/k.git", tag = "[v0-9\.]*", subdirectory = "pyk" }!kframework = { git = "https://github.com/runtimeverification/k.git", tag = "v'${K_VERSION}'", subdirectory = "pyk" }!' pyproject.toml
           poetry update
           git add . && git commit -m "pyproject.toml: sync pyk version ${K_VERSION}" || true
       - name: 'Push updates'
