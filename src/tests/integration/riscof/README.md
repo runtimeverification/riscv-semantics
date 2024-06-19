@@ -1,5 +1,5 @@
 # RISC-V Architectural Tests
-This directory contains the RISC-V Architectural Test Suite and associated configuration.
+This directory contains the configuration for the `riscof` tool used to execute the RISC-V Architectural Test Suite.
 
 ## Contents
 ### config.ini
