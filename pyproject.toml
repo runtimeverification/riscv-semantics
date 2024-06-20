@@ -15,7 +15,7 @@ riscv-semantics = "kriscv.kdist.plugin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-kframework = { git = "https://github.com/runtimeverification/k.git", tag = "v7.1.12", subdirectory = "pyk" }
+kframework = { git = "https://github.com/runtimeverification/k.git", tag = "v7.1.14", subdirectory = "pyk" }
 pyyaml = "^6.0.1"
 types-pyyaml = "^6.0.12.20240311"
 filelock = "^3.14.0"
