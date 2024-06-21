@@ -522,7 +522,7 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "kframework"
-version = "7.1.14"
+version = "7.1.15"
 description = ""
 optional = false
 python-versions = "^3.10"
@@ -544,8 +544,8 @@ xdg-base-dirs = "^6.0.1"
 [package.source]
 type = "git"
 url = "https://github.com/runtimeverification/k.git"
-reference = "v7.1.14"
-resolved_reference = "84263cdbedc3d2f30ef931c332b8395d2138bc49"
+reference = "v7.1.15"
+resolved_reference = "bdea563677e9b414ff4904f753dc870a1f744663"
 subdirectory = "pyk"
 
 [[package]]
@@ -1541,4 +1541,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "7923ee779fcd2afa892c58762550aaf2c6f2cf49f69b4b22e5341e798fc9cd2e"
+content-hash = "9307540e20d9caeea32b42974233d56fd1b5a581c541be8c31f799cee989da04"
