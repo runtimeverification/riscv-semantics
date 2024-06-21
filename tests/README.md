@@ -4,7 +4,7 @@ This directory contains the input RISC-V files for various tests.
 ## Contents
 
 ### failing.txt
-A list of tests that are known to fail under the current implementation. Each line consists of a single path to a failing test file. Paths are given relative to the `riscv-semantics` repository root.
+A list of tests that are known to fail under the current implementation. Each line consists of a single path to a failing test file. Paths are given relative to the `riscv-semantics/tests` directory.
 
 ### riscv-arch-test / riscv-arch-test-compiled
 The official RISC-V Architectural Test Suite. These are exercised in `src/tests/integration/test_conformance.py` as part of `make test_integration`.
