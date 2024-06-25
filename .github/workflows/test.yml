@@ -38,7 +38,15 @@ jobs:
     runs-on: [self-hosted, linux, flyweight]
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: 3.12
+      - name: Setup Poetry
+        uses: Gr1N/setup-poetry@v9
+        with:
+          python-version: '3.10'
       - name: 'Run code quality checks'
         run: make check
       - name: 'Run pyupgrade'
