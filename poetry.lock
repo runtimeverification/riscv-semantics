@@ -555,13 +555,13 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "kframework"
-version = "7.1.32"
+version = "7.1.33"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "kframework-7.1.32-py3-none-any.whl", hash = "sha256:3874da6cedd1fd9e7c0f85cde1887806d5fdd35a0470e1ec6c428cd1debd848a"},
-    {file = "kframework-7.1.32.tar.gz", hash = "sha256:8790793bb539123ccccfe8571703ed8316013eb8e21b4e4a4b01282aa1a3f0c6"},
+    {file = "kframework-7.1.33-py3-none-any.whl", hash = "sha256:a15562f6223494e9959a881548be445948fa562db5d70e70620cb39fa01cc663"},
+    {file = "kframework-7.1.33.tar.gz", hash = "sha256:5e79abeccf65f170bae06301c07b16639ffcda8e78354e2dfdac9f471cc03a01"},
 ]
 
 [package.dependencies]
@@ -918,17 +918,17 @@ test = ["enum34", "ipaddress", "mock", "pywin32", "wmi"]
 
 [[package]]
 name = "pybind11"
-version = "2.13.0"
+version = "2.13.1"
 description = "Seamless operability between C++11 and Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pybind11-2.13.0-py3-none-any.whl", hash = "sha256:da2eaf03b9973f3e9fdfb4880a716b5770f6bfdc2da32d2e92120173d687a553"},
-    {file = "pybind11-2.13.0.tar.gz", hash = "sha256:1dbab243bdbd72d9f3e9cd0a63f65500b6d09d61c20fab43edf8c5c2ad3a7538"},
+    {file = "pybind11-2.13.1-py3-none-any.whl", hash = "sha256:97881536abe0cd4260a9ccc5bf6d1cf3113318f08af1feb82d4b9f95e93f0aa4"},
+    {file = "pybind11-2.13.1.tar.gz", hash = "sha256:65be498b1cac516161add1508e65375674916bebf2570d057dc9c3c7bcbbc7b0"},
 ]
 
 [package.extras]
-global = ["pybind11-global (==2.13.0)"]
+global = ["pybind11-global (==2.13.1)"]
 
 [[package]]
 name = "pycodestyle"
@@ -1581,4 +1581,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d4fc7a7cba27ab39a564d9ff0f48c022ebac7d6e56ff7ba71ec0059e53ddfc97"
+content-hash = "4f3a9c7e2176598f39b048317cfc8af176cec50b912b90169e2b0af11e72c494"
