@@ -26,3 +26,11 @@ The test source files can be found under `riscv-arch-test/riscv-test-suite` and 
       - `<test_name>.s`, the pre-linking RISC-V ASM
 	  - `<test_name>.elf`, the fully compiled object file
 	  - `<test_name>.disass`, the disassembly of the compiled object file
+
+### simple
+A suite of simple handwritten RISC-V tests. Inputs are RISC-V ASM files `test.S` and are compiled with
+is compiled to ELF using
+```
+riscv64-unknown-elf-gcc -nostdlib -nostartfiles -static -march=rv32e -mabi=ilp32e -mno-relax -mlittle-endian -Xassembler -mno-arch-attr test.S
+```
+NOT YET IMPLEMENTED: Each input file must define global symbols `_start` and `_end`. The test is executed with the PC initially set to `_start`, and will halt when the PC reaches `_end`. The final KAST configuration is compared against `test.S.out`.
