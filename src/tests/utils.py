@@ -8,3 +8,14 @@ if TYPE_CHECKING:
 
 
 REPO_ROOT: Final = Path(__file__).parents[2].resolve(strict=True)
+TESTS_DIR: Final = (REPO_ROOT / 'tests').resolve(strict=True)
+
+
+def _failing_tests() -> set[Path]:
+    return {
+        (TESTS_DIR / test_path).resolve(strict=True)
+        for test_path in (TESTS_DIR / 'failing.txt').read_text().splitlines()
+    }
+
+
+FAILING_TESTS: Final = _failing_tests()

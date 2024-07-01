@@ -4,7 +4,7 @@ This directory contains the input RISC-V files for various tests.
 ## Contents
 
 ### failing.txt
-A list of tests that are known to fail under the current implementation. Each line consists of a single path to a failing test file. Paths are given relative to the `riscv-semantics` repository root.
+A list of tests that are known to fail under the current implementation. Each line consists of a single path to a failing test file. Paths are given relative to the `riscv-semantics/tests` directory.
 
 ### riscv-arch-test / riscv-arch-test-compiled
 The official RISC-V Architectural Test Suite. These are exercised in `src/tests/integration/test_conformance.py` as part of `make test_integration`.
@@ -26,3 +26,10 @@ The test source files can be found under `riscv-arch-test/riscv-test-suite` and 
       - `<test_name>.s`, the pre-linking RISC-V ASM
 	  - `<test_name>.elf`, the fully compiled object file
 	  - `<test_name>.disass`, the disassembly of the compiled object file
+
+### simple
+A suite of handwritten RISC-V tests. Inputs are RISC-V ASM files `test.S` which are compiled to ELF with
+```
+riscv64-unknown-elf-gcc -nostdlib -nostartfiles -static -march=rv32e -mabi=ilp32e -mno-relax -mlittle-endian -Xassembler -mno-arch-attr test.S
+```
+NOT YET IMPLEMENTED: Each input file must define global symbols `_start` and `_end`. The test is executed with the PC initially set to `_start`, and will halt when the PC reaches `_end`. The final KAST configuration is compared against `test.S.out`.
