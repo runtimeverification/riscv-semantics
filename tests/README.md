@@ -28,8 +28,7 @@ The test source files can be found under `riscv-arch-test/riscv-test-suite` and 
 	  - `<test_name>.disass`, the disassembly of the compiled object file
 
 ### simple
-A suite of simple handwritten RISC-V tests. Inputs are RISC-V ASM files `test.S` and are compiled with
-is compiled to ELF using
+A suite of handwritten RISC-V tests. Inputs are RISC-V ASM files `test.S` which are compiled to ELF with
 ```
 riscv64-unknown-elf-gcc -nostdlib -nostartfiles -static -march=rv32e -mabi=ilp32e -mno-relax -mlittle-endian -Xassembler -mno-arch-attr test.S
 ```
