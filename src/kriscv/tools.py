@@ -13,17 +13,21 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pyk.kast.inner import KInner
+    from pyk.kllvm.runtime import Runtime
     from pyk.ktool.kprint import KPrint
 
 
 class Tools:
     __krun: KRun
+    __runtime: Runtime
 
     def __init__(
         self,
         definition_dir: Path,
+        runtime: Runtime,
     ) -> None:
         self.__krun = KRun(definition_dir)
+        self.__runtime = runtime
 
     @property
     def krun(self) -> KRun:
@@ -32,6 +36,10 @@ class Tools:
     @property
     def kprint(self) -> KPrint:
         return self.__krun
+
+    @property
+    def runtime(self) -> Runtime:
+        return self.__runtime
 
     def init_config(self, config_vars: dict[str, KInner]) -> KInner:
         conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
