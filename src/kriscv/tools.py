@@ -6,8 +6,9 @@ from elftools.elf.elffile import ELFFile  # type: ignore
 from pyk.kast.inner import Subst
 from pyk.ktool.krun import KRun
 from pyk.prelude.k import GENERATED_TOP_CELL
+from pyk.prelude.kint import intToken
 
-from kriscv import elf_parser
+from kriscv import elf_parser, term_builder
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -50,6 +51,23 @@ class Tools:
         final_config_kore = self.krun.run_pattern(config_kore)
         return self.krun.kore_to_kast(final_config_kore)
 
-    def run_elf(self, elf_file: Path) -> KInner:
+    def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
         with open(elf_file, 'rb') as f:
-            return self.run_config(self.init_config(elf_parser.config_vars(ELFFile(f))))
+            elf = ELFFile(f)
+            if end_symbol is not None:
+                end_values = elf_parser.read_symbol(elf, end_symbol)
+                if len(end_values) == 0:
+                    raise AssertionError(f'Cannot find end symbol {end_symbol!r}: {elf_file}')
+                if len(end_values) > 1:
+                    raise AssertionError(
+                        f'End symbol {end_symbol!r} should be unique, but found multiple instances: {elf_file}'
+                    )
+                halt_cond = term_builder.halt_at_address(intToken(end_values[0]))
+            else:
+                halt_cond = term_builder.halt_never()
+            config_vars = {
+                '$MEM': elf_parser.memory_rangemap(elf),
+                '$PC': elf_parser.entry_point(elf),
+                '$HALT': halt_cond,
+            }
+            return self.run_config(self.init_config(config_vars))

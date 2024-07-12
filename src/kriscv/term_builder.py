@@ -14,6 +14,14 @@ if TYPE_CHECKING:
     T = TypeVar('T')
 
 
+def halt_never() -> KInner:
+    return KApply('HaltNever')
+
+
+def halt_at_address(address: KInner) -> KInner:
+    return KApply('HaltAtAddress', address)
+
+
 def disassemble(instr: KInner) -> KInner:
     return KApply('disassemble', instr)
 

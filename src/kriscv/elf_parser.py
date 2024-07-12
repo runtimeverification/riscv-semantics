@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from pyk.kast.inner import KInner
 
 
-def _memory_rangemap(elf: ELFFile) -> KInner:
+def memory_rangemap(elf: ELFFile) -> KInner:
     segments: dict[tuple[KInner, KInner], KInner] = {}
     for seg in elf.iter_segments():
         if seg['p_type'] == 'PT_LOAD':
@@ -22,11 +22,15 @@ def _memory_rangemap(elf: ELFFile) -> KInner:
     return rangemap_of(segments)
 
 
-def _entry_point(elf: ELFFile) -> KInner:
+def entry_point(elf: ELFFile) -> KInner:
     return intToken(elf.header['e_entry'])
 
 
-def config_vars(elf: ELFFile) -> dict[str, KInner]:
-    memory = _memory_rangemap(elf)
-    pc = _entry_point(elf)
-    return {'$MEM': memory, '$PC': pc}
+def read_symbol(elf: ELFFile, symbol: str) -> list[int]:
+    symtab = elf.get_section_by_name('.symtab')
+    if symtab is None:
+        return []
+    syms = symtab.get_symbol_by_name(symbol)
+    if syms is None:
+        return []
+    return [sym['st_value'] for sym in syms]

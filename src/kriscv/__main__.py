@@ -19,6 +19,7 @@ class KRISCVOpts: ...
 @dataclass
 class RunOpts(KRISCVOpts):
     input_file: Path
+    end_symbol: str | None
 
 
 def kriscv(args: Sequence[str]) -> None:
@@ -35,14 +36,14 @@ def _parse_args(args: Sequence[str]) -> KRISCVOpts:
 
     match ns.command:
         case 'run':
-            return RunOpts(input_file=Path(ns.input_file).resolve(strict=True))
+            return RunOpts(input_file=Path(ns.input_file).resolve(strict=True), end_symbol=ns.end_symbol)
         case _:
             raise AssertionError()
 
 
 def _kriscv_run(opts: RunOpts) -> None:
     tools = semantics()
-    final_conf = tools.run_elf(opts.input_file)
+    final_conf = tools.run_elf(opts.input_file, end_symbol=opts.end_symbol)
     print(tools.kprint.pretty_print(final_conf))
 
 
@@ -53,7 +54,7 @@ def _arg_parser() -> ArgumentParser:
 
     run_parser = command_parser.add_parser('run', help='execute RISC-V ELF files programs')
     run_parser.add_argument('input_file', metavar='FILE', help='RISC-V ELF file to run')
-
+    run_parser.add_argument('--end-symbol', type=str, help='Symbol marking the address which terminates execution')
     return parser
 
 
