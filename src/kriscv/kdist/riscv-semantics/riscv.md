@@ -89,5 +89,9 @@ module RISCV
        <pc> PC </pc>
        <halt> H </halt>
        requires notBool shouldHalt(H)
+
+  rule <instrs> ADDI RD , RS , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, chopAndExtend(readReg(REGS, RS) +Int IMM, XLEN())) </regs>
+       <pc> PC => wrapAddr(PC +Int 4) </pc>
 endmodule
 ```
