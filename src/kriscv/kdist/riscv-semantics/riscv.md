@@ -93,5 +93,9 @@ module RISCV
   rule <instrs> ADDI RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, chopAndExtend(readReg(REGS, RS) +Int IMM, XLEN())) </regs>
        <pc> PC => wrapAddr(PC +Int 4) </pc>
+
+  rule <instrs> LUI RD , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, chopAndExtend(IMM <<Int 12, XLEN())) </regs>
+       <pc> PC => wrapAddr(PC +Int 4) </pc>
 endmodule
 ```
