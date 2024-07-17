@@ -66,7 +66,7 @@ class Tools:
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {
-                '$MEM': elf_parser.memory_rangemap(elf),
+                '$MEM': elf_parser.memory_map(elf),
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,
             }

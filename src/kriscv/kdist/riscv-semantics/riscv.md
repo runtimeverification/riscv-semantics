@@ -15,7 +15,7 @@ module RISCV-CONFIGURATION
   configuration
     <riscv>
       <instrs> .K </instrs>
-      <mem> $MEM:RangeMap </mem>
+      <mem> $MEM:Map </mem> // Map{Int, Int}
       <regs> .Map </regs> // Map{Int, Int}
       <pc> $PC:Int </pc>
     </riscv>
@@ -47,26 +47,25 @@ module RISCV-TERMINATION
 endmodule
 
 module RISCV-MEMORY
-  imports BYTES
   imports INT
+  imports MAP
   imports RANGEMAP
   imports RISCV-CONFIGURATION
   imports RISCV-DISASSEMBLE
   imports RISCV-INSTRUCTIONS
 
-  syntax Int ::= loadByte(address: Int) [function]
-  rule [[ loadByte(ADDR) => ({ MEM [ ADDR ] } :>Bytes) [ #let ([ S , _ ) :Range) = find_range(MEM, ADDR) #in ADDR -Int S ] ]]
-       <mem> MEM </mem>
-
   syntax Int ::= wrapAddr(address: Int) [function]
   rule wrapAddr(A) => A modInt (2 ^Int XLEN())
 
-  syntax Instruction ::= fetchInstr(address: Int) [function]
-  rule fetchInstr(ADDR) =>
-    disassemble((loadByte(ADDR +Int 3) <<Int 24) |Int
-                (loadByte(ADDR +Int 2) <<Int 16) |Int
-                (loadByte(ADDR +Int 1) <<Int 8 ) |Int
-                 loadByte(ADDR       ))
+  syntax Int ::= loadByte(memory: Map, address: Int) [function]
+  rule loadByte(MEM, ADDR) => { MEM [ wrapAddr(ADDR) ] } :>Int
+
+  syntax Instruction ::= fetchInstr(memory: Map, address: Int) [function]
+  rule fetchInstr(MEM, ADDR) =>
+    disassemble((loadByte(MEM, ADDR +Int 3) <<Int 24) |Int
+                (loadByte(MEM, ADDR +Int 2) <<Int 16) |Int
+                (loadByte(MEM, ADDR +Int 1) <<Int 8 ) |Int
+                 loadByte(MEM, ADDR       ))
 
 
   syntax Map ::= writeReg(regs: Map, rd: Int, value: Int) [function]
@@ -85,7 +84,8 @@ module RISCV
   imports RISCV-MEMORY
   imports RISCV-TERMINATION
 
-  rule <instrs> .K => fetchInstr(PC) </instrs>
+  rule <instrs> .K => fetchInstr(MEM, PC) </instrs>
+       <mem> MEM </mem>
        <pc> PC </pc>
        <halt> H </halt>
        requires notBool shouldHalt(H)
