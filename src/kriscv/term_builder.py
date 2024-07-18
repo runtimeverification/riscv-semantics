@@ -227,4 +227,4 @@ def ebreak_instr() -> KInner:
 
 
 def invalid_instr() -> KInner:
-    return KApply('INVALIDINSTR')
+    return KApply('INVALID_INSTR')

@@ -70,7 +70,7 @@ module RISCV-INSTRUCTIONS
     | "ECALL"     [symbol(ECALL)]
     | "EBREAK"    [symbol(EBREAK)]
 
-  syntax InvalidInstr ::= "INVALID_INSTR" [symbol(INVALIDINSTR)]
+  syntax InvalidInstr ::= "INVALID_INSTR" [symbol(INVALID_INSTR)]
 
   // Truncate to length bits, then sign extend
   syntax Int ::= chopAndExtend(bits: Int, length: Int) [function, total]
