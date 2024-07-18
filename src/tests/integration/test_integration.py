@@ -20,12 +20,15 @@ SIMPLE_TESTS: Final = tuple(asm_file for asm_file in SIMPLE_DIR.rglob('*.S'))
 
 def _test_simple(elf_file: Path, expected_file: Path, update: bool) -> None:
     tools = semantics()
-    actual = tools.kprint.pretty_print(tools.run_elf(elf_file))
-    expected = expected_file.read_text()
+    actual = tools.kprint.pretty_print(tools.run_elf(elf_file, end_symbol='_halt'), sort_collections=True)
 
     if update:
+        expected_file.touch()
         expected_file.write_text(actual)
+        return
 
+    expected_file = expected_file.resolve(strict=True)
+    expected = expected_file.read_text()
     assert actual == expected
 
 
@@ -53,5 +56,5 @@ def test_simple(asm_file: Path, update_expected_output: bool, temp_dir: Path) ->
     ]
     subprocess.run(compile_cmd, check=True)
     assert elf_file.exists()
-    expected_file = Path(str(asm_file) + '.out').resolve(strict=True)
+    expected_file = Path(str(asm_file) + '.out')
     _test_simple(elf_file, expected_file, update_expected_output)
