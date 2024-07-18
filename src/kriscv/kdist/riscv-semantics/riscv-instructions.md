@@ -73,7 +73,7 @@ module RISCV-INSTRUCTIONS
   syntax InvalidInstr ::= "INVALID_INSTR" [symbol(INVALIDINSTR)]
 
   // Truncate to length bits, then sign extend
-  syntax Int ::= chopAndExtend(bits: Int, length: Int) [function]
+  syntax Int ::= chopAndExtend(bits: Int, length: Int) [function, total]
   rule chopAndExtend(B, L) => (-1 <<Int L) |Int B requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
   rule chopAndExtend(B, L) => B &Int (2 ^Int L -Int 1) [owise]
 endmodule

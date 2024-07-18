@@ -35,7 +35,7 @@ module RISCV-DISASSEMBLE
   syntax UnrecognizedOpCode ::=
       "UNRECOGNIZED"
 
-  syntax OpCode ::= decodeOpCode(Int) [function]
+  syntax OpCode ::= decodeOpCode(Int) [function, total]
   rule decodeOpCode(55 ) => LUI
   rule decodeOpCode(23 ) => AUIPC
   rule decodeOpCode(111) => JAL
