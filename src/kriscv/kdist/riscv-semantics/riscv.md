@@ -9,8 +9,8 @@ module RISCV-CONFIGURATION
 
   syntax HaltCondition
 
-  syntax Int ::= XLEN() [macro]
-  rule XLEN() => 32
+  syntax Int ::= "XLEN" [macro]
+  rule XLEN => 32
 
   configuration
     <riscv>
@@ -55,7 +55,7 @@ module RISCV-MEMORY
   imports RISCV-INSTRUCTIONS
 
   syntax Int ::= wrapAddr(address: Int) [function]
-  rule wrapAddr(A) => A modInt (2 ^Int XLEN())
+  rule wrapAddr(A) => A modInt (2 ^Int XLEN)
 
   syntax Int ::= loadByte(memory: Map, address: Int) [function]
   rule loadByte(MEM, ADDR) => { MEM [ wrapAddr(ADDR) ] } :>Int
@@ -91,11 +91,11 @@ module RISCV
        requires notBool shouldHalt(H)
 
   rule <instrs> ADDI RD , RS , IMM => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, chopAndExtend(readReg(REGS, RS) +Int IMM, XLEN())) </regs>
+       <regs> REGS => writeReg(REGS, RD, chopAndExtend(readReg(REGS, RS) +Int IMM, XLEN)) </regs>
        <pc> PC => wrapAddr(PC +Int 4) </pc>
 
   rule <instrs> LUI RD , IMM => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, chopAndExtend(IMM <<Int 12, XLEN())) </regs>
+       <regs> REGS => writeReg(REGS, RD, chopAndExtend(IMM <<Int 12, XLEN)) </regs>
        <pc> PC => wrapAddr(PC +Int 4) </pc>
 endmodule
 ```
