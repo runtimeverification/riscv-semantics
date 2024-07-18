@@ -1,10 +1,12 @@
 ```k
 requires "riscv-instructions.md"
+requires "word.md"
 
 module RISCV-DISASSEMBLE
   imports RISCV-INSTRUCTIONS
   imports INT
   imports STRING
+  imports WORD
 
   syntax OpCode ::=
       RTypeOpCode
@@ -95,24 +97,24 @@ module RISCV-DISASSEMBLE
   rule disassemble(RType(OP, 6, 0,  RD, RS1, RS2)) => OR   RD , RS1 , RS2
   rule disassemble(RType(OP, 7, 0,  RD, RS1, RS2)) => AND  RD , RS1 , RS2
 
-  rule disassemble(IType(OP-IMM, 0, RD, RS1, IMM)) => ADDI  RD , RS1 , chopAndExtend(IMM, 12)
+  rule disassemble(IType(OP-IMM, 0, RD, RS1, IMM)) => ADDI  RD , RS1 , infSignExtend(IMM, 12)
   rule disassemble(IType(OP-IMM, 1, RD, RS1, IMM)) => SLLI  RD , RS1 , IMM &Int 31 requires (IMM >>Int 5) &Int 127 ==Int 0
-  rule disassemble(IType(OP-IMM, 2, RD, RS1, IMM)) => SLTI  RD , RS1 , chopAndExtend(IMM, 12)
-  rule disassemble(IType(OP-IMM, 3, RD, RS1, IMM)) => SLTIU RD , RS1 , chopAndExtend(IMM, 12)
-  rule disassemble(IType(OP-IMM, 4, RD, RS1, IMM)) => XORI  RD , RS1 , chopAndExtend(IMM, 12)
+  rule disassemble(IType(OP-IMM, 2, RD, RS1, IMM)) => SLTI  RD , RS1 , infSignExtend(IMM, 12)
+  rule disassemble(IType(OP-IMM, 3, RD, RS1, IMM)) => SLTIU RD , RS1 , infSignExtend(IMM, 12)
+  rule disassemble(IType(OP-IMM, 4, RD, RS1, IMM)) => XORI  RD , RS1 , infSignExtend(IMM, 12)
   rule disassemble(IType(OP-IMM, 5, RD, RS1, IMM)) => SRLI  RD , RS1 , IMM &Int 31 requires (IMM >>Int 5) &Int 127 ==Int 0
   rule disassemble(IType(OP-IMM, 5, RD, RS1, IMM)) => SRAI  RD , RS1 , IMM &Int 31 requires (IMM >>Int 5) &Int 127 ==Int 32
-  rule disassemble(IType(OP-IMM, 6, RD, RS1, IMM)) => ORI   RD , RS1 , chopAndExtend(IMM, 12)
-  rule disassemble(IType(OP-IMM, 7, RD, RS1, IMM)) => ANDI  RD , RS1 , chopAndExtend(IMM, 12)
+  rule disassemble(IType(OP-IMM, 6, RD, RS1, IMM)) => ORI   RD , RS1 , infSignExtend(IMM, 12)
+  rule disassemble(IType(OP-IMM, 7, RD, RS1, IMM)) => ANDI  RD , RS1 , infSignExtend(IMM, 12)
 
 
-  rule disassemble(IType(JALR, 0, RD, RS1, IMM)) => JALR RD , chopAndExtend(IMM, 12) ( RS1 )
+  rule disassemble(IType(JALR, 0, RD, RS1, IMM)) => JALR RD , infSignExtend(IMM, 12) ( RS1 )
 
-  rule disassemble(IType(LOAD, 0, RD, RS1, IMM)) => LB  RD , chopAndExtend(IMM, 12) ( RS1 )
-  rule disassemble(IType(LOAD, 1, RD, RS1, IMM)) => LH  RD , chopAndExtend(IMM, 12) ( RS1 )
-  rule disassemble(IType(LOAD, 2, RD, RS1, IMM)) => LW  RD , chopAndExtend(IMM, 12) ( RS1 )
-  rule disassemble(IType(LOAD, 4, RD, RS1, IMM)) => LBU RD , chopAndExtend(IMM, 12) ( RS1 )
-  rule disassemble(IType(LOAD, 5, RD, RS1, IMM)) => LHU RD , chopAndExtend(IMM, 12) ( RS1 )
+  rule disassemble(IType(LOAD, 0, RD, RS1, IMM)) => LB  RD , infSignExtend(IMM, 12) ( RS1 )
+  rule disassemble(IType(LOAD, 1, RD, RS1, IMM)) => LH  RD , infSignExtend(IMM, 12) ( RS1 )
+  rule disassemble(IType(LOAD, 2, RD, RS1, IMM)) => LW  RD , infSignExtend(IMM, 12) ( RS1 )
+  rule disassemble(IType(LOAD, 4, RD, RS1, IMM)) => LBU RD , infSignExtend(IMM, 12) ( RS1 )
+  rule disassemble(IType(LOAD, 5, RD, RS1, IMM)) => LHU RD , infSignExtend(IMM, 12) ( RS1 )
 
   rule disassemble(IType(MISC-MEM, 0, 0, 0, 2099)) => FENCE.TSO
   rule disassemble(IType(MISC-MEM, 0, 0, 0, IMM)) => FENCE (IMM >>Int 4) &Int 15 , IMM &Int 15 requires (IMM >>Int 8) &Int 15 ==Int 0
@@ -120,21 +122,21 @@ module RISCV-DISASSEMBLE
   rule disassemble(IType(SYSTEM, 0, 0, 0, 0)) => ECALL
   rule disassemble(IType(SYSTEM, 0, 0, 0, 1)) => EBREAK
 
-  rule disassemble(SType(STORE, 0, RS1, RS2, IMM)) => SB RS2 , chopAndExtend(IMM, 12) ( RS1 )
-  rule disassemble(SType(STORE, 1, RS1, RS2, IMM)) => SH RS2 , chopAndExtend(IMM, 12) ( RS1 )
-  rule disassemble(SType(STORE, 2, RS1, RS2, IMM)) => SW RS2 , chopAndExtend(IMM, 12) ( RS1 )
+  rule disassemble(SType(STORE, 0, RS1, RS2, IMM)) => SB RS2 , infSignExtend(IMM, 12) ( RS1 )
+  rule disassemble(SType(STORE, 1, RS1, RS2, IMM)) => SH RS2 , infSignExtend(IMM, 12) ( RS1 )
+  rule disassemble(SType(STORE, 2, RS1, RS2, IMM)) => SW RS2 , infSignExtend(IMM, 12) ( RS1 )
 
-  rule disassemble(BType(BRANCH, 0, RS1, RS2, IMM)) => BEQ  RS1 , RS2 , chopAndExtend(IMM, 12) *Int 2
-  rule disassemble(BType(BRANCH, 1, RS1, RS2, IMM)) => BNE  RS1 , RS2 , chopAndExtend(IMM, 12) *Int 2
-  rule disassemble(BType(BRANCH, 4, RS1, RS2, IMM)) => BLT  RS1 , RS2 , chopAndExtend(IMM, 12) *Int 2
-  rule disassemble(BType(BRANCH, 5, RS1, RS2, IMM)) => BGE  RS1 , RS2 , chopAndExtend(IMM, 12) *Int 2
-  rule disassemble(BType(BRANCH, 6, RS1, RS2, IMM)) => BLTU RS1 , RS2 , chopAndExtend(IMM, 12) *Int 2
-  rule disassemble(BType(BRANCH, 7, RS1, RS2, IMM)) => BGEU RS1 , RS2 , chopAndExtend(IMM, 12) *Int 2
+  rule disassemble(BType(BRANCH, 0, RS1, RS2, IMM)) => BEQ  RS1 , RS2 , infSignExtend(IMM, 12) *Int 2
+  rule disassemble(BType(BRANCH, 1, RS1, RS2, IMM)) => BNE  RS1 , RS2 , infSignExtend(IMM, 12) *Int 2
+  rule disassemble(BType(BRANCH, 4, RS1, RS2, IMM)) => BLT  RS1 , RS2 , infSignExtend(IMM, 12) *Int 2
+  rule disassemble(BType(BRANCH, 5, RS1, RS2, IMM)) => BGE  RS1 , RS2 , infSignExtend(IMM, 12) *Int 2
+  rule disassemble(BType(BRANCH, 6, RS1, RS2, IMM)) => BLTU RS1 , RS2 , infSignExtend(IMM, 12) *Int 2
+  rule disassemble(BType(BRANCH, 7, RS1, RS2, IMM)) => BGEU RS1 , RS2 , infSignExtend(IMM, 12) *Int 2
 
   rule disassemble(UType(LUI, RD, IMM))   => LUI   RD , IMM
   rule disassemble(UType(AUIPC, RD, IMM)) => AUIPC RD , IMM
 
-  rule disassemble(JType(JAL, RD, IMM)) => JAL RD , chopAndExtend(IMM, 20) *Int 2
+  rule disassemble(JType(JAL, RD, IMM)) => JAL RD , infSignExtend(IMM, 20) *Int 2
 
   rule disassemble(_:EncodingType) => INVALID_INSTR [owise]
 endmodule
