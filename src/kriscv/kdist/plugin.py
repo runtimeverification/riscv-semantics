@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pyk.kbuild.utils import k_version
 from pyk.kdist.api import Target
+from pyk.kllvm.compiler import compile_kllvm, compile_runtime
 from pyk.ktool.kompile import kompile
 
 if TYPE_CHECKING:
@@ -40,6 +42,37 @@ class KompileTarget(Target):
         return ('riscv-semantics.source',)
 
 
+class KLLVMTarget(Target):
+    def build(self, output_dir: Path, deps: dict[str, Path], args: dict[str, Any], verbose: bool) -> None:
+        compile_kllvm(output_dir, verbose=verbose)
+
+    def context(self) -> dict[str, str]:
+        return {
+            'k-version': k_version().text,
+            'python-path': sys.executable,
+            'python-version': sys.version,
+        }
+
+
+class KLLVMRuntimeTarget(Target):
+    def build(self, output_dir: Path, deps: dict[str, Path], args: dict[str, Any], verbose: bool) -> None:
+        compile_runtime(
+            definition_dir=deps['riscv-semantics.llvm'],
+            target_dir=output_dir,
+            verbose=verbose,
+        )
+
+    def deps(self) -> tuple[str, ...]:
+        return ('riscv-semantics.llvm',)
+
+    def context(self) -> dict[str, str]:
+        return {
+            'k-version': k_version().text,
+            'python-path': sys.executable,
+            'python-version': sys.version,
+        }
+
+
 __TARGETS__: Final = {
     'source': SourceTarget(),
     'llvm': KompileTarget(
@@ -51,4 +84,6 @@ __TARGETS__: Final = {
             'warnings_to_errors': True,
         },
     ),
+    'kllvm': KLLVMTarget(),
+    'kllvm-runtime': KLLVMRuntimeTarget(),
 }

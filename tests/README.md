@@ -32,4 +32,4 @@ A suite of handwritten RISC-V tests. Inputs are RISC-V ASM files `test.S` which 
 ```
 riscv64-unknown-elf-gcc -nostdlib -nostartfiles -static -march=rv32e -mabi=ilp32e -mno-relax -mlittle-endian -Xassembler -mno-arch-attr test.S
 ```
-NOT YET IMPLEMENTED: Each input file must define global symbols `_start` and `_end`. The test is executed with the PC initially set to `_start`, and will halt when the PC reaches `_end`. The final KAST configuration is compared against `test.S.out`.
+Each input file must define global symbols `_start` and `_halt`. The test is executed with the PC initially set to `_start`, and will halt when the PC reaches `_halt`. The final KAST configuration is compared against `test.S.out`.

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.prelude.bytes import bytesToken
-from pyk.prelude.collections import rangemap_of
+from pyk.prelude.collections import map_of
 from pyk.prelude.kint import intToken
 
 if TYPE_CHECKING:
@@ -11,22 +10,35 @@ if TYPE_CHECKING:
     from pyk.kast.inner import KInner
 
 
-def _memory_rangemap(elf: ELFFile) -> KInner:
-    segments: dict[tuple[KInner, KInner], KInner] = {}
+def _memory_segments(elf: ELFFile) -> dict[tuple[int, int], bytes]:
+    segments: dict[tuple[int, int], bytes] = {}
     for seg in elf.iter_segments():
         if seg['p_type'] == 'PT_LOAD':
             start = seg['p_vaddr']
             file_size = seg['p_filesz']
             data = seg.data() + b'\0' * (seg['p_memsz'] - file_size)
-            segments[(intToken(start), intToken(start + file_size))] = bytesToken(data)
-    return rangemap_of(segments)
+            segments[(start, start + file_size)] = data
+    return segments
 
 
-def _entry_point(elf: ELFFile) -> KInner:
+def memory_map(elf: ELFFile) -> KInner:
+    mem_map: dict[KInner, KInner] = {}
+    for addr_range, data in _memory_segments(elf).items():
+        start, end = addr_range
+        for addr in range(start, end):
+            mem_map[intToken(addr)] = intToken(data[addr - start])
+    return map_of(mem_map)
+
+
+def entry_point(elf: ELFFile) -> KInner:
     return intToken(elf.header['e_entry'])
 
 
-def config_vars(elf: ELFFile) -> dict[str, KInner]:
-    memory = _memory_rangemap(elf)
-    pc = _entry_point(elf)
-    return {'$MEM': memory, '$PC': pc}
+def read_symbol(elf: ELFFile, symbol: str) -> list[int]:
+    symtab = elf.get_section_by_name('.symtab')
+    if symtab is None:
+        return []
+    syms = symtab.get_symbol_by_name(symbol)
+    if syms is None:
+        return []
+    return [sym['st_value'] for sym in syms]

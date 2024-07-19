@@ -43,12 +43,10 @@ jobs:
         run: make check
       - name: 'Run pyupgrade'
         run: make pyupgrade
-      - name: 'Run unit tests'
-        run: make test-unit
 
-  integration-tests:
+  build-and-test:
     needs: code-quality-checks
-    name: 'Integration Tests'
+    name: 'Build and Test'
     runs-on: [self-hosted, linux, normal]
     env:
       CONTAINER: riscv-integration-${{ github.sha }}
@@ -66,6 +64,8 @@ jobs:
         run: docker exec --user user ${CONTAINER} poetry install
       - name: 'Build semantics'
         run: docker exec --user user ${CONTAINER} make kdist-build
+      - name: 'Run unit tests'
+        run: docker exec --user user ${CONTAINER} make test-unit
       - name: 'Run integration tests'
         run: docker exec --user user ${CONTAINER} make test-integration
       - name: 'Tear down Docker'
