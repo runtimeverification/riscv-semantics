@@ -494,13 +494,13 @@ zoneinfo = ["backports.zoneinfo (>=0.2.1)", "tzdata (>=2024.1)"]
 
 [[package]]
 name = "importlib-metadata"
-version = "8.0.0"
+version = "8.1.0"
 description = "Read metadata from Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "importlib_metadata-8.0.0-py3-none-any.whl", hash = "sha256:15584cf2b1bf449d98ff8a6ff1abef57bf20f3ac6454f431736cd3e660921b2f"},
-    {file = "importlib_metadata-8.0.0.tar.gz", hash = "sha256:188bd24e4c346d3f0a933f275c2fec67050326a856b9a359881d7c2a697e8812"},
+    {file = "importlib_metadata-8.1.0-py3-none-any.whl", hash = "sha256:3cd29f739ed65973840b068e3132135ce954c254d48b5b640484467ef7ab3c8c"},
+    {file = "importlib_metadata-8.1.0.tar.gz", hash = "sha256:fcdcb1d5ead7bdf3dd32657bb94ebe9d2aabfe89a19782ddc32da5041d6ebfb4"},
 ]
 
 [package.dependencies]
@@ -555,13 +555,13 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "kframework"
-version = "7.1.76"
+version = "7.1.77"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "kframework-7.1.76-py3-none-any.whl", hash = "sha256:f2864e7f6e96caa8e768205b59c94eb2457ccc8eae98a813a61152e2be19866e"},
-    {file = "kframework-7.1.76.tar.gz", hash = "sha256:f78c93b0a36457f6e6c58483bb76aed9186a7a49ba51aabad0e4f33e3e30c493"},
+    {file = "kframework-7.1.77-py3-none-any.whl", hash = "sha256:52d13e961784956811be9d35a4993190582b8289f771c8f5f62be344094e5907"},
+    {file = "kframework-7.1.77.tar.gz", hash = "sha256:d0eef9057444fce29e2c0ab4e9ef4c71988b599939acc0044c1d901b93ff26f0"},
 ]
 
 [package.dependencies]
@@ -1582,4 +1582,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9db3e1ce0ea45ac5f1169ea76f370d8f8676f3f309de7bd1eacd16edca2f165a"
+content-hash = "59449a4c9cc9513bf49d1326f29eb85c83ac212768fa620480ce398a08a2a00f"
