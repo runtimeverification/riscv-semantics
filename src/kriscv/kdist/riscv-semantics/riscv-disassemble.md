@@ -1,3 +1,5 @@
+# Disassembler
+In this file, we implement the instruction disassembler, converting raw instruction bits to the syntax defined in [riscv-intructions.md](./riscv-instructions.md).
 ```k
 requires "riscv-instructions.md"
 requires "word.md"
@@ -7,7 +9,29 @@ module RISCV-DISASSEMBLE
   imports INT
   imports STRING
   imports WORD
+```
+The input is given as an `Int` with the instruction stored in the 32 least-significant bits.
+```k
+  syntax Instruction ::= disassemble(Int) [symbol(disassemble), function, total, memo]
+  rule disassemble(I:Int) => disassemble(decode(I))
+```
+Disassembly is then done in two phases:
+- Separate out the component fields of the instruction based on its format (R, I, S, B, U, or J), returning an `InstructionFormat` value.
+- Inspect the fields of the resulting `InstructionFormat` to produce the disassembled instruction.
 
+The various `InstructionFormat`s are defined below.
+```k
+  syntax InstructionFormat ::=
+      RType(opcode: RTypeOpCode, funct3: Int, funct7: Int, rd: Register, rs1: Register, rs2: Register)
+    | IType(opcode: ITypeOpCode, funct3: Int, rd: Register, rs1: Register, imm: Int)
+    | SType(opcode: STypeOpCode, funct3: Int, rs1: Register, rs2: Register, imm: Int)
+    | BType(opcode: BTypeOpCode, funct3: Int, rs1: Register, rs2: Register, imm: Int)
+    | UType(opcode: UTypeOpCode, rd: Register, imm: Int)
+    | JType(opcode: JTypeOpCode, rd: Register, imm: Int)
+    | UnrecognizedInstructionFormat(Int)
+```
+We determine the correct format by decoding the op code from the 7 least-signficant bits,
+```k
   syntax OpCode ::=
       RTypeOpCode
     | ITypeOpCode
@@ -50,21 +74,15 @@ module RISCV-DISASSEMBLE
   rule decodeOpCode(15 ) => MISC-MEM
   rule decodeOpCode(115) => SYSTEM
   rule decodeOpCode(_  ) => UNRECOGNIZED [owise]
-
-  syntax EncodingType ::=
-      RType(opcode: RTypeOpCode, funct3: Int, funct7: Int, rd: Register, rs1: Register, rs2: Register)
-    | IType(opcode: ITypeOpCode, funct3: Int, rd: Register, rs1: Register, imm: Int)
-    | SType(opcode: STypeOpCode, funct3: Int, rs1: Register, rs2: Register, imm: Int)
-    | BType(opcode: BTypeOpCode, funct3: Int, rs1: Register, rs2: Register, imm: Int)
-    | UType(opcode: UTypeOpCode, rd: Register, imm: Int)
-    | JType(opcode: JTypeOpCode, rd: Register, imm: Int)
-    | UnrecognizedEncodingType(Int)
-
-  syntax EncodingType ::=
-      decode(Int) [function, total]
-    | decodeWithOp(OpCode, Int) [function]
-
+```
+matching on the type of the resulting opcode,
+```k
+  syntax InstructionFormat ::= decode(Int) [function, total]
   rule decode(I) => decodeWithOp(decodeOpCode(I &Int 127), I >>Int 7)
+```
+then finally bit-fiddling to mask out the appropriate bits for each field.
+```k
+  syntax InstructionFormat ::= decodeWithOp(OpCode, Int) [function]
 
   rule decodeWithOp(OPCODE:RTypeOpCode, I) =>
     RType(OPCODE, (I >>Int 5) &Int 7, (I >>Int 18) &Int 127, I &Int 31, (I >>Int 8) &Int 31, (I >>Int 13) &Int 31)
@@ -79,12 +97,11 @@ module RISCV-DISASSEMBLE
   rule decodeWithOp(OPCODE:JTypeOpCode, I) =>
     JType(OPCODE, I &Int 31, (((I >>Int 24) &Int 1) <<Int 19) |Int (((I >>Int 5) &Int 255) <<Int 11) |Int (((I >>Int 13) &Int 1) <<Int 10) |Int ((I >>Int 14) &Int 1023))
   rule decodeWithOp(_:UnrecognizedOpCode, I) =>
-    UnrecognizedEncodingType(I)
-
-  syntax Instruction ::= disassemble(Int) [symbol(disassemble), function, total, memo]
-                       | disassemble(EncodingType) [function, total]
-
-  rule disassemble(I:Int) => disassemble(decode(I))
+    UnrecognizedInstructionFormat(I)
+```
+Finally, we can disassemble the instruction by inspecting the fields for each format. Note that, where appropriate, we infinitely sign extend immediates to represent them as K `Int`s.
+```k
+  syntax Instruction ::= disassemble(InstructionFormat) [function, total]
 
   rule disassemble(RType(OP, 0, 0,  RD, RS1, RS2)) => ADD  RD , RS1 , RS2
   rule disassemble(RType(OP, 0, 32, RD, RS1, RS2)) => SUB  RD , RS1 , RS2
@@ -106,7 +123,6 @@ module RISCV-DISASSEMBLE
   rule disassemble(IType(OP-IMM, 5, RD, RS1, IMM)) => SRAI  RD , RS1 , IMM &Int 31 requires (IMM >>Int 5) &Int 127 ==Int 32
   rule disassemble(IType(OP-IMM, 6, RD, RS1, IMM)) => ORI   RD , RS1 , infSignExtend(IMM, 12)
   rule disassemble(IType(OP-IMM, 7, RD, RS1, IMM)) => ANDI  RD , RS1 , infSignExtend(IMM, 12)
-
 
   rule disassemble(IType(JALR, 0, RD, RS1, IMM)) => JALR RD , infSignExtend(IMM, 12) ( RS1 )
 
@@ -138,6 +154,6 @@ module RISCV-DISASSEMBLE
 
   rule disassemble(JType(JAL, RD, IMM)) => JAL RD , infSignExtend(IMM, 20) *Int 2
 
-  rule disassemble(_:EncodingType) => INVALID_INSTR [owise]
+  rule disassemble(_:InstructionFormat) => INVALID_INSTR [owise]
 endmodule
 ```
