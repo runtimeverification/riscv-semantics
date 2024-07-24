@@ -28,6 +28,12 @@ or interpreted as an `XLEN`-bit signed two's complement integer by infinitely si
   rule infSignExtend(B, L) => (-1 <<Int L) |Int B requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
   rule infSignExtend(B, _) => B [owise]
 ```
+`N`-bit signed two's complement integers with `N <= XLEN` can also be sign extended to `XLEN`-bits.
+```k
+  syntax Word ::= signExtend(bits: Int, signBitIdx: Int) [function, total]
+  rule signExtend(B, L) => W(((2 ^Int (XLEN -Int L) -Int 1) <<Int L) |Int B) requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
+  rule signExtend(B, _) => W(B) [owise]
+```
 Booleans can be encoded as `Word`s in the obvious way
 ```k
   syntax Word ::= Bool2Word(Bool) [function, total]
