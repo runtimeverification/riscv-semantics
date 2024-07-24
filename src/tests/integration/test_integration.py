@@ -50,6 +50,7 @@ def test_simple(asm_file: Path, update_expected_output: bool, temp_dir: Path) ->
         '-mlittle-endian',
         '-Xassembler',
         '-mno-arch-attr',
+        f'-I {SIMPLE_DIR}',
         str(asm_file),
         '-o',
         str(elf_file),
