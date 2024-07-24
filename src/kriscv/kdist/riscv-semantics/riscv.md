@@ -133,6 +133,18 @@ module RISCV
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) +Word chop(IMM)) </regs>
        <pc> PC => PC +Word W(4) </pc>
 ```
+`SLTI` treats the value in `RS` as a signed two's complement and compares it to `IMM`, writing `1` to `RD` if `RS` is less than `IMM` and `0` otherwise.
+```k
+  rule <instrs> SLTI RD , RS , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS) <sWord chop(IMM))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+```
+`SLTIU` proceeds analogously, but treating `RS` and `IMM` as XLEN-bit unsigned integers.
+```k
+  rule <instrs> SLTIU RD , RS , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS) <uWord chop(IMM))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+```
 `LUI` builds a 32-bit constant from the 20-bit immediate by setting the 12 least-significant bits to `0`, then sign extends to `XLEN` bits and places the result in register `RD`.
 ```k
   rule <instrs> LUI RD , IMM => .K ...</instrs>
