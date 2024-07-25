@@ -145,6 +145,20 @@ module RISCV
        <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS) <uWord chop(IMM))) </regs>
        <pc> PC => PC +Word W(4) </pc>
 ```
+`ADDI`, `ORI`, and `XORI` perform bitwise operations between `RS` and `IMM`, storing the result in `RD`.
+```k
+  rule <instrs> ANDI RD , RS , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) &Word chop(IMM)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> ORI RD , RS , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) |Word chop(IMM)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> XORI RD , RS , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) xorWord chop(IMM)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+```
 `LUI` builds a 32-bit constant from the 20-bit immediate by setting the 12 least-significant bits to `0`, then sign extends to `XLEN` bits and places the result in register `RD`.
 ```k
   rule <instrs> LUI RD , IMM => .K ...</instrs>
