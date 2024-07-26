@@ -14,8 +14,11 @@
     </mem>
   </riscv>
   <test>
-    <halt>
+    <haltCond>
       ADDRESS ( W ( 65640 ) )
+    </haltCond>
+    <halt>
+      true
     </halt>
   </test>
   <generatedCounter>

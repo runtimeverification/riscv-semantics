@@ -11,13 +11,15 @@ The `<riscv>` section contain the following cells:
 - `<mem>`, a map from initialized `Word` addresses to the byte stored at the address
 
 The `<test>` section currently contains on a single cell:
-- `<halt>`, a value representing when the program should be halted
+- `<haltCond>`, a value indicating under which conditions the program should be halted
+- `<halt>`, whether to halt the program
 ```k
 requires "riscv-disassemble.md"
 requires "riscv-instructions.md"
 requires "word.md"
 
 module RISCV-CONFIGURATION
+  imports BOOL
   imports INT
   imports MAP
   imports RANGEMAP
@@ -33,16 +35,17 @@ module RISCV-CONFIGURATION
       <mem> $MEM:Map </mem> // Map{Word, Int}
     </riscv>
     <test>
-      <halt> $HALT:HaltCondition </halt>
+      <haltCond> $HALT:HaltCondition </haltCond>
+      <halt> false:Bool </halt>
     </test>
 endmodule
 ```
 
 ## Termination
 RISC-V does not provide a `halt` instruction,  instead relying on the surrounding environment, e.g., making a sys-call to exit with a particular exit code.
-As we do not model the surrounding environment, we add our own custom halting mechanism, denoted by a `HaltCondition` value.
+For testing purposes, we then add our own custom halting mechanism denoted by a `HaltCondition` value.
 
-The `shouldHalt` contextual function inspects the configuration to determine whether we should halt based on the selected `HaltCondition`. Currently, we support:
+Currently, we support:
 - Never halting unless a trap or exception is reached
 - Halting when the `PC` reaches a particular address
 ```k
@@ -51,20 +54,19 @@ module RISCV-TERMINATION
   imports BOOL
   imports INT
 
-  syntax Bool ::= shouldHalt(HaltCondition) [function]
+  syntax Instruction ::= "CHECK_HALT"
+
   syntax HaltCondition ::=
       "NEVER"                [symbol(HaltNever)]
     | "ADDRESS" "(" Word ")" [symbol(HaltAtAddress)]
 
-  rule shouldHalt(NEVER) => false
+  rule <instrs> CHECK_HALT => .K ...</instrs>
+       <haltCond> NEVER </haltCond>
 
-  rule [[ shouldHalt(ADDRESS(END)) => true ]]
+  rule <instrs> CHECK_HALT => .K ...</instrs>
        <pc> PC </pc>
-       requires END ==Word PC
-
-  rule [[ shouldHalt(ADDRESS(END)) => false ]]
-       <pc> PC </pc>
-       requires END =/=Word PC
+       <haltCond> ADDRESS(END) </haltCond>
+       <halt> _ => PC ==Word END </halt>
 endmodule
 ```
 
@@ -119,11 +121,10 @@ module RISCV
   imports RISCV-TERMINATION
   imports WORD
 
-  rule <instrs> .K => fetchInstr(MEM, PC) </instrs>
+  rule <instrs> .K => fetchInstr(MEM, PC) ~> CHECK_HALT </instrs>
        <pc> PC </pc>
-       <halt> H </halt>
        <mem> MEM </mem>
-       requires notBool shouldHalt(H)
+       <halt> false </halt>
 ```
 `ADDI` adds the immediate `IMM` to the value in register `RS`, storing the result in register `RD`. Note that we must use `chop` to convert `IMM` from an infinitely sign-extended K `Int` to an `XLEN`-bit `Word`.
 ```k
