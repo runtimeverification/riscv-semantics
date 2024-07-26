@@ -38,7 +38,7 @@ jobs:
     runs-on: [self-hosted, linux, flyweight]
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: 'Run code quality checks'
         run: make check
       - name: 'Run pyupgrade'
@@ -52,7 +52,7 @@ jobs:
       CONTAINER: riscv-integration-${{ github.sha }}
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
