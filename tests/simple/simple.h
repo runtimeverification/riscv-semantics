@@ -12,3 +12,8 @@
 
 #define HALT \
         j _halt;
+
+#define MEMORY \
+  .data;       \
+  .globl _mem; \
+  _mem:

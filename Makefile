@@ -44,6 +44,9 @@ test-unit: poetry-install
 test-integration: tests/riscv-arch-test-compiled poetry-install
 	$(POETRY_RUN) pytest src/tests/integration --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
 
+test-simple: poetry-install
+	$(POETRY_RUN) pytest src/tests/integration/test_integration.py --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
+
 RISCOF_DIRS = $(shell find src/tests/integration/riscof -type d)
 RISCOF_FILES = $(shell find src/tests/integration/riscof -type f)
 

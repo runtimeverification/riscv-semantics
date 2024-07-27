@@ -14,10 +14,10 @@ if TYPE_CHECKING:
 
 def pytest_addoption(parser: Parser) -> None:
     parser.addoption(
-        '--update-expected-output',
+        '--save-final-config',
         action='store_true',
         default=False,
-        help='Write expected output files for simple tests',
+        help='Save the final configuration for each simple test',
     )
     parser.addoption(
         '--temp-dir',
@@ -27,8 +27,8 @@ def pytest_addoption(parser: Parser) -> None:
 
 
 @pytest.fixture
-def update_expected_output(request: FixtureRequest) -> bool:
-    return request.config.getoption('--update-expected-output')
+def save_final_config(request: FixtureRequest) -> bool:
+    return request.config.getoption('--save-final-config')
 
 
 @pytest.fixture
