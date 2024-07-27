@@ -89,14 +89,12 @@ is used to zero-out all but the least-significant `XLEN`-bits in case of overflo
   syntax Word ::= Word "<<Word" Int [function]
   rule W(I1) <<Word I2 => chop(I1 <<Int I2)
 ```
-For right shifts, we provide both arithmetic and logical variants
+For right shifts, we provide both arithmetic and logical variants.
 ```k
   syntax Word ::= Word ">>aWord" Int [function]
-  rule W(I1) >>aWord I2 => W(I1 >>Int I2)
-```
-Because K does not provide a logical right shift for `Int`, we implement it as an arithmetic shift followed by zeroing-out all the sign bits.
-```k
+  rule W1 >>aWord I2 => chop(Word2SInt(W1) >>Int I2)
+
   syntax Word ::= Word ">>lWord" Int [function]
-  rule W(I1) >>lWord I2 => W((I1 >>Int I2) &Int (2 ^Int (XLEN -Int I2) -Int 1))
+  rule W(I1) >>lWord I2 => W(I1 >>Int I2)
 endmodule
 ```
