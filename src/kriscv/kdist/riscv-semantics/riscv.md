@@ -178,5 +178,17 @@ module RISCV
   rule <instrs> LUI RD , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, signExtend(IMM <<Int 12, 32)) </regs>
        <pc> PC => PC +Word W(4) </pc>
+```
+`AUIPC` proceeds similarly to `LUI`, but adding the sign-extended constant to the current `PC` before placing the result in `RD`.
+```k
+  rule <instrs> AUIPC RD , IMM => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, PC +Word signExtend(IMM <<Int 12, 32)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+```
+The following instructions behave analogously to their `I`-suffixed counterparts, but taking their second argument from an `RS2` register rather than an immediate.
+```k
+  rule <instrs> ADD RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) +Word readReg(REGS, RS2)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
 endmodule
 ```
