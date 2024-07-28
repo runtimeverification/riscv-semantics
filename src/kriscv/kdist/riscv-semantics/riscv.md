@@ -190,5 +190,29 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> ADD RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) +Word readReg(REGS, RS2)) </regs>
        <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> SUB RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) -Word readReg(REGS, RS2)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> SLT RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS1) <sWord readReg(REGS, RS2))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> SLTU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS1) <uWord readReg(REGS, RS2))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> AND RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) &Word readReg(REGS, RS2)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> OR RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) |Word readReg(REGS, RS2)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> XOR RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) xorWord readReg(REGS, RS2)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
 endmodule
 ```
