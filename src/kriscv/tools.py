@@ -47,7 +47,7 @@ class Tools:
 
     def run_config(self, config: KInner) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
-        final_config_kore = self.krun.run_pattern(config_kore)
+        final_config_kore = self.krun.run_pattern(config_kore, check=True)
         return self.krun.kore_to_kast(final_config_kore)
 
     def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
