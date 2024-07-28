@@ -214,5 +214,19 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> XOR RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) xorWord readReg(REGS, RS2)) </regs>
        <pc> PC => PC +Word W(4) </pc>
+```
+`SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
+```k
+  rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> SRL RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+
+  rule <instrs> SRA RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
 endmodule
 ```
