@@ -83,10 +83,23 @@ module RISCV-MEMORY
   imports RISCV-INSTRUCTIONS
   imports WORD
 ```
-We abstract the particular memory representation behind a `loadByte` function which return the byte stored at a particular address.
+We abstract the particular memory representation behind `loadByte` and `storeByte` functions.
 ```k
   syntax Int ::= loadByte(memory: Map, address: Word) [function]
   rule loadByte(MEM, ADDR) => { MEM[ADDR] } :>Int
+
+  syntax Map ::= storeByte(memory: Map, address: Word, byte: Int) [function, total]
+  rule storeByte(MEM, ADDR, B) => MEM[ADDR <- B]
+```
+For multi-byte loads and stores, we presume a little-endian architecture.
+```k
+  syntax Int ::= loadBytes(memory: Map, address: Word, numBytes: Int) [function]
+  rule loadBytes(MEM, ADDR, 1  ) => loadByte(MEM, ADDR)
+  rule loadBytes(MEM, ADDR, NUM) => (loadBytes(MEM, ADDR +Word W(1), NUM -Int 1) <<Int 8) |Int loadByte(MEM, ADDR) requires NUM >Int 1
+
+  syntax Map ::= storeBytes(memory: Map, address: Word, bytes: Int, numBytes: Int) [function]
+  rule storeBytes(MEM, ADDR, BS, 1  ) => storeByte(MEM, ADDR, BS)
+  rule storeBytes(MEM, ADDR, BS, NUM) => storeBytes(storeByte(MEM, ADDR, BS &Int 255), ADDR +Word W(1), BS >>Int 8, NUM -Int 1) requires NUM >Int 1
 ```
 Instructions are always 32-bits, and are stored in little-endian format regardless of the endianness of the overall architecture.
 ```k
@@ -298,5 +311,51 @@ The remaining branch instructions proceed analogously, but performing different 
   rule <instrs> BGEU _RS1 , _RS2 , _OFFSET => .K ...</instrs>
        <pc> PC => PC +Word W(4) </pc>
        [owise]
+```
+`LB`, `LH`, and `LW` load `1`, `2`, and `4` bytes respectively from the memory address which is `OFFSET` greater than the value in register `RS1`, then sign extends the loaded bytes and places them in register `RD`.
+```k
+  rule <instrs> LB RD , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET)), 8)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM </mem>
+
+  rule <instrs> LH RD , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2), 16)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM </mem>
+
+  rule <instrs> LW RD , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 4), 32)) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM </mem>
+```
+`LBU` and `LHU` are analogous to `LB` and `LH`, but zero-extending rather than sign-extending.
+```k
+   rule <instrs> LBU RD , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, W(loadByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET)))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM </mem>
+
+  rule <instrs> LHU RD , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, W(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2))) </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM </mem>
+```
+Dually, `SB`, `SH`, and `SW` store the least-significant `1`, `2`, and `4` bytes respectively from `RS2` to the memory address which is `OFFSET` greater than the value in register `RS1`.
+```k
+  rule <instrs> SB RS2 , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM => storeByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 255) </mem>
+
+  rule <instrs> SH RS2 , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 65535, 2) </mem>
+
+  rule <instrs> SW RS2 , OFFSET ( RS1 ) => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word W(4) </pc>
+       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 4294967295, 4) </mem>
 endmodule
 ```
