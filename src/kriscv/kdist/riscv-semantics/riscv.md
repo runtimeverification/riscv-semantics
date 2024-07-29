@@ -357,5 +357,14 @@ Dually, `SB`, `SH`, and `SW` store the least-significant `1`, `2`, and `4` bytes
        <regs> REGS </regs>
        <pc> PC => PC +Word W(4) </pc>
        <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 4294967295, 4) </mem>
+```
+We presume a single hart with exclusive access to memory, so `FENCE` and `FENCE.TSO` are no-ops.
+```k
+   rule <instrs> FENCE _PRED, _SUCC => .K ...</instrs>
+
+   rule <instrs> FENCE.TSO => .K ...</instrs>
+```
+Finally, as we do not model the external execution environment, we leave the `ECALL` and `EBREAK` instructions unevaluated.
+```k
 endmodule
 ```
