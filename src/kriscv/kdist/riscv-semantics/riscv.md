@@ -228,5 +228,11 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> SRA RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
        <pc> PC => PC +Word W(4) </pc>
+```
+`JAL` stores `PC + 4` in `RD`, then increments `PC` by `OFFSET`.
+```k
+  rule <instrs> JAL RD, OFFSET => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
 endmodule
 ```
