@@ -240,5 +240,63 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> JALR RD, OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
        <pc> PC => (PC +Word (readReg(REGS, RS1) +Word chop(OFFSET))) &Word chop(-1 <<Int 1) </pc>
+```
+`BEQ` increments `PC` by `OFFSET` so long as the values in registers `RS1` and `RS2` are equal. Otherwise, `PC` is incremented by `4`.
+```k
+  rule <instrs> BEQ RS1 , RS2 , OFFSET => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires readReg(REGS, RS1) ==Word readReg(REGS, RS2)
+
+  rule <instrs> BEQ _RS1 , _RS2 , _OFFSET => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       [owise]
+```
+The remaining branch instructions proceed analogously, but performing different comparisons between `RS1` and `RS2`.
+```k
+  rule <instrs> BNE RS1 , RS2 , OFFSET => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires readReg(REGS, RS1) =/=Word readReg(REGS, RS2)
+
+  rule <instrs> BNE _RS1 , _RS2 , _OFFSET => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       [owise]
+
+  rule <instrs> BLT RS1 , RS2 , OFFSET => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires readReg(REGS, RS1) <sWord readReg(REGS, RS2)
+
+  rule <instrs> BLT _RS1 , _RS2 , _OFFSET => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       [owise]
+
+  rule <instrs> BGE RS1 , RS2 , OFFSET => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires readReg(REGS, RS1) >=sWord readReg(REGS, RS2)
+
+  rule <instrs> BGE _RS1 , _RS2 , _OFFSET => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       [owise]
+
+  rule <instrs> BLTU RS1 , RS2 , OFFSET => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires readReg(REGS, RS1) <uWord readReg(REGS, RS2)
+
+  rule <instrs> BLTU _RS1 , _RS2 , _OFFSET => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       [owise]
+
+  rule <instrs> BGEU RS1 , RS2 , OFFSET => .K ...</instrs>
+       <regs> REGS </regs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires readReg(REGS, RS1) >=uWord readReg(REGS, RS2)
+
+  rule <instrs> BGEU _RS1 , _RS2 , _OFFSET => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       [owise]
 endmodule
 ```
