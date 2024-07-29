@@ -6,7 +6,6 @@ from elftools.elf.elffile import ELFFile  # type: ignore
 from pyk.kast.inner import Subst
 from pyk.ktool.krun import KRun
 from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kint import intToken
 
 from kriscv import elf_parser, term_builder
 
@@ -62,7 +61,7 @@ class Tools:
                     raise AssertionError(
                         f'End symbol {end_symbol!r} should be unique, but found multiple instances: {elf_file}'
                     )
-                halt_cond = term_builder.halt_at_address(intToken(end_values[0]))
+                halt_cond = term_builder.halt_at_address(term_builder.word(end_values[0]))
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {

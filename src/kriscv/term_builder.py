@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.kast.inner import KApply, KSort
+from pyk.kast.inner import KApply, KInner, KSort
 from pyk.prelude.kint import intToken
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import TypeVar
-
-    from pyk.kast.inner import KInner
 
     T = TypeVar('T')
 
@@ -228,3 +226,17 @@ def ebreak_instr() -> KInner:
 
 def invalid_instr() -> KInner:
     return KApply('INVALID_INSTR')
+
+
+def word(bits: KInner | int | str | bytes) -> KInner:
+    match bits:
+        case KInner():
+            val = bits
+        case int():
+            assert bits >= 0
+            val = intToken(bits)
+        case str():
+            val = intToken(int(bits, 2))
+        case bytes():
+            val = intToken(int.from_bytes(bits, 'big', signed=False))
+    return KApply('W', val)
