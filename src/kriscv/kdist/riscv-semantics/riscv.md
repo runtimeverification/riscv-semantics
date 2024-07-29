@@ -62,11 +62,12 @@ module RISCV-TERMINATION
 
   rule <instrs> CHECK_HALT => .K ...</instrs>
        <haltCond> NEVER </haltCond>
+       <halt> false </halt>
 
   rule <instrs> CHECK_HALT => .K ...</instrs>
        <pc> PC </pc>
        <haltCond> ADDRESS(END) </haltCond>
-       <halt> _ => PC ==Word END </halt>
+       <halt> false => PC ==Word END </halt>
 endmodule
 ```
 
