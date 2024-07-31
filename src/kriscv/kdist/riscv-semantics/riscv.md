@@ -1,18 +1,17 @@
 # RISC-V Execution
 ## Configuration
 The configuration is divided into two sections:
-- `<riscv>`, containing the state of the abstract machine
-- `<test>`, containing any additional state needed to run tests
+- `<riscv>`, containing the state of the abstract machine.
+- `<test>`, containing any additional state needed to run tests.
 
 The `<riscv>` section contain the following cells:
-- `<instrs>`, a K-sequence of fetched instruction to be executed
-- `<regs>`, a map from each initialized `Register` to its current value
-- `<pc>`, the program counter register
-- `<mem>`, a map from initialized `Word` addresses to the byte stored at the address
+- `<instrs>`, a K-sequence denoting a pipeline of operations to be executed. Initially, we load the `#EXECUTE` operation, which indicates that instructions should be continually fetched and executed.
+- `<regs>`, a map from each initialized `Register` to its current value.
+- `<pc>`, the program counter register.
+- `<mem>`, a map from initialized `Word` addresses to the byte stored at the address.
 
 The `<test>` section currently contains on a single cell:
-- `<haltCond>`, a value indicating under which conditions the program should be halted
-- `<halt>`, whether to halt the program
+- `<haltCond>`, a value indicating under which conditions the program should be halted.
 ```k
 requires "riscv-disassemble.md"
 requires "riscv-instructions.md"
@@ -25,49 +24,63 @@ module RISCV-CONFIGURATION
   imports RANGEMAP
   imports WORD
 
-  syntax HaltCondition
+  syntax KItem ::= "#EXECUTE"
 
   configuration
     <riscv>
-      <instrs> .K </instrs>
+      <instrs> #EXECUTE ~> .K </instrs>
       <regs> .Map </regs> // Map{Register, Word}
       <pc> $PC:Word </pc>
       <mem> $MEM:Map </mem> // Map{Word, Int}
     </riscv>
     <test>
       <haltCond> $HALT:HaltCondition </haltCond>
-      <halt> false:Bool </halt>
     </test>
+
+  syntax HaltCondition
 endmodule
 ```
 
 ## Termination
-RISC-V does not provide a `halt` instruction,  instead relying on the surrounding environment, e.g., making a sys-call to exit with a particular exit code.
-For testing purposes, we then add our own custom halting mechanism denoted by a `HaltCondition` value.
+RISC-V does not provide a `halt` instruction or equivalent, instead relying on the surrounding environment, e.g., making a sys-call to exit with a particular exit code.
+As we do not model the surrounding environment, for testing purposes we add our own custom halting mechanism denoted by a `HaltCondition` value.
 
-Currently, we support:
-- Never halting unless a trap or exception is reached
-- Halting when the `PC` reaches a particular address
+This is done with three components:
+- A `HaltCondition` value stored in the configuation indicating under which conditions we should halt.
+- A `#CHECK_HALT` operation indicating that the halt condition should be checked.
+- A `#HALT` operation which terminates the simulation by consuming all following operations in the pipeline without executing them.
 ```k
 module RISCV-TERMINATION
   imports RISCV-CONFIGURATION
   imports BOOL
   imports INT
 
-  syntax Instruction ::= "CHECK_HALT"
+  syntax KItem ::=
+      "#HALT"
+    | "#CHECK_HALT"
+
+  rule <instrs> #HALT ~> (_ => .K) ...</instrs>
 
   syntax HaltCondition ::=
       "NEVER"                [symbol(HaltNever)]
     | "ADDRESS" "(" Word ")" [symbol(HaltAtAddress)]
-
-  rule <instrs> CHECK_HALT => .K ...</instrs>
+```
+The `NEVER` condition indicates that we should never halt.
+```k
+  rule <instrs> #CHECK_HALT => .K ...</instrs>
        <haltCond> NEVER </haltCond>
-       <halt> false </halt>
-
-  rule <instrs> CHECK_HALT => .K ...</instrs>
+```
+The `ADDRESS(_)` condition indicates that we should halt if the `PC` reaches a particular address.
+```k
+  rule <instrs> #CHECK_HALT => #HALT ...</instrs>
        <pc> PC </pc>
        <haltCond> ADDRESS(END) </haltCond>
-       <halt> false => PC ==Word END </halt>
+       requires PC ==Word END
+
+  rule <instrs> #CHECK_HALT => .K ...</instrs>
+       <pc> PC </pc>
+       <haltCond> ADDRESS(END) </haltCond>
+       requires PC =/=Word END
 endmodule
 ```
 
@@ -123,9 +136,7 @@ endmodule
 ```
 
 ## Instruction Execution
-The actual execution semantics has two components:
-- The instruction fetch cycle, which disassembles an instruction from the current `PC` so long as the `HaltCondition` fails, placing it into the `<instrs>` cell
-- Rules to implement each instruction, removing the instruction from the top of the `<instrs>` cell and updating any state as necessary.
+The `RISCV` module contains the actual rules to fetch and execute instructions.
 ```k
 module RISCV
   imports RISCV-CONFIGURATION
@@ -134,12 +145,21 @@ module RISCV
   imports RISCV-MEMORY
   imports RISCV-TERMINATION
   imports WORD
+```
+`#EXECUTE` indicates that we should continuously fetch and execute instructions, loading the instruction into the `#NEXT[_]` operator.
+```k
+  syntax KItem ::= "#NEXT" "[" Instruction "]"
 
-  rule <instrs> .K => fetchInstr(MEM, PC) ~> CHECK_HALT </instrs>
+  rule <instrs> (.K => #NEXT[ fetchInstr(MEM, PC) ]) ~> #EXECUTE ...</instrs>
        <pc> PC </pc>
        <mem> MEM </mem>
-       <halt> false </halt>
 ```
+`#NEXT[ I ]` sets up the pipeline to execute the the fetched instruction.
+```k
+  rule <instrs> #NEXT[ I ] => I ~> #CHECK_HALT ...</instrs>
+```
+We then provide rules to consume and execute each instruction from the top of the pipeline.
+
 `ADDI` adds the immediate `IMM` to the value in register `RS`, storing the result in register `RD`. Note that we must use `chop` to convert `IMM` from an infinitely sign-extended K `Int` to an `XLEN`-bit `Word`.
 ```k
   rule <instrs> ADDI RD , RS , IMM => .K ...</instrs>
@@ -364,7 +384,7 @@ We presume a single hart with exclusive access to memory, so `FENCE` and `FENCE.
 
    rule <instrs> FENCE.TSO => .K ...</instrs>
 ```
-Finally, as we do not model the external execution environment, we leave the `ECALL` and `EBREAK` instructions unevaluated.
+As we do not model the external execution environment, we leave the `ECALL` and `EBREAK` instructions unevaluated.
 ```k
 endmodule
 ```
