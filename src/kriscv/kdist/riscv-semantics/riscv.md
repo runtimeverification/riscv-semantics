@@ -156,7 +156,25 @@ module RISCV
 ```
 `#NEXT[ I ]` sets up the pipeline to execute the the fetched instruction.
 ```k
-  rule <instrs> #NEXT[ I ] => I ~> #CHECK_HALT ...</instrs>
+  rule <instrs> #NEXT[ I ] => I ~> #PC[ I ] ~> #CHECK_HALT ...</instrs>
+```
+`#PC[ I ]` updates the `PC` as needed to fetch the next instruction after executing `I`. For most instructions, this increments `PC` by the width of the instruction (always `4` bytes in the base ISA). For branch and jump instructions, which already manually update the `PC`, this is a no-op.
+```k
+  syntax KItem ::= "#PC" "[" Instruction "]"
+
+  rule <instrs> #PC[ I ] => .K ...</instrs>
+       <pc> PC => PC +Word pcIncrAmount(I) </pc>
+
+  syntax Word ::= pcIncrAmount(Instruction) [function, total]
+  rule pcIncrAmount(BEQ _ , _ , _   ) => W(0)
+  rule pcIncrAmount(BNE _ , _ , _   ) => W(0)
+  rule pcIncrAmount(BLT _ , _ , _   ) => W(0)
+  rule pcIncrAmount(BLTU _ , _ , _  ) => W(0)
+  rule pcIncrAmount(BGE _ , _ , _   ) => W(0)
+  rule pcIncrAmount(BGEU _ , _ , _  ) => W(0)
+  rule pcIncrAmount(JAL _ , _       ) => W(0)
+  rule pcIncrAmount(JALR _ , _ ( _ )) => W(0)
+  rule pcIncrAmount(_)                => W(4) [owise]
 ```
 We then provide rules to consume and execute each instruction from the top of the pipeline.
 
@@ -164,103 +182,83 @@ We then provide rules to consume and execute each instruction from the top of th
 ```k
   rule <instrs> ADDI RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) +Word chop(IMM)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `SLTI` treats the value in `RS` as a signed two's complement and compares it to `IMM`, writing `1` to `RD` if `RS` is less than `IMM` and `0` otherwise.
 ```k
   rule <instrs> SLTI RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS) <sWord chop(IMM))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `SLTIU` proceeds analogously, but treating `RS` and `IMM` as XLEN-bit unsigned integers.
 ```k
   rule <instrs> SLTIU RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS) <uWord chop(IMM))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `ADDI`, `ORI`, and `XORI` perform bitwise operations between `RS` and `IMM`, storing the result in `RD`.
 ```k
   rule <instrs> ANDI RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) &Word chop(IMM)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> ORI RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) |Word chop(IMM)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> XORI RD , RS , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) xorWord chop(IMM)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `SLLI`, `SRLI`, and `SRAI` perform logical left, logical right, and arithmetic right shifts respectively.
 ```k
   rule <instrs> SLLI RD , RS , SHAMT => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) <<Word SHAMT) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SRLI RD , RS , SHAMT => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>lWord SHAMT) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SRAI RD , RS , SHAMT => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>aWord SHAMT) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `LUI` builds a 32-bit constant from the 20-bit immediate by setting the 12 least-significant bits to `0`, then sign extends to `XLEN` bits and places the result in register `RD`.
 ```k
   rule <instrs> LUI RD , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, signExtend(IMM <<Int 12, 32)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `AUIPC` proceeds similarly to `LUI`, but adding the sign-extended constant to the current `PC` before placing the result in `RD`.
 ```k
   rule <instrs> AUIPC RD , IMM => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, PC +Word signExtend(IMM <<Int 12, 32)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
+       <pc> PC </pc>
 ```
 The following instructions behave analogously to their `I`-suffixed counterparts, but taking their second argument from an `RS2` register rather than an immediate.
 ```k
   rule <instrs> ADD RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) +Word readReg(REGS, RS2)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SUB RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) -Word readReg(REGS, RS2)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SLT RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS1) <sWord readReg(REGS, RS2))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SLTU RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, Bool2Word(readReg(REGS, RS1) <uWord readReg(REGS, RS2))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> AND RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) &Word readReg(REGS, RS2)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> OR RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) |Word readReg(REGS, RS2)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> XOR RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) xorWord readReg(REGS, RS2)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SRL RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 
   rule <instrs> SRA RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
 ```
 `JAL` stores `PC + 4` in `RD`, then increments `PC` by `OFFSET`.
 ```k
@@ -336,46 +334,38 @@ The remaining branch instructions proceed analogously, but performing different 
 ```k
   rule <instrs> LB RD , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, signExtend(loadByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET)), 8)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM </mem>
 
   rule <instrs> LH RD , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2), 16)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM </mem>
 
   rule <instrs> LW RD , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 4), 32)) </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM </mem>
 ```
 `LBU` and `LHU` are analogous to `LB` and `LH`, but zero-extending rather than sign-extending.
 ```k
    rule <instrs> LBU RD , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, W(loadByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET)))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM </mem>
 
   rule <instrs> LHU RD , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, W(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2))) </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM </mem>
 ```
 Dually, `SB`, `SH`, and `SW` store the least-significant `1`, `2`, and `4` bytes respectively from `RS2` to the memory address which is `OFFSET` greater than the value in register `RS1`.
 ```k
   rule <instrs> SB RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM => storeByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 255) </mem>
 
   rule <instrs> SH RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 65535, 2) </mem>
 
   rule <instrs> SW RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => PC +Word W(4) </pc>
        <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 4294967295, 4) </mem>
 ```
 We presume a single hart with exclusive access to memory, so `FENCE` and `FENCE.TSO` are no-ops.
