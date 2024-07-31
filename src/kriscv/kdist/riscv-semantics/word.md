@@ -90,11 +90,20 @@ is used to zero-out all but the least-significant `XLEN`-bits in case of overflo
   rule W(I1) <<Word I2 => chop(I1 <<Int I2)
 ```
 For right shifts, we provide both arithmetic and logical variants.
+
+Counterintuitively, we use the arithmetic right shift operator `>>Int` for `Int` to implement the logical right shift operator `>>lWord` for `Word`. Indeed, note the following:
+- `Int` values are infinitely sign-extended two's complement integers.
+- `>>Int` arithmetically shifts by padding with the infinitely repeated sign bit.
+- For an `I:Int` underlying `W(I):Word`, only the least-significant `XLEN`-bits of `I` are populated, so the infinitely repeated sign bit is always `0`.
+
+That is, for any `I:Int` underlying some `W(I):Word`, applying `>>Int` will always pad with `0`s, correctly implementing a logical right shift.
+```k
+  syntax Word ::= Word ">>lWord" Int [function]
+  rule W(I1) >>lWord I2 => W(I1 >>Int I2)
+```
+To actually perform an arithmetic shift over `Word`, we first convert to an infinitely sign-extended `Int` of equal value using `Word2SInt`, ensuring `>>Int` will pad with `1`s for a negative `Word`. The final result will still be infinitely sign-extended, so we must `chop` it back to a `Word`.
 ```k
   syntax Word ::= Word ">>aWord" Int [function]
   rule W1 >>aWord I2 => chop(Word2SInt(W1) >>Int I2)
-
-  syntax Word ::= Word ">>lWord" Int [function]
-  rule W(I1) >>lWord I2 => W(I1 >>Int I2)
 endmodule
 ```
