@@ -25,7 +25,7 @@ make kdist-build
 ## Usage
 Execute a compiled RISC-V ELF file with the following command:
 ```bash
-poetry -C kriscv run test.elf
+poetry -C kriscv run kriscv run test.elf
 ```
 The output shows the final K configuration, including the state of memory, all registers, and any encountered errors. Execution can also be halted at a particular global symbol by providing the `--end-symbol` flag.
 
