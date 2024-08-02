@@ -10,7 +10,7 @@ from pyk.ktool.krun import KRun
 from pyk.prelude.k import GENERATED_TOP_CELL
 
 from kriscv import elf_parser, term_builder
-from kriscv.term_manip import kore_word, match_map
+from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -68,7 +68,7 @@ class Tools:
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {
-                '$MEM': elf_parser.memory_map(elf),
+                '$MEM': elf_parser.memory(elf),
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,
             }
@@ -86,8 +86,9 @@ class Tools:
 
     def get_memory(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
-        mem_kore = self.krun.kast_to_kore(cells['MEM_CELL'], sort=KSort('Map'))
+        mem_kore = self.krun.kast_to_kore(cells['MEM_CELL'], sort=KSort('SparseBytes'))
         mem = {}
-        for addr, val in match_map(mem_kore):
-            mem[kore_word(addr)] = kore_int(val)
+        for addr, data in kore_sparse_bytes(mem_kore).items():
+            for idx, val in enumerate(data):
+                mem[addr + idx] = val
         return mem

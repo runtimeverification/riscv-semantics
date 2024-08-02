@@ -1,5 +1,4 @@
 # `XLEN`-bit Word Datatype
-
 In this file, we define a `Word` datatype representing a sequence of `XLEN` bits, where `XLEN=32` for `RV32*` ISAs and `XLEN=64` for `RV64*` ISAs.
 ```k
 module WORD

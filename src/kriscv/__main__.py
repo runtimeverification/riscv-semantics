@@ -44,7 +44,7 @@ def _parse_args(args: Sequence[str]) -> KRISCVOpts:
 def _kriscv_run(opts: RunOpts) -> None:
     tools = semantics()
     final_conf = tools.run_elf(opts.input_file, end_symbol=opts.end_symbol)
-    print(tools.kprint.pretty_print(final_conf))
+    print(tools.kprint.pretty_print(final_conf, sort_collections=True))
 
 
 def _arg_parser() -> ArgumentParser:

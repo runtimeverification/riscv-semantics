@@ -15,6 +15,7 @@ The `<test>` section currently contains on a single cell:
 ```k
 requires "riscv-disassemble.md"
 requires "riscv-instructions.md"
+requires "sparse-bytes.md"
 requires "word.md"
 
 module RISCV-CONFIGURATION
@@ -22,6 +23,7 @@ module RISCV-CONFIGURATION
   imports INT
   imports MAP
   imports RANGEMAP
+  imports SPARSE-BYTES
   imports WORD
 
   syntax KItem ::= "#EXECUTE"
@@ -31,7 +33,7 @@ module RISCV-CONFIGURATION
       <instrs> #EXECUTE ~> .K </instrs>
       <regs> .Map </regs> // Map{Register, Word}
       <pc> $PC:Word </pc>
-      <mem> $MEM:Map </mem> // Map{Word, Int}
+      <mem> $MEM:SparseBytes </mem>
     </riscv>
     <test>
       <haltCond> $HALT:HaltCondition </haltCond>
@@ -95,28 +97,30 @@ module RISCV-MEMORY
   imports RISCV-DISASSEMBLE
   imports RISCV-INSTRUCTIONS
   imports WORD
+
+  syntax Memory = SparseBytes
 ```
 We abstract the particular memory representation behind `loadByte` and `storeByte` functions.
 ```k
-  syntax Int ::= loadByte(memory: Map, address: Word) [function]
-  rule loadByte(MEM, ADDR) => { MEM[ADDR] } :>Int
+  syntax Int ::= loadByte(memory: Memory, address: Word) [function, symbol(Memory:loadByte)]
+  rule loadByte(MEM, W(ADDR)) => { readByte(MEM, ADDR) }:>Int
 
-  syntax Map ::= storeByte(memory: Map, address: Word, byte: Int) [function, total]
-  rule storeByte(MEM, ADDR, B) => MEM[ADDR <- B]
+  syntax Memory ::= storeByte(memory: Memory, address: Word, byte: Int) [function, total, symbol(Memory:storeByte)]
+  rule storeByte(MEM, W(ADDR), B) => writeByte(MEM, ADDR, B)
 ```
 For multi-byte loads and stores, we presume a little-endian architecture.
 ```k
-  syntax Int ::= loadBytes(memory: Map, address: Word, numBytes: Int) [function]
+  syntax Int ::= loadBytes(memory: Memory, address: Word, numBytes: Int) [function]
   rule loadBytes(MEM, ADDR, 1  ) => loadByte(MEM, ADDR)
   rule loadBytes(MEM, ADDR, NUM) => (loadBytes(MEM, ADDR +Word W(1), NUM -Int 1) <<Int 8) |Int loadByte(MEM, ADDR) requires NUM >Int 1
 
-  syntax Map ::= storeBytes(memory: Map, address: Word, bytes: Int, numBytes: Int) [function]
+  syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function]
   rule storeBytes(MEM, ADDR, BS, 1  ) => storeByte(MEM, ADDR, BS)
   rule storeBytes(MEM, ADDR, BS, NUM) => storeBytes(storeByte(MEM, ADDR, BS &Int 255), ADDR +Word W(1), BS >>Int 8, NUM -Int 1) requires NUM >Int 1
 ```
 Instructions are always 32-bits, and are stored in little-endian format regardless of the endianness of the overall architecture.
 ```k
-  syntax Instruction ::= fetchInstr(memory: Map, address: Word) [function]
+  syntax Instruction ::= fetchInstr(memory: Memory, address: Word) [function]
   rule fetchInstr(MEM, ADDR) =>
     disassemble((loadByte(MEM, ADDR +Word W(3)) <<Int 24) |Int
                 (loadByte(MEM, ADDR +Word W(2)) <<Int 16) |Int
