@@ -22,6 +22,7 @@ Prerequsites: `python >= 3.10`, `pip >= 20.0.2`, `poetry >= 1.3.2`.
 poetry install
 make kdist-build
 ```
+
 ## Usage
 Execute a compiled RISC-V ELF file with the following command:
 ```bash
@@ -37,5 +38,13 @@ Use `make` to run common tasks (see the [Makefile](Makefile) for a complete list
 * `make format`: Format code
 * `make test-unit`: Run unit tests
 * `make test-integration`: Run integration tests
-
+* `make test-architectural`: Run the RISC-V Architectural Test Suite
 For interactive use, spawn a shell with `poetry shell` (after `poetry install`), then run an interpreter.
+
+### Running Tests
+The integration and architectural tests require the [RISC-V GNU Toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain). During installation, follow instructions to build the Newlib-based cross-compiler. The `riscv64-unknown-elf-*` binaries must be available on your `PATH`.
+
+Prior to running `make test-architectural`, you must also fetch the RISC-V Architectural Test Suite
+```bash
+git submodule update --init --recursive -- tests/riscv-arch-test
+```
