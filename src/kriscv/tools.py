@@ -24,12 +24,8 @@ class Tools:
     __krun: KRun
     __runtime: Runtime
 
-    def __init__(
-        self,
-        definition_dir: Path,
-        runtime: Runtime,
-    ) -> None:
-        self.__krun = KRun(definition_dir)
+    def __init__(self, definition_dir: Path, runtime: Runtime, *, temp_dir: Path | None = None) -> None:
+        self.__krun = KRun(definition_dir, use_directory=temp_dir)
         self.__runtime = runtime
 
     @property
