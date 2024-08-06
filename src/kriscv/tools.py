@@ -53,14 +53,8 @@ class Tools:
         with open(elf_file, 'rb') as f:
             elf = ELFFile(f)
             if end_symbol is not None:
-                end_values = elf_parser.read_symbol(elf, end_symbol)
-                if len(end_values) == 0:
-                    raise AssertionError(f'Cannot find end symbol {end_symbol!r}: {elf_file}')
-                if len(end_values) > 1:
-                    raise AssertionError(
-                        f'End symbol {end_symbol!r} should be unique, but found multiple instances: {elf_file}'
-                    )
-                halt_cond = term_builder.halt_at_address(term_builder.word(end_values[0]))
+                end_addr = elf_parser.read_unique_symbol(elf, end_symbol, error_loc=str(elf_file))
+                halt_cond = term_builder.halt_at_address(term_builder.word(end_addr))
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {

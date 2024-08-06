@@ -29,6 +29,16 @@ def entry_point(elf: ELFFile) -> KInner:
     return word(elf.header['e_entry'])
 
 
+def read_unique_symbol(elf: ELFFile, symbol: str, *, error_loc: str | None) -> int:
+    values = read_symbol(elf, symbol)
+    error_loc = error_loc if error_loc else ''
+    if len(values) == 0:
+        raise AssertionError(f'{error_loc}: Cannot find symbol {symbol!r}.')
+    if len(values) > 1:
+        raise AssertionError(f'{error_loc}: Symbol {symbol!r} should be unique, but found multiple instances.')
+    return values[0]
+
+
 def read_symbol(elf: ELFFile, symbol: str) -> list[int]:
     symtab = elf.get_section_by_name('.symtab')
     if symtab is None:
