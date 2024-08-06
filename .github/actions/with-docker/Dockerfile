@@ -4,6 +4,8 @@ ARG TOOLCHAIN_VERSION
 ARG TOOLCHAIN_VERSION
 FROM runtimeverificationinc/riscv-gnu-toolchain:ubuntu-jammy-${TOOLCHAIN_VERSION} as TOOLCHAIN
 
+FROM registry.gitlab.com/incoresemi/docker-images/compliance:latest as SAIL
+
 ARG K_VERSION
 FROM runtimeverificationinc/kframework-k:ubuntu-jammy-${K_VERSION}
 
@@ -25,7 +27,9 @@ USER user
 WORKDIR /home/user
 
 ENV PATH=/home/user/.local/bin:${PATH}
-RUN curl -sSL https://install.python-poetry.org | python3 -
 
 COPY --from=TOOLCHAIN /opt/riscv /home/user/riscv
 ENV PATH=/home/user/riscv/bin:${PATH}
+
+COPY --from=SAIL /usr/bin/riscv_sim_RV32 /usr/bin/riscv_sim_RV32
+COPY --from=SAIL /usr/bin/riscv_sim_RV64 /usr/bin/riscv_sim_RV64

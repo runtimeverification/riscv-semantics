@@ -48,7 +48,7 @@ RISCOF_DIRS = $(shell find src/tests/riscof -type d)
 RISCOF_FILES = $(shell find src/tests/riscof -type f)
 
 test-architectural: tests/riscv-arch-test $(RISCOF_DIRS) $(RISCOF_FILES)
-	$(POETRY_RUN) riscof run --suite tests/riscv-arch-test/riscv-test-suite --env tests/riscv-arch-test/riscv-test-suite/env --config src/tests/riscof/config.ini --work-dir tests/riscv-arch-test-compiled --no-ref-run
+	$(POETRY_RUN) riscof run --suite tests/riscv-arch-test/riscv-test-suite --env tests/riscv-arch-test/riscv-test-suite/env --config src/tests/riscof/config.ini --work-dir tests/riscv-arch-test-compiled --no-browser
 
 # Coverage
 

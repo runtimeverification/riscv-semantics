@@ -26,7 +26,7 @@ class kriscv(pluginTemplate):  # noqa N801
         config = kwargs.get('config')
         if config is None:
             logger.error('Config for kriscv is missing.')
-            raise SystemExit
+            raise SystemExit(1)
         self.num_jobs = str(config['jobs'] if 'jobs' in config else 1)
         self.pluginpath = os.path.abspath(config['pluginpath'])
         self.isa_spec = os.path.abspath(config['ispec'])
@@ -81,7 +81,7 @@ class kriscv(pluginTemplate):  # noqa N801
             make.add_target(execute, tname=test_name)
         make.execute_all(self.workdir)
         if not self.target_run:
-            raise SystemExit
+            raise SystemExit(0)
 
 
 def _mabi(spec_isa: str) -> str:
@@ -94,10 +94,10 @@ def _mabi(spec_isa: str) -> str:
     if '32E' in spec_isa:
         return 'ilp32e'
     logger.error(f'Bad ISA string in ISA YAML: {spec_isa}')
-    raise SystemExit
+    raise SystemExit(1)
 
 
 def _check_exec_exists(executable: str) -> None:
     if shutil.which(executable) is None:
         logger.error(f'{executable}: executable not found. Please check environment setup.')
-        raise SystemExit
+        raise SystemExit(1)
