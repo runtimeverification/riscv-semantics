@@ -274,7 +274,7 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 ```k
   rule <instrs> JALR RD, OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
-       <pc> PC => (PC +Word (readReg(REGS, RS1) +Word chop(OFFSET))) &Word chop(-1 <<Int 1) </pc>
+       <pc> PC => (readReg(REGS, RS1) +Word chop(OFFSET)) &Word chop(-1 <<Int 1) </pc>
 ```
 `BEQ` increments `PC` by `OFFSET` so long as the values in registers `RS1` and `RS2` are equal. Otherwise, `PC` is incremented by `4`.
 ```k
