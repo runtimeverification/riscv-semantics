@@ -32,11 +32,6 @@ class kriscv(pluginTemplate):  # noqa N801
         self.isa_spec = os.path.abspath(config['ispec'])
         self.platform_spec = os.path.abspath(config['pspec'])
         self.target_run = ('target_run' not in config) or config['target_run'] == '1'
-        if self.target_run:
-            logger.error(
-                "Executing tests with riscof not yet supported. Set 'target_run=0' in config.ini to just compile the tests"
-            )
-            raise SystemExit
 
     def initialise(self, suite: str, workdir: str, env: str) -> None:
         self.suite = suite
@@ -49,6 +44,7 @@ class kriscv(pluginTemplate):  # noqa N801
     def build(self, isa_yaml: str, platform_yaml: str) -> None:
         ispec = utils.load_yaml(isa_yaml)['hart0']
         self.mabi = _mabi(ispec['ISA'])
+        _check_exec_exists('kriscv')
         _check_exec_exists('riscv64-unknown-elf-gcc')
         _check_exec_exists('riscv64-unknown-elf-objdump')
         _check_exec_exists('make')
@@ -76,10 +72,16 @@ class kriscv(pluginTemplate):  # noqa N801
                 input=f'{test_name}.elf',
                 output=f'{test_name}.disass',
             )
-            work_dir = entry['work_dir']
-            execute = f'@cd {work_dir}; {compile_asm_cmd}; {compile_elf_cmd}; {objdump_cmd}'
+            work_dir = Path(entry['work_dir']).resolve(strict=True)
+            sig_file = work_dir / (name + '.signature')
+            execute_cmd = (
+                f'kriscv run-arch-test {test_name}.elf --output {sig_file}' if self.target_run else 'echo "NO RUN"'
+            )
+            execute = f'@cd {work_dir}; {compile_asm_cmd}; {compile_elf_cmd}; {objdump_cmd}; {execute_cmd}'
             make.add_target(execute, tname=test_name)
         make.execute_all(self.workdir)
+        if not self.target_run:
+            raise SystemExit
 
 
 def _mabi(spec_isa: str) -> str:
