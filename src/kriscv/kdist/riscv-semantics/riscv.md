@@ -270,7 +270,7 @@ The following instructions behave analogously to their `I`-suffixed counterparts
        <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
        <pc> PC => PC +Word chop(OFFSET) </pc>
 ```
-`JALR` stores `PC + 4` in `RD`, increments `PC` by the value in register `RS1` plus `OFFSET`, then sets the least-significant bit of this new `PC` to `0`.
+`JALR` stores `PC + 4` in `RD`, sets `PC` to the value in register `RS1` plus `OFFSET`, then sets the least-significant bit of this new `PC` to `0`.
 ```k
   rule <instrs> JALR RD, OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
