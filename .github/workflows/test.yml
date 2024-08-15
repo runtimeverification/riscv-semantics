@@ -68,6 +68,8 @@ jobs:
         run: docker exec --user user ${CONTAINER} make test-unit
       - name: 'Run integration tests'
         run: docker exec --user user ${CONTAINER} make test-integration
+      - name: 'Run architectural tests'
+        run: docker exec --user user ${CONTAINER} make test-architectural
       - name: 'Tear down Docker'
         if: always()
         run: docker stop --time=0 ${CONTAINER}

@@ -16,6 +16,7 @@ from ..utils import TESTS_DIR
 if TYPE_CHECKING:
     from typing import Final
 
+    from kriscv.tools import Tools
 
 SIMPLE_DIR: Final = TESTS_DIR / 'simple'
 SIMPLE_TESTS: Final = tuple(asm_file for asm_file in SIMPLE_DIR.rglob('*.S'))
@@ -75,8 +76,7 @@ def _check_mem_entry(assert_file: Path, mem_symbol: int, memory: dict[int, int],
         raise AssertionError(err_msg.format(reason=f'found {actual} (0x{actual:02X})'))
 
 
-def _test_simple(elf_file: Path, assert_file: Path, final_config_output: Path | None) -> None:
-    tools = semantics()
+def _test_simple(tools: Tools, elf_file: Path, assert_file: Path, final_config_output: Path | None) -> None:
     final_config = tools.run_elf(elf_file, end_symbol='_halt')
 
     if final_config_output is not None:
@@ -152,4 +152,4 @@ def test_simple(asm_file: Path, save_final_config: bool, temp_dir: Path) -> None
     assert elf_file.exists()
     assert_file = Path(str(asm_file) + '.assert')
     final_config_output = (Path(temp_dir) / (asm_file.name + '.out')) if save_final_config else None
-    _test_simple(elf_file, assert_file, final_config_output)
+    _test_simple(semantics(temp_dir=temp_dir), elf_file, assert_file, final_config_output)

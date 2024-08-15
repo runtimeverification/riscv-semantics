@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import itertools
+from typing import TYPE_CHECKING, cast
 
 from pyk.kast.inner import KApply, KInner, KSort
+from pyk.prelude.bytes import bytesToken
 from pyk.prelude.kint import intToken
+
+from kriscv.term_manip import normalize_memory
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -240,3 +244,68 @@ def word(bits: KInner | int | str | bytes) -> KInner:
         case bytes():
             val = intToken(int.from_bytes(bits, 'big', signed=False))
     return KApply('W', val)
+
+
+def dot_sb() -> KInner:
+    return KApply('.SparseBytes')
+
+
+def sb_empty(count: KInner) -> KInner:
+    return KApply('SparseBytes:#empty', count)
+
+
+def sb_bytes(bs: KInner) -> KInner:
+    return KApply('SparseBytes:#bytes', bs)
+
+
+def sb_empty_cons(empty: KInner, rest_bf: KInner) -> KInner:
+    return KApply('SparseBytes:EmptyCons', empty, rest_bf)
+
+
+def sb_bytes_cons(bs: KInner, rest_ef: KInner) -> KInner:
+    return KApply('SparseBytes:BytesCons', bs, rest_ef)
+
+
+def sparse_bytes(data: dict[int, bytes]) -> KInner:
+    clean_data: list[tuple[int, bytes]] = sorted(normalize_memory(data).items())
+
+    if len(clean_data) == 0:
+        return dot_sb()
+
+    # Collect all empty gaps between segements
+    gaps = []
+    start = clean_data[0][0]
+    if start != 0:
+        gaps.append((0, start))
+    for (start1, val1), (start2, _) in itertools.pairwise(clean_data):
+        end1 = start1 + len(val1)
+        # normalize_memory should already have merged consecutive segments
+        assert end1 < start2
+        gaps.append((end1, start2 - end1))
+
+    # Merge segments and gaps into a list of sparse bytes items
+    sparse_data: list[tuple[int, int | bytes]] = sorted(
+        cast('list[tuple[int, int | bytes]]', clean_data) + cast('list[tuple[int, int | bytes]]', gaps), reverse=True
+    )
+
+    sparse_k = dot_sb()
+    for _, gap_or_val in sparse_data:
+        if isinstance(gap_or_val, int):
+            sparse_k = sb_empty_cons(sb_empty(intToken(gap_or_val)), sparse_k)
+        elif isinstance(gap_or_val, bytes):
+            sparse_k = sb_bytes_cons(sb_bytes(bytesToken(gap_or_val)), sparse_k)
+        else:
+            raise AssertionError()
+    return sparse_k
+
+
+def sort_memory() -> KSort:
+    return KSort('SparseBytes')
+
+
+def load_byte(mem: KInner, addr: KInner) -> KInner:
+    return KApply('Memory:loadByte', mem, addr)
+
+
+def store_byte(mem: KInner, addr: KInner, value: KInner) -> KInner:
+    return KApply('Memory:storeByte', mem, addr, value)
