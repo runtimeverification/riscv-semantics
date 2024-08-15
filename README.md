@@ -48,4 +48,4 @@ Prior to running `make test-architectural`, you must also fetch the RISC-V Archi
 ```bash
 git submodule update --init --recursive -- tests/riscv-arch-test
 ```
-and install the [Sail RISC-V model](https://github.com/riscv/sail-riscv) for use as a golden reference.
+and install the [Sail RISC-V model](https://github.com/riscv/sail-riscv) for use as a reference implementation.
