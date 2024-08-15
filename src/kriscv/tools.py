@@ -10,7 +10,7 @@ from pyk.ktool.krun import KRun
 from pyk.prelude.k import GENERATED_TOP_CELL
 
 from kriscv import elf_parser, term_builder
-from kriscv.term_manip import kore_word, match_map
+from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -24,12 +24,8 @@ class Tools:
     __krun: KRun
     __runtime: Runtime
 
-    def __init__(
-        self,
-        definition_dir: Path,
-        runtime: Runtime,
-    ) -> None:
-        self.__krun = KRun(definition_dir)
+    def __init__(self, definition_dir: Path, runtime: Runtime, *, temp_dir: Path | None = None) -> None:
+        self.__krun = KRun(definition_dir, use_directory=temp_dir)
         self.__runtime = runtime
 
     @property
@@ -57,18 +53,12 @@ class Tools:
         with open(elf_file, 'rb') as f:
             elf = ELFFile(f)
             if end_symbol is not None:
-                end_values = elf_parser.read_symbol(elf, end_symbol)
-                if len(end_values) == 0:
-                    raise AssertionError(f'Cannot find end symbol {end_symbol!r}: {elf_file}')
-                if len(end_values) > 1:
-                    raise AssertionError(
-                        f'End symbol {end_symbol!r} should be unique, but found multiple instances: {elf_file}'
-                    )
-                halt_cond = term_builder.halt_at_address(term_builder.word(end_values[0]))
+                end_addr = elf_parser.read_unique_symbol(elf, end_symbol, error_loc=str(elf_file))
+                halt_cond = term_builder.halt_at_address(term_builder.word(end_addr))
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {
-                '$MEM': elf_parser.memory_map(elf),
+                '$MEM': elf_parser.memory(elf),
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,
             }
@@ -86,8 +76,9 @@ class Tools:
 
     def get_memory(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
-        mem_kore = self.krun.kast_to_kore(cells['MEM_CELL'], sort=KSort('Map'))
+        mem_kore = self.krun.kast_to_kore(cells['MEM_CELL'], sort=KSort('SparseBytes'))
         mem = {}
-        for addr, val in match_map(mem_kore):
-            mem[kore_word(addr)] = kore_int(val)
+        for addr, data in kore_sparse_bytes(mem_kore).items():
+            for idx, val in enumerate(data):
+                mem[addr + idx] = val
         return mem
