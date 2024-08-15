@@ -279,6 +279,7 @@ def sparse_bytes(data: dict[int, bytes]) -> KInner:
         gaps.append((0, start))
     for (start1, val1), (start2, _) in itertools.pairwise(clean_data):
         end1 = start1 + len(val1)
+        # normalize_memory should already have merged consecutive segments
         assert end1 < start2
         gaps.append((end1, start2 - end1))
 
