@@ -575,13 +575,13 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "kframework"
-version = "7.1.114"
+version = "7.1.117"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "kframework-7.1.114-py3-none-any.whl", hash = "sha256:e96d55d256abe5badba9c19e4ea8db4c8462c6ac6a75a7c8cfd96fdd53a09abe"},
-    {file = "kframework-7.1.114.tar.gz", hash = "sha256:fd3cd1a696849128e659d928ac0890fb5d44903d904eaa3e4a91f9534de584dc"},
+    {file = "kframework-7.1.117-py3-none-any.whl", hash = "sha256:a8967b4000109a2aa672acd1db9ad95c40e43994ac85923beb3112a84fd9928f"},
+    {file = "kframework-7.1.117.tar.gz", hash = "sha256:797f7a3864e7f274602eb1e2bbd35d063b291244b24661593316da9f0ee952a4"},
 ]
 
 [package.dependencies]
@@ -1604,4 +1604,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "2eb9268851f27d198b859dbe8a482dc91c58aa13993e7b8fe55dfe2ca9528978"
+content-hash = "33fd58b7f18d8d148fb95e2c1d84ac0572dfa3c73298e1102d94836b380f240b"
