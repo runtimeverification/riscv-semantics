@@ -13,6 +13,7 @@ ARG PYTHON_VERSION=3.10
 
 RUN    apt-get -y update             \
     && apt-get -y install            \
+         curl                        \
          graphviz                    \
          python${PYTHON_VERSION}     \
          python${PYTHON_VERSION}-dev \
@@ -33,3 +34,6 @@ ENV PATH=/home/user/riscv/bin:${PATH}
 
 COPY --from=SAIL /usr/bin/riscv_sim_RV32 /usr/bin/riscv_sim_RV32
 COPY --from=SAIL /usr/bin/riscv_sim_RV64 /usr/bin/riscv_sim_RV64
+
+RUN    curl -sSL https://install.python-poetry.org | python3 - \
+    && poetry --version
