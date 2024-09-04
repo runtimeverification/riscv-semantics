@@ -13,6 +13,7 @@ ARG PYTHON_VERSION=3.10
 
 RUN    apt-get -y update             \
     && apt-get -y install            \
+         curl                        \
          graphviz                    \
          python${PYTHON_VERSION}     \
          python${PYTHON_VERSION}-dev \
