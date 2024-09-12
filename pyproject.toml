@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kriscv"
-version = "0.1.32"
+version = "0.1.33"
 description = "K tooling for the RISC-V architecture"
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -18,7 +18,7 @@ riscv-semantics = "kriscv.kdist.plugin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-kframework = "7.1.137"
+kframework = "7.1.142"
 pyyaml = "^6.0.1"
 types-pyyaml = "^6.0.12.20240311"
 filelock = "^3.14.0"
