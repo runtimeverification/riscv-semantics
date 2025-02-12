@@ -23,6 +23,12 @@ poetry install
 make kdist-build
 ```
 
+If you encounter issues like `fatal error: 'x86_64-linux-gnu/python3.10/pyconfig.h' file not found` during `make kdist-build`, try the following:
+
+```bash
+poetry env use --no-cache $(k-which-python)
+```
+
 ## Usage
 Execute a compiled RISC-V ELF file with the following command:
 ```bash
@@ -49,3 +55,5 @@ Prior to running `make test-architectural`, you must also fetch the RISC-V Archi
 git submodule update --init --recursive -- tests/riscv-arch-test
 ```
 and install the [Sail RISC-V model](https://github.com/riscv/sail-riscv) for use as a reference implementation.
+
+
