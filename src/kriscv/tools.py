@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from elftools.elf.elffile import ELFFile  # type: ignore
@@ -46,7 +47,16 @@ class Tools:
 
     def run_config(self, config: KInner) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
-        final_config_kore = self.krun.run_pattern(config_kore, check=True)
+        try:
+            final_config_kore = self.krun.run_pattern(config_kore, check=True)
+        except CalledProcessError as e:
+            with open('krun_stdout.txt', 'w') as f:
+                f.write(e.stdout)
+            with open('krun_stderr.txt', 'w') as f:
+                f.write(e.stderr)
+            with open('krun_input.txt', 'w') as f:
+                config_kore.write(f)
+            raise
         return self.krun.kore_to_kast(final_config_kore)
 
     def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
