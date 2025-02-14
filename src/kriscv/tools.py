@@ -55,12 +55,9 @@ class Tools:
             stderr_path = path / 'krun_stderr.txt'
             input_path = path / 'krun_input.txt'
 
-            with open(stdout_path, 'w') as f:
-                f.write(e.stdout)
-            with open(stderr_path, 'w') as f:
-                f.write(e.stderr)
-            with open(input_path, 'w') as f:
-                config_kore.write(f)
+            stdout_path.write_text(e.stdout)
+            stderr_path.write_text(e.stderr)
+            input_path.write_text(config_kore.text)
 
             print('Generated debug files:')
             print(f'- {stdout_path.resolve()}: KRun standard output')
