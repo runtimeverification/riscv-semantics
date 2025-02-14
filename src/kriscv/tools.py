@@ -8,13 +8,13 @@ from pyk.kast.inner import KSort, Subst
 from pyk.kast.manip import split_config_from
 from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
+from pathlib import Path
 from pyk.prelude.k import GENERATED_TOP_CELL
 
 from kriscv import elf_parser, term_builder
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
-    from pathlib import Path
 
     from pyk.kast.inner import KInner
     from pyk.kllvm.runtime import Runtime
@@ -50,12 +50,22 @@ class Tools:
         try:
             final_config_kore = self.krun.run_pattern(config_kore, check=True)
         except CalledProcessError as e:
-            with open('krun_stdout.txt', 'w') as f:
+            path = Path.cwd()
+            stdout_path = path / 'krun_stdout.txt'
+            stderr_path = path / 'krun_stderr.txt'
+            input_path = path / 'krun_input.txt'
+            
+            with open(stdout_path, 'w') as f:
                 f.write(e.stdout)
-            with open('krun_stderr.txt', 'w') as f:
+            with open(stderr_path, 'w') as f:
                 f.write(e.stderr)
-            with open('krun_input.txt', 'w') as f:
+            with open(input_path, 'w') as f:
                 config_kore.write(f)
+                
+            print("Generated debug files:")
+            print(f"- {stdout_path.resolve()}: KRun standard output")
+            print(f"- {stderr_path.resolve()}: KRun error output")
+            print(f"- {input_path.resolve()}: Input configuration in Kore format")
             raise
         return self.krun.kore_to_kast(final_config_kore)
 

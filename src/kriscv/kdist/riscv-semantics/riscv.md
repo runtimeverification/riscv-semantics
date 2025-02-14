@@ -103,7 +103,7 @@ module RISCV-MEMORY
 We abstract the particular memory representation behind `loadByte` and `storeByte` functions.
 ```k
   syntax Int ::= loadByte(memory: Memory, address: Word) [function, symbol(Memory:loadByte)]
-  rule loadByte(MEM, W(ADDR)) => { readByte(MEM, ADDR) }:>Int
+  rule loadByte(MEM, W(ADDR)) => MaybeByte2Int(readByte(MEM, ADDR))
 
   syntax Memory ::= storeByte(memory: Memory, address: Word, byte: Int) [function, total, symbol(Memory:storeByte)]
   rule storeByte(MEM, W(ADDR), B) => writeByte(MEM, ADDR, B)
