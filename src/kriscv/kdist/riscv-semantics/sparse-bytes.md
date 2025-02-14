@@ -54,6 +54,10 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   syntax MaybeByte ::=
       Int
     | ".Byte"
+  
+  syntax Int ::= MaybeByte2Int(MaybeByte) [function, total]
+  rule MaybeByte2Int(I:Int) => I
+  rule MaybeByte2Int(.Byte) => 0
 
   syntax MaybeByte ::=
       readByte  (SparseBytes  , Int) [function, total]

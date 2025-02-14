@@ -262,13 +262,13 @@ def test_disassemble(instr_bits: str, expected: KInner) -> None:
 MEMORY_TEST_DATA: Final[tuple[tuple[str, dict[int, bytes], int, int], ...]] = (
     ('empty_start', {}, 0, 0x1A),
     ('empty_later', {}, 10, 0x1A),
-    ('mid_bytes', {1: b'\x7F\x7F'}, 2, 0x1A),
-    ('start_pre_bytes', {1: b'\x7F\x7F'}, 0, 0x1A),
-    ('empty_pre_bytes', {2: b'\x7F\x7F'}, 1, 0x1A),
-    ('end_post_bytes', {2: b'\x7F\x7F'}, 4, 0x1A),
-    ('empty_post_bytes', {2: b'\x7F\x7F', 6: b'\x7F'}, 4, 0x1A),
-    ('end', {2: b'\x7F\x7F'}, 5, 0x1A),
-    ('merge_bytes', {1: b'\x7F\x7F', 4: b'\x7F'}, 3, 0x1A),
+    ('mid_bytes', {1: b'\x7f\x7f'}, 2, 0x1A),
+    ('start_pre_bytes', {1: b'\x7f\x7f'}, 0, 0x1A),
+    ('empty_pre_bytes', {2: b'\x7f\x7f'}, 1, 0x1A),
+    ('end_post_bytes', {2: b'\x7f\x7f'}, 4, 0x1A),
+    ('empty_post_bytes', {2: b'\x7f\x7f', 6: b'\x7f'}, 4, 0x1A),
+    ('end', {2: b'\x7f\x7f'}, 5, 0x1A),
+    ('merge_bytes', {1: b'\x7f\x7f', 4: b'\x7f'}, 3, 0x1A),
 )
 
 

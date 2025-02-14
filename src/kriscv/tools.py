@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from elftools.elf.elffile import ELFFile  # type: ignore
@@ -13,7 +15,6 @@ from kriscv import elf_parser, term_builder
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
-    from pathlib import Path
 
     from pyk.kast.inner import KInner
     from pyk.kllvm.runtime import Runtime
@@ -46,7 +47,23 @@ class Tools:
 
     def run_config(self, config: KInner) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
-        final_config_kore = self.krun.run_pattern(config_kore, check=True)
+        try:
+            final_config_kore = self.krun.run_pattern(config_kore, check=True)
+        except CalledProcessError as e:
+            path = Path.cwd()
+            stdout_path = path / 'krun_stdout.txt'
+            stderr_path = path / 'krun_stderr.txt'
+            input_path = path / 'krun_input.txt'
+
+            stdout_path.write_text(e.stdout)
+            stderr_path.write_text(e.stderr)
+            input_path.write_text(config_kore.text)
+
+            print('Generated debug files:')
+            print(f'- {stdout_path.resolve()}: KRun standard output')
+            print(f'- {stderr_path.resolve()}: KRun error output')
+            print(f'- {input_path.resolve()}: Input configuration in Kore format')
+            raise
         return self.krun.kore_to_kast(final_config_kore)
 
     def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
