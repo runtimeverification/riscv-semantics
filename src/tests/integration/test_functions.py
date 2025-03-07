@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from itertools import count
 from typing import TYPE_CHECKING
 
 import pytest
@@ -18,6 +19,15 @@ if TYPE_CHECKING:
 @pytest.fixture(scope='module')
 def definition_dir() -> Path:
     return kdist.get('riscv-semantics.func-test')
+
+
+def config(kitem: Pattern) -> App:
+    return generated_top(
+        (
+            k(kseq((kitem,))),
+            generated_counter(int_dv(0)),
+        ),
+    )
 
 
 def sw(rs2: int, imm: int, rs1: int) -> App:
@@ -61,14 +71,52 @@ def test_disassemble(definition_dir: Path, test_id: str, code: bytes, sort: Sort
     assert actual == expected
 
 
-def config(kitem: Pattern) -> App:
-    return generated_top(
-        (
-            k(kseq((kitem,))),
-            generated_counter(int_dv(0)),
-        ),
-    )
-
-
 def disassemble(n: int) -> App:
     return App('Lbldisassemble', (), (int_dv(n),))
+
+
+def is_32bit(x: int) -> bool:
+    return 0 <= x < 0x100000000
+
+
+def chop(x: int) -> int:
+    return x & 0xFFFFFFFF
+
+
+def signed(x: int) -> int:
+    assert is_32bit(x)
+    return x if x < 0x80000000 else x - 0x100000000
+
+
+MUL_TEST_DATA: Final = (
+    (0, 0),
+    (0, 1),
+    (1, 0),
+    (1, 1),
+    (0xFFFFFFFF, 1),
+    (0xFFFFFFFF, 12),
+    (0xFFFFFFFF, 0xFFFFFFFF),
+    (0xFFFF8765, 0xFFF01234),
+    (0xFFFF8765, 12),
+)
+
+
+assert all(is_32bit(op1) and is_32bit(op2) for op1, op2 in MUL_TEST_DATA)
+
+
+@pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
+def test_mul(definition_dir: Path, op1: int, op2: int) -> None:
+    # Given
+    init = config(inj(SortApp('SortWord'), SORT_K_ITEM, App('LblmulWord', (), (w(op1), w(op2)))))
+    res = chop(op1 * op2)
+    expected = config(inj(SortApp('SortWord'), SORT_K_ITEM, w(res)))
+
+    # When
+    actual = llvm_interpret(definition_dir, init)
+
+    # Then
+    assert actual == expected
+
+
+def w(x: int) -> App:
+    return App('LblW', (), (int_dv(x),))
