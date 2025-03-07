@@ -103,16 +103,24 @@ Finally, we can disassemble the instruction by inspecting the fields for each fo
 ```k
   syntax Instruction ::= disassemble(InstructionFormat) [function, total]
 
-  rule disassemble(RType(OP, 0, 0,  RD, RS1, RS2)) => ADD  RD , RS1 , RS2
-  rule disassemble(RType(OP, 0, 32, RD, RS1, RS2)) => SUB  RD , RS1 , RS2
-  rule disassemble(RType(OP, 1, 0,  RD, RS1, RS2)) => SLL  RD , RS1 , RS2
-  rule disassemble(RType(OP, 2, 0,  RD, RS1, RS2)) => SLT  RD , RS1 , RS2
-  rule disassemble(RType(OP, 3, 0,  RD, RS1, RS2)) => SLTU RD , RS1 , RS2
-  rule disassemble(RType(OP, 4, 0,  RD, RS1, RS2)) => XOR  RD , RS1 , RS2
-  rule disassemble(RType(OP, 5, 0,  RD, RS1, RS2)) => SRL  RD , RS1 , RS2
-  rule disassemble(RType(OP, 5, 32, RD, RS1, RS2)) => SRA  RD , RS1 , RS2
-  rule disassemble(RType(OP, 6, 0,  RD, RS1, RS2)) => OR   RD , RS1 , RS2
-  rule disassemble(RType(OP, 7, 0,  RD, RS1, RS2)) => AND  RD , RS1 , RS2
+  rule disassemble(RType(OP, 0, 0,  RD, RS1, RS2)) => ADD    RD , RS1 , RS2
+  rule disassemble(RType(OP, 0, 32, RD, RS1, RS2)) => SUB    RD , RS1 , RS2
+  rule disassemble(RType(OP, 1, 0,  RD, RS1, RS2)) => SLL    RD , RS1 , RS2
+  rule disassemble(RType(OP, 2, 0,  RD, RS1, RS2)) => SLT    RD , RS1 , RS2
+  rule disassemble(RType(OP, 3, 0,  RD, RS1, RS2)) => SLTU   RD , RS1 , RS2
+  rule disassemble(RType(OP, 4, 0,  RD, RS1, RS2)) => XOR    RD , RS1 , RS2
+  rule disassemble(RType(OP, 5, 0,  RD, RS1, RS2)) => SRL    RD , RS1 , RS2
+  rule disassemble(RType(OP, 5, 32, RD, RS1, RS2)) => SRA    RD , RS1 , RS2
+  rule disassemble(RType(OP, 6, 0,  RD, RS1, RS2)) => OR     RD , RS1 , RS2
+  rule disassemble(RType(OP, 7, 0,  RD, RS1, RS2)) => AND    RD , RS1 , RS2
+  rule disassemble(RType(OP, 0, 1,  RD, RS1, RS2)) => MUL    RD , RS1 , RS2
+  rule disassemble(RType(OP, 1, 1,  RD, RS1, RS2)) => MULH   RD , RS1 , RS2
+  rule disassemble(RType(OP, 2, 1,  RD, RS1, RS2)) => MULHSU RD , RS1 , RS2
+  rule disassemble(RType(OP, 3, 1,  RD, RS1, RS2)) => MULHU  RD , RS1 , RS2
+  rule disassemble(RType(OP, 4, 1,  RD, RS1, RS2)) => DIV    RD , RS1 , RS2
+  rule disassemble(RType(OP, 5, 1,  RD, RS1, RS2)) => DIVU   RD , RS1 , RS2
+  rule disassemble(RType(OP, 6, 1,  RD, RS1, RS2)) => REM    RD , RS1 , RS2
+  rule disassemble(RType(OP, 7, 1,  RD, RS1, RS2)) => REMU   RD , RS1 , RS2
 
   rule disassemble(IType(OP-IMM, 0, RD, RS1, IMM)) => ADDI  RD , RS1 , infSignExtend(IMM, 12)
   rule disassemble(IType(OP-IMM, 1, RD, RS1, IMM)) => SLLI  RD , RS1 , IMM &Int 31 requires (IMM >>Int 5) &Int 127 ==Int 0
