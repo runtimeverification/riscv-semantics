@@ -253,6 +253,11 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> XOR RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) xorWord readReg(REGS, RS2)) </regs>
 ```
+`MUL` gives the lowest `XLEN` bits after multiplication.
+```k
+  rule <instrs> MUL RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *Word readReg(REGS, RS2)) </regs>
+```
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
