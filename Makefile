@@ -23,7 +23,7 @@ poetry-install:
 # Semantics
 
 kdist-build: poetry-install
-	$(POETRY) run kdist -v build riscv-semantics.llvm riscv-semantics.kllvm riscv-semantics.kllvm-runtime
+	$(POETRY) run kdist -v build riscv-semantics.*
 
 kdist-clean: poetry-install
 	$(POETRY) run kdist clean

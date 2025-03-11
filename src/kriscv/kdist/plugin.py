@@ -78,8 +78,17 @@ __TARGETS__: Final = {
     'llvm': KompileTarget(
         lambda src_dir: {
             'main_file': src_dir / 'riscv-semantics/riscv.md',
-            'syntax_module': 'RISCV',
             'include_dirs': [src_dir],
+            'syntax_module': 'RISCV',
+            'md_selector': 'k',
+            'warnings_to_errors': True,
+        },
+    ),
+    'func-test': KompileTarget(
+        lambda src_dir: {
+            'main_file': src_dir / 'riscv-semantics/func-test.md',
+            'include_dirs': [src_dir],
+            'syntax_module': 'FUNC-TEST',
             'md_selector': 'k',
             'warnings_to_errors': True,
         },
