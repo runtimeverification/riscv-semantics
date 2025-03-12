@@ -258,6 +258,17 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> MUL RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *Word readReg(REGS, RS2)) </regs>
 ```
+`MULU`, `MULHU`, `MULHSU` give the higher `XLEN` bits after multiplication, with signedness of the operands interpreted accordingly.
+```k
+  rule <instrs> MULH RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *hWord readReg(REGS, RS2)) </regs>
+
+  rule <instrs> MULHU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *huWord readReg(REGS, RS2)) </regs>
+
+  rule <instrs> MULHSU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *hsuWord readReg(REGS, RS2)) </regs>
+```
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
