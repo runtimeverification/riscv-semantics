@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from itertools import count
 from typing import TYPE_CHECKING
 
 import pytest
@@ -18,6 +19,27 @@ if TYPE_CHECKING:
 @pytest.fixture(scope='module')
 def definition_dir() -> Path:
     return kdist.get('riscv-semantics.func-test')
+
+
+def _test_function(definition_dir: Path, app: Pattern, res: Pattern) -> None:
+    # Given
+    init = config(app)
+    expected = config(res)
+
+    # When
+    actual = llvm_interpret(definition_dir, init)
+
+    # Then
+    assert actual == expected
+
+
+def config(kitem: Pattern) -> App:
+    return generated_top(
+        (
+            k(kseq((kitem,))),
+            generated_counter(int_dv(0)),
+        ),
+    )
 
 
 def sw(rs2: int, imm: int, rs1: int) -> App:
@@ -49,26 +71,100 @@ DISASSEMBLE_TEST_DATA: Final = (
     ids=[test_id for test_id, *_ in DISASSEMBLE_TEST_DATA],
 )
 def test_disassemble(definition_dir: Path, test_id: str, code: bytes, sort: SortApp, pattern: Pattern) -> None:
-    # Given
+    def disassemble(n: int) -> App:
+        return App('Lbldisassemble', (), (int_dv(n),))
+
     n = int.from_bytes(code, byteorder='big')
-    init = config(inj(SortApp('SortInstruction'), SORT_K_ITEM, disassemble(n)))
-    expected = config(inj(sort, SORT_K_ITEM, pattern))
-
-    # When
-    actual = llvm_interpret(definition_dir, init)
-
-    # Then
-    assert actual == expected
+    app = inj(SortApp('SortInstruction'), SORT_K_ITEM, disassemble(n))
+    res = inj(sort, SORT_K_ITEM, pattern)
+    _test_function(definition_dir=definition_dir, app=app, res=res)
 
 
-def config(kitem: Pattern) -> App:
-    return generated_top(
-        (
-            k(kseq((kitem,))),
-            generated_counter(int_dv(0)),
-        ),
+def is_32bit(x: int) -> bool:
+    return 0 <= x < 0x100000000
+
+
+def chop(x: int) -> int:
+    return x & 0xFFFFFFFF
+
+
+def signed(x: int) -> int:
+    assert is_32bit(x)
+    return x if x < 0x80000000 else x - 0x100000000
+
+
+MUL_TEST_DATA: Final = (
+    (0, 0),
+    (0, 1),
+    (1, 0),
+    (1, 1),
+    (0xFFFFFFFF, 1),
+    (0xFFFFFFFF, 12),
+    (0xFFFFFFFF, 0xFFFFFFFF),
+    (0xFFFF8765, 0xFFF01234),
+    (0xFFFF8765, 12),
+)
+
+
+assert all(is_32bit(op1) and is_32bit(op2) for op1, op2 in MUL_TEST_DATA)
+
+
+def _test_mul(
+    definition_dir: Path,
+    symbol: str,
+    op1: int,
+    op2: int,
+    res: int,
+) -> None:
+    def w(x: int) -> App:
+        return App('LblW', (), (int_dv(x),))
+
+    _test_function(
+        definition_dir=definition_dir,
+        app=inj(SortApp('SortWord'), SORT_K_ITEM, App(symbol, (), (w(op1), w(op2)))),
+        res=inj(SortApp('SortWord'), SORT_K_ITEM, w(res)),
     )
 
 
-def disassemble(n: int) -> App:
-    return App('Lbldisassemble', (), (int_dv(n),))
+@pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
+def test_mul(definition_dir: Path, op1: int, op2: int) -> None:
+    _test_mul(
+        definition_dir=definition_dir,
+        symbol='LblmulWord',
+        op1=op1,
+        op2=op2,
+        res=chop(op1 * op2),
+    )
+
+
+@pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
+def test_mulh(definition_dir: Path, op1: int, op2: int) -> None:
+    _test_mul(
+        definition_dir=definition_dir,
+        symbol='LblmulhWord',
+        op1=op1,
+        op2=op2,
+        res=chop((signed(op1) * signed(op2)) >> 32),
+    )
+
+
+@pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
+def test_mulhu(definition_dir: Path, op1: int, op2: int) -> None:
+    _test_mul(
+        definition_dir=definition_dir,
+        symbol='LblmulhuWord',
+        op1=op1,
+        op2=op2,
+        res=chop((op1 * op2) >> 32),
+    )
+
+
+@pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
+def test_mulhsu(definition_dir: Path, op1: int, op2: int) -> None:
+    _test_mul(
+        definition_dir=definition_dir,
+        symbol='LblmulhsuWord',
+        op1=op1,
+        op2=op2,
+        res=chop((signed(op1) * op2) >> 32),
+    )
