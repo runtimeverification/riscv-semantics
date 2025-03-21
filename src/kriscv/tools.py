@@ -9,7 +9,6 @@ from pyk.kast.inner import KSort, Subst
 from pyk.kast.manip import split_config_from
 from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
-from pyk.prelude.collections import map_empty
 from pyk.prelude.k import GENERATED_TOP_CELL
 
 from kriscv import elf_parser, term_builder
@@ -67,7 +66,13 @@ class Tools:
             raise
         return self.krun.kore_to_kast(final_config_kore)
 
-    def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
+    def run_elf(
+        self,
+        elf_file: Path,
+        *,
+        regs: dict[int, int] | None = None,
+        end_symbol: str | None = None,
+    ) -> KInner:
         with open(elf_file, 'rb') as f:
             elf = ELFFile(f)
             if end_symbol is not None:
@@ -76,7 +81,7 @@ class Tools:
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {
-                '$REGS': map_empty(),
+                '$REGS': term_builder.regs(regs or {}),
                 '$MEM': elf_parser.memory(elf),
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,
