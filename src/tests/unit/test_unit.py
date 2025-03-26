@@ -11,7 +11,7 @@ from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
 from pyk.kore.match import kore_int
 from pyk.prelude.kint import INT, intToken
 
-from kriscv import term_builder
+from kriscv import build, term_builder
 from kriscv.term_builder import register
 from kriscv.term_manip import kore_sparse_bytes, normalize_memory
 
@@ -30,7 +30,7 @@ def _eval_call(tools: Tools, call: KInner, sort: KSort) -> KInner:
 
 def _eval_call_to_kore(tools: Tools, call: KInner, sort: KSort) -> Pattern:
     llvm_input = pattern_to_llvm(tools.krun.kast_to_kore(call, sort))
-    llvm_res = tools.runtime.evaluate(llvm_input)
+    llvm_res = build.runtime.evaluate(llvm_input)
     return llvm_to_pattern(llvm_res)
 
 
