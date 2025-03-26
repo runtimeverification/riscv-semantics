@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from pyk.kast.inner import KApply, KInner, KSort
 from pyk.prelude.bytes import bytesToken
+from pyk.prelude.collections import map_of
 from pyk.prelude.kint import intToken
 
 from kriscv.term_manip import normalize_memory
@@ -309,3 +310,8 @@ def load_byte(mem: KInner, addr: KInner) -> KInner:
 
 def store_byte(mem: KInner, addr: KInner, value: KInner) -> KInner:
     return KApply('Memory:storeByte', mem, addr, value)
+
+
+def regs(dct: dict[int, int]) -> KInner:
+    regs: dict[KInner, KInner] = {intToken(k): word(v) for k, v in dct.items()}
+    return map_of(regs)

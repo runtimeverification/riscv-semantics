@@ -31,7 +31,7 @@ module RISCV-CONFIGURATION
   configuration
     <riscv>
       <instrs> #EXECUTE ~> .K </instrs>
-      <regs> .Map </regs> // Map{Register, Word}
+      <regs> $REGS:Map </regs> // Map{Register, Word}
       <pc> $PC:Word </pc>
       <mem> $MEM:SparseBytes </mem>
     </riscv>

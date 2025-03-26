@@ -66,7 +66,13 @@ class Tools:
             raise
         return self.krun.kore_to_kast(final_config_kore)
 
-    def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
+    def run_elf(
+        self,
+        elf_file: Path,
+        *,
+        regs: dict[int, int] | None = None,
+        end_symbol: str | None = None,
+    ) -> KInner:
         with open(elf_file, 'rb') as f:
             elf = ELFFile(f)
             if end_symbol is not None:
@@ -75,6 +81,7 @@ class Tools:
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {
+                '$REGS': term_builder.regs(regs or {}),
                 '$MEM': elf_parser.memory(elf),
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,
