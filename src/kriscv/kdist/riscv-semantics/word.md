@@ -69,6 +69,22 @@ Note that two's complement enables us to use a single addition or subtraction op
   syntax Word ::= Word "-Word" Word [function, total]
   rule W(I1) -Word W(I2) => chop(I1 -Int I2)
 ```
+The same is true for the `XLEN` least-significant bits of the result of multiplication.
+```k
+  syntax Word ::= Word "*Word" Word [function, total, symbol(mulWord)]
+  rule W(I1) *Word W(I2) => chop(I1 *Int I2)
+```
+The value of the upper `XLEN` bits however depends on signedness of the operands, as reflected by the followig functions.
+```k
+  syntax Word ::= Word "*hWord" Word [function, total, symbol(mulhWord)]
+  rule W1 *hWord W2 => chop((Word2SInt(W1) *Int Word2SInt(W2)) >>Int XLEN)
+
+  syntax Word ::= Word "*huWord" Word [function, total, symbol(mulhuWord)]
+  rule W(I1) *huWord W(I2) => chop((I1 *Int I2) >>Int XLEN)
+
+  syntax Word ::= Word "*hsuWord" Word [function, total, symbol(mulhsuWord)]
+  rule W1 *hsuWord W(I2) => chop((Word2SInt(W1) *Int I2) >>Int XLEN)
+```
 Above, the `chop` utility function
 ```k
   syntax Word ::= chop(Int) [function, total]
