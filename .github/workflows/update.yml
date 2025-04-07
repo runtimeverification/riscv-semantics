@@ -11,7 +11,7 @@ concurrency:
 jobs:
   update-deps:
     name: 'Update Dependecies'
-    runs-on: [self-hosted, linux, flyweight]
+    runs-on: ubuntu-24.04
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
