@@ -8,15 +8,11 @@ from typing import TYPE_CHECKING
 
 from pyk.cterm.symbolic import CTermSymbolic
 from pyk.kcfg.explore import KCFGExplore
-from pyk.kcfg.semantics import KCFGSemantics
 from pyk.ktool.kprove import KProve
 from pyk.proof.reachability import APRProof
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
-
-    from pyk.cterm import CTerm
-    from pyk.kcfg.kcfg import KCFGExtendResult
 
 
 @dataclass
@@ -58,7 +54,6 @@ class SymTools:
                     definition=self.kprove.definition,
                 )
                 yield KCFGExplore(
-                    kcfg_semantics=RiscVSemantics(),
                     id=id,
                     cterm_symbolic=cterm_symbolic,
                 )
@@ -104,42 +99,3 @@ class SymTools:
             prover.advance_proof(proof, max_iterations=max_iterations)
 
         return proof
-
-
-class RiscVSemantics(KCFGSemantics):
-    def is_terminal(self, c: CTerm) -> bool:
-        from pyk.kast.inner import KApply, KLabel, KSequence, KVariable
-
-        match c.cell('INSTRS_CELL'):
-            case KSequence(items):
-                match items:
-                    case ():
-                        return True
-                    case (KVariable(),):
-                        return True
-                    case (KApply(KLabel('#HALT_RISCV-TERMINATION_KItem')), *_):
-                        return True
-                    case _:
-                        return False
-            case KVariable():
-                return True
-            case _:
-                return False
-
-    def abstract_node(self, c: CTerm) -> CTerm:
-        return c
-
-    def is_loop(self, c: CTerm) -> bool:
-        return False
-
-    def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
-        return False
-
-    def can_make_custom_step(self, c: CTerm) -> bool:
-        return False
-
-    def custom_step(self, c: CTerm, cs: CTermSymbolic) -> KCFGExtendResult | None:
-        return None
-
-    def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
-        return False
