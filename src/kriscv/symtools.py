@@ -49,7 +49,7 @@ class SymTools:
             }
         ) as server:
             with KoreClient('localhost', server.port) as client:
-                cterm_symbolic = cterm_symbolic = CTermSymbolic(
+                cterm_symbolic = CTermSymbolic(
                     kore_client=client,
                     definition=self.kprove.definition,
                 )
@@ -88,7 +88,7 @@ class SymTools:
             # load an existing proof (to continue work on it)
             proof = APRProof.read_proof_data(proof_dir=self.proof_dir, id=f'{spec_module}.{claim_id}')
         else:
-            # ignore existing proof data and reinitilize it from a claim
+            # ignore existing proof data and reinitialize it from a claim
             proof = APRProof.from_claim(self.kprove.definition, claim=claim, logs={}, proof_dir=self.proof_dir)
 
         with self.explore(id=spec_label) as kcfg_explore:
