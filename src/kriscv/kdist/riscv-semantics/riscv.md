@@ -50,7 +50,7 @@ As we do not model the surrounding environment, for testing purposes we add our 
 This is done with three components:
 - A `HaltCondition` value stored in the configuation indicating under which conditions we should halt.
 - A `#CHECK_HALT` operation indicating that the halt condition should be checked.
-- A `#HALT` operation which terminates the simulation by consuming all following operations in the pipeline without executing them.
+- A `#HALT` operation which terminates the simulation by not matching any semantic rule.
 ```k
 module RISCV-TERMINATION
   imports RISCV-CONFIGURATION
@@ -60,8 +60,6 @@ module RISCV-TERMINATION
   syntax KItem ::=
       "#HALT"
     | "#CHECK_HALT"
-
-  rule <instrs> #HALT ~> (_ => .K) ...</instrs>
 
   syntax HaltCondition ::=
       "NEVER"                [symbol(HaltNever)]
