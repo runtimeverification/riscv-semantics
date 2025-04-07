@@ -31,7 +31,7 @@ module RISCV-CONFIGURATION
   configuration
     <riscv>
       <instrs> #EXECUTE ~> .K </instrs>
-      <regs> .Map </regs> // Map{Register, Word}
+      <regs> $REGS:Map </regs> // Map{Register, Word}
       <pc> $PC:Word </pc>
       <mem> $MEM:SparseBytes </mem>
     </riscv>
@@ -50,7 +50,7 @@ As we do not model the surrounding environment, for testing purposes we add our 
 This is done with three components:
 - A `HaltCondition` value stored in the configuation indicating under which conditions we should halt.
 - A `#CHECK_HALT` operation indicating that the halt condition should be checked.
-- A `#HALT` operation which terminates the simulation by consuming all following operations in the pipeline without executing them.
+- A `#HALT` operation which terminates the simulation by not matching any semantic rule.
 ```k
 module RISCV-TERMINATION
   imports RISCV-CONFIGURATION
@@ -60,8 +60,6 @@ module RISCV-TERMINATION
   syntax KItem ::=
       "#HALT"
     | "#CHECK_HALT"
-
-  rule <instrs> #HALT ~> (_ => .K) ...</instrs>
 
   syntax HaltCondition ::=
       "NEVER"                [symbol(HaltNever)]
@@ -252,6 +250,22 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 
   rule <instrs> XOR RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) xorWord readReg(REGS, RS2)) </regs>
+```
+`MUL` gives the lowest `XLEN` bits after multiplication.
+```k
+  rule <instrs> MUL RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *Word readReg(REGS, RS2)) </regs>
+```
+`MULU`, `MULHU`, `MULHSU` give the higher `XLEN` bits after multiplication, with signedness of the operands interpreted accordingly.
+```k
+  rule <instrs> MULH RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *hWord readReg(REGS, RS2)) </regs>
+
+  rule <instrs> MULHU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *huWord readReg(REGS, RS2)) </regs>
+
+  rule <instrs> MULHSU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *hsuWord readReg(REGS, RS2)) </regs>
 ```
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k

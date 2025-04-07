@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from pyk.kbuild.utils import k_version
 from pyk.kdist.api import Target
 from pyk.kllvm.compiler import compile_kllvm, compile_runtime
-from pyk.ktool.kompile import kompile
+from pyk.ktool.kompile import LLVMKompileType, PykBackend, kompile
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -78,6 +78,26 @@ __TARGETS__: Final = {
     'llvm': KompileTarget(
         lambda src_dir: {
             'main_file': src_dir / 'riscv-semantics/riscv.md',
+            'include_dirs': [src_dir],
+            'syntax_module': 'RISCV',
+            'md_selector': 'k',
+            'warnings_to_errors': True,
+        },
+    ),
+    'llvm-lib': KompileTarget(
+        lambda src_dir: {
+            'main_file': src_dir / 'riscv-semantics/riscv.md',
+            'include_dirs': [src_dir],
+            'syntax_module': 'RISCV',
+            'llvm_kompile_type': LLVMKompileType.C,
+            'md_selector': 'k',
+            'warnings_to_errors': True,
+        },
+    ),
+    'haskell': KompileTarget(
+        lambda src_dir: {
+            'main_file': src_dir / 'riscv-semantics/riscv.md',
+            'backend': PykBackend.HASKELL,
             'include_dirs': [src_dir],
             'syntax_module': 'RISCV',
             'md_selector': 'k',

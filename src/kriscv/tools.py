@@ -17,17 +17,14 @@ from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 if TYPE_CHECKING:
 
     from pyk.kast.inner import KInner
-    from pyk.kllvm.runtime import Runtime
     from pyk.ktool.kprint import KPrint
 
 
 class Tools:
     __krun: KRun
-    __runtime: Runtime
 
-    def __init__(self, definition_dir: Path, runtime: Runtime, *, temp_dir: Path | None = None) -> None:
+    def __init__(self, definition_dir: Path, *, temp_dir: Path | None = None) -> None:
         self.__krun = KRun(definition_dir, use_directory=temp_dir)
-        self.__runtime = runtime
 
     @property
     def krun(self) -> KRun:
@@ -36,10 +33,6 @@ class Tools:
     @property
     def kprint(self) -> KPrint:
         return self.__krun
-
-    @property
-    def runtime(self) -> Runtime:
-        return self.__runtime
 
     def init_config(self, config_vars: dict[str, KInner]) -> KInner:
         conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
@@ -66,7 +59,13 @@ class Tools:
             raise
         return self.krun.kore_to_kast(final_config_kore)
 
-    def run_elf(self, elf_file: Path, *, end_symbol: str | None = None) -> KInner:
+    def run_elf(
+        self,
+        elf_file: Path,
+        *,
+        regs: dict[int, int] | None = None,
+        end_symbol: str | None = None,
+    ) -> KInner:
         with open(elf_file, 'rb') as f:
             elf = ELFFile(f)
             if end_symbol is not None:
@@ -75,6 +74,7 @@ class Tools:
             else:
                 halt_cond = term_builder.halt_never()
             config_vars = {
+                '$REGS': term_builder.regs(regs or {}),
                 '$MEM': elf_parser.memory(elf),
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,

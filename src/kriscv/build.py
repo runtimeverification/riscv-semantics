@@ -17,4 +17,4 @@ runtime: Final = importer.import_runtime(kdist.get('riscv-semantics.kllvm-runtim
 
 
 def semantics(*, temp_dir: Path | None = None) -> Tools:
-    return Tools(definition_dir=kdist.get('riscv-semantics.llvm'), runtime=runtime, temp_dir=temp_dir)
+    return Tools(definition_dir=kdist.get('riscv-semantics.llvm'), temp_dir=temp_dir)
