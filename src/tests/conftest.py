@@ -24,6 +24,12 @@ def pytest_addoption(parser: Parser) -> None:
         type=Path,
         help='Directory to save temporary files',
     )
+    parser.addoption(
+        '--debug-mode',
+        action='store_true',
+        default=False,
+        help='Run tests in debug mode, saving temporary files in the debug directory',
+    )
 
 
 @pytest.fixture
@@ -37,6 +43,11 @@ def temp_dir(request: FixtureRequest) -> Path:
         return Path(request.config.temp_dir)  # type: ignore[attr-defined]
     else:
         return Path(request.config.workerinput['temp_dir'])  # type: ignore[attr-defined]
+
+
+@pytest.fixture
+def debug_mode(request: FixtureRequest) -> bool:
+    return request.config.getoption('--debug-mode', default=False)
 
 
 def pytest_configure(config: Config) -> None:
