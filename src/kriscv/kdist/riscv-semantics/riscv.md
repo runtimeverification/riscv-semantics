@@ -133,7 +133,9 @@ Registers should be manipulated with the `writeReg` and `readReg` functions, whi
 
   syntax Word ::= readReg(regs: Map, rs: Int) [function]
   rule readReg(_   , 0 ) => W(0)
-  rule readReg(REGS, RS) => { REGS[RS] }:>Word requires RS =/=Int 0
+  rule readReg((RS |-> VAL:Word) _REGS, RS) => VAL requires RS =/=Int 0
+  rule readReg(REGS, RS) => W(0) requires RS =/=Int 0 andBool (notBool RS in_keys(REGS))
+  rule readReg((RS |-> VAL) _REGS, RS) => W(0)  requires RS =/=Int 0 andBool (notBool isWord(VAL))
 endmodule
 ```
 
