@@ -75,6 +75,11 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   rule readByteBF(#bytes(B) _ , I) => B[ I ] requires I >=Int 0 andBool I <Int lengthBytes(B)
   rule readByteBF(#bytes(B) EF, I) => readByteEF(EF, I -Int lengthBytes(B))
                                              requires I >=Int lengthBytes(B)
+  
+  rule readByteBF(#bytes(B +Bytes _) _ , I) => B[ I ] 
+    requires I >=Int 0 andBool I <Int lengthBytes(B) [simplification(45)]
+  rule readByteBF(#bytes(B +Bytes BS) EF , I) => readByteBF(#bytes(BS) EF , I -Int lengthBytes(B)) 
+    requires I >=Int lengthBytes(B) [simplification(45)]
 ```
 `writeByte` writes a single byte to a given index. With regards to time complexity,
 - If the index is in the middle of an existing `#empty(_)` or `#bytes(_)` region, time complexity is `O(E)` where `E` is the number of entries up to the index.

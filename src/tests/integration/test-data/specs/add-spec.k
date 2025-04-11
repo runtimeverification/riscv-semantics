@@ -3,7 +3,7 @@ requires "riscv-semantics/riscv.md"
 module ADD-SPEC
   imports RISCV
 
-  claim [add]:
+  claim [id]:
     <instrs> (.K => #HALT) ~> #EXECUTE ... </instrs>
     <regs>
       1 |-> X
