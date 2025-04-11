@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 SPEC_DIR: Final = TEST_DATA_DIR / 'specs'
 SPEC_TESTS: Final = list(SPEC_DIR.glob('*.k'))
 DEBUG_DIR: Final = TEST_DATA_DIR / 'debug'
+BUG_REPORT: Final = TEST_DATA_DIR / 'debug' / 'bug-reports'
 
 
 @dataclass
@@ -54,7 +55,7 @@ def symtools(tmp_path: Path, debug_mode: bool) -> SymTools:
     """
     temp_dir = DEBUG_DIR if debug_mode else tmp_path
     temp_dir.mkdir(parents=True, exist_ok=True)
-    return SymTools.default(proof_dir=temp_dir)
+    return SymTools.default(proof_dir=temp_dir, bug_report=BUG_REPORT if debug_mode else None)
 
 
 @pytest.mark.parametrize(
@@ -70,10 +71,8 @@ def test_specs(
 ) -> None:
     # Given
     spec_file = load_spec(spec_file.name)
-    if debug_mode:
-        max_depth = 1
-    else:
-        max_depth = 1000
+    
+    max_depth = 1 if debug_mode else 1000
 
     # When
     proof = symtools.prove(
