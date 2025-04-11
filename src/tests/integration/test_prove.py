@@ -70,13 +70,17 @@ def test_specs(
 ) -> None:
     # Given
     spec_file = load_spec(spec_file.name)
+    if debug_mode:
+        max_depth = 1
+    else:
+        max_depth = 1000
 
     # When
     proof = symtools.prove(
         spec_file=spec_file,
         spec_module=spec_file.stem.upper(),
         claim_id=f'{spec_file.stem.upper()}.id',
-        max_depth=1,
+        max_depth=max_depth,
     )
 
     if debug_mode:
@@ -84,4 +88,4 @@ def test_specs(
             f.write('\n'.join(APRProofShow(symtools.kprove).show(proof, nodes=[node.id for node in proof.kcfg.nodes])))
 
     # Then
-    assert proof.status == ProofStatus.PASSED
+    assert proof.status == ProofStatus.PASSED, f'Proof failed: {proof.failure_info}'
