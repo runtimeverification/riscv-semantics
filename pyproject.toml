@@ -24,6 +24,7 @@ types-pyyaml = "^6.0.12.20240311"
 filelock = "^3.14.0"
 riscof = "^1.25.3"
 pyelftools = "^0.26"
+riscv-assembler = "^1.2.1"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"

@@ -33,6 +33,11 @@ class RunArchTestOpts(KRISCVOpts):
     output_file: Path | None
 
 
+@dataclass
+class AssembleOpts(KRISCVOpts):
+    instruction: str
+
+
 def kriscv(args: Sequence[str]) -> None:
     opts = _parse_args(args)
     match opts:
@@ -40,6 +45,8 @@ def kriscv(args: Sequence[str]) -> None:
             _kriscv_run(opts)
         case RunArchTestOpts():
             _kriscv_run_arch_test(opts)
+        case AssembleOpts():
+            _kriscv_assemble(opts)
         case _:
             raise AssertionError()
 
@@ -63,6 +70,11 @@ def _parse_args(args: Sequence[str]) -> KRISCVOpts:
                 temp_dir=ns.temp_dir,
                 input_file=ns.input_file.resolve(strict=True),
                 output_file=ns.output_file,
+            )
+        case 'assemble':
+            return AssembleOpts(
+                temp_dir=ns.temp_dir,
+                instruction=ns.instruction,
             )
         case _:
             raise AssertionError()
@@ -115,6 +127,16 @@ def _kriscv_run_arch_test(opts: RunArchTestOpts) -> None:
             out.write(word + '\n')
 
 
+def _kriscv_assemble(opts: AssembleOpts) -> None:
+    from riscv_assembler.convert import AssemblyConverter  # type: ignore
+
+    converter = AssemblyConverter()
+    binary_str = converter.convert(opts.instruction)[0]
+    binary_int = int(binary_str, 2)
+    little_endian_bytes = binary_int.to_bytes(4, byteorder='little')
+    print(''.join(f'\\x{b:02x}' for b in little_endian_bytes))
+
+
 def _arg_parser() -> ArgumentParser:
     parser = ArgumentParser(prog='kriscv')
 
@@ -138,6 +160,13 @@ def _arg_parser() -> ArgumentParser:
     )
     run_arch_test_parser.add_argument(
         '-o', '--output', dest='output_file', type=Path, help='output file for the test signature'
+    )
+
+    assemble_parser = command_parser.add_parser(
+        'assemble', help='assemble a RISC-V instruction, e.g., lw x3, 0(x3)', parents=[common_parser]
+    )
+    assemble_parser.add_argument(
+        'instruction', type=str, metavar='INSTRUCTION', help='RISC-V assembly instruction to assemble'
     )
 
     return parser
