@@ -44,8 +44,6 @@ class SymTools:
 
     @contextmanager
     def explore(self, *, id: str) -> Iterator[KCFGExplore]:
-        pass
-
         with cterm_symbolic(
             self.kprove.definition,
             self.haskell_dir,
