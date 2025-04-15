@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 from typing import TYPE_CHECKING, cast
 
-from pyk.kast.inner import KApply, KInner, KSort
+from pyk.kast.inner import KApply, KInner, KSort, KVariable
 from pyk.prelude.bytes import bytesToken
 from pyk.prelude.collections import map_of
 from pyk.prelude.kint import intToken
@@ -267,8 +267,27 @@ def sb_bytes_cons(bs: KInner, rest_ef: KInner) -> KInner:
     return KApply('SparseBytes:BytesCons', bs, rest_ef)
 
 
-def sparse_bytes(data: dict[int, bytes]) -> KInner:
+def length_bytes(var: str) -> KInner:
+    return KApply('lengthBytes(_)_BYTES-HOOKED_Int_Bytes', [KVariable(var, 'Bytes')])
+
+
+def add_bytes(bytes1: KInner, bytes2: KInner) -> KInner:
+    return KApply('_+Bytes__BYTES-HOOKED_Bytes_Bytes_Bytes', bytes1, bytes2)
+
+
+def sparse_bytes(data: dict[int, bytes], symdata: dict[int, tuple[int, str]] | None = None) -> KInner:
+    """
+    Build a sparse bytes term from a dictionary of data and a dictionary of symbolic data.
+
+    Args:
+        data: Address -> bytes
+        symdata: Address -> (byte length, variable name)
+
+    Returns:
+        Sparse bytes term
+    """
     clean_data: list[tuple[int, bytes]] = sorted(normalize_memory(data).items())
+    symdata = dict(sorted(symdata.items(), key=lambda x: x[0])) if symdata else {}
 
     if len(clean_data) == 0:
         return dot_sb()
@@ -290,11 +309,36 @@ def sparse_bytes(data: dict[int, bytes]) -> KInner:
     )
 
     sparse_k = dot_sb()
-    for _, gap_or_val in sparse_data:
+    for addr, gap_or_val in sparse_data:
         if isinstance(gap_or_val, int):
+            for symaddr, (symsize, _) in symdata.items():
+                if addr <= symaddr < addr + gap_or_val:
+                    assert symaddr + symsize <= addr + gap_or_val
+                    raise NotImplementedError('We do not support to make empty segments with partial symbolic bytes!')
             sparse_k = sb_empty_cons(sb_empty(intToken(gap_or_val)), sparse_k)
         elif isinstance(gap_or_val, bytes):
-            sparse_k = sb_bytes_cons(sb_bytes(bytesToken(gap_or_val)), sparse_k)
+            curr_addr = addr
+            curr_bytes: KInner | None = None
+            for symaddr, (symsize, symname) in symdata.items():
+                if addr <= symaddr < addr + len(gap_or_val):
+                    assert symaddr + symsize <= addr + len(gap_or_val)
+                    # Extract bytes before the variable
+                    if symaddr > curr_addr:
+                        temp_bytes = bytesToken(gap_or_val[curr_addr - addr : symaddr - addr])
+                        curr_bytes = add_bytes(curr_bytes, temp_bytes) if curr_bytes else temp_bytes
+                    # Add the variable
+                    curr_bytes = (
+                        add_bytes(curr_bytes, KVariable(symname, 'Bytes'))
+                        if curr_bytes
+                        else KVariable(symname, 'Bytes')
+                    )
+                    # Skip over the variable bytes
+                    curr_addr = symaddr + symsize
+            if curr_addr < addr + len(gap_or_val):
+                temp_bytes = bytesToken(gap_or_val[curr_addr - addr :])
+                curr_bytes = add_bytes(curr_bytes, temp_bytes) if curr_bytes else temp_bytes
+            assert curr_bytes is not None
+            sparse_k = sb_bytes_cons(sb_bytes(curr_bytes), sparse_k)
         else:
             raise AssertionError()
     return sparse_k
