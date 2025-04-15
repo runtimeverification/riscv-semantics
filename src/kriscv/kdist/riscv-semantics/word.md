@@ -5,6 +5,7 @@ module WORD
   imports BOOL
   imports BYTES
   imports INT
+  imports K-EQUAL
 
   syntax Int ::= "XLEN" [macro]
   rule XLEN => 32
@@ -32,6 +33,8 @@ or interpreted as an `XLEN`-bit signed two's complement integer by infinitely si
   syntax Word ::= signExtend(bits: Int, signBitIdx: Int) [function, total]
   rule signExtend(B, L) => W(((2 ^Int (XLEN -Int L) -Int 1) <<Int L) |Int B) requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
   rule signExtend(B, _) => W(B) [owise]
+
+  rule signExtend(B, L) ==K signExtend(C, M) => B ==K C andBool L ==K M [simplification]
 ```
 Booleans can be encoded as `Word`s in the obvious way
 ```k

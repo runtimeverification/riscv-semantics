@@ -17,6 +17,7 @@ requires "riscv-disassemble.md"
 requires "riscv-instructions.md"
 requires "sparse-bytes.md"
 requires "word.md"
+requires "lemmas/lemmas.k"
 
 module RISCV-CONFIGURATION
   imports BOOL
@@ -149,6 +150,7 @@ module RISCV
   imports RISCV-MEMORY
   imports RISCV-TERMINATION
   imports WORD
+  imports LEMMAS
 ```
 `#EXECUTE` indicates that we should continuously fetch and execute instructions, loading the instruction into the `#NEXT[_]` operator.
 ```k
