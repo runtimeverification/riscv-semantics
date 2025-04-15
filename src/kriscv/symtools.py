@@ -6,13 +6,16 @@ from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pyk.cterm.symbolic import CTermSymbolic
+from pyk.cli.utils import bug_report_arg
+from pyk.cterm.symbolic import cterm_symbolic
 from pyk.kcfg.explore import KCFGExplore
 from pyk.ktool.kprove import KProve
 from pyk.proof.reachability import APRProof
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
+
+    from pyk.utils import BugReport
 
 
 @dataclass
@@ -21,9 +24,10 @@ class SymTools:
     llvm_lib_dir: Path
     proof_dir: Path
     source_dirs: tuple[Path, ...]
+    bug_report: BugReport | None
 
     @staticmethod
-    def default(*, proof_dir: Path) -> SymTools:
+    def default(*, proof_dir: Path, bug_report: str | Path | None = None) -> SymTools:
         from pyk.kdist import kdist
 
         return SymTools(
@@ -31,32 +35,23 @@ class SymTools:
             llvm_lib_dir=kdist.get('riscv-semantics.llvm-lib'),
             source_dirs=(kdist.get('riscv-semantics.source'),),
             proof_dir=proof_dir,
+            bug_report=bug_report_arg(bug_report) if bug_report else None,
         )
 
     @cached_property
     def kprove(self) -> KProve:
-        return KProve(definition_dir=self.haskell_dir, use_directory=self.proof_dir)
+        return KProve(definition_dir=self.haskell_dir, use_directory=self.proof_dir, bug_report=self.bug_report)
 
     @contextmanager
     def explore(self, *, id: str) -> Iterator[KCFGExplore]:
-        from pyk.kore.rpc import BoosterServer, KoreClient
-
-        with BoosterServer(
-            {
-                'kompiled_dir': self.haskell_dir,
-                'llvm_kompiled_dir': self.llvm_lib_dir,
-                'module_name': self.kprove.main_module,
-            }
-        ) as server:
-            with KoreClient('localhost', server.port) as client:
-                cterm_symbolic = CTermSymbolic(
-                    kore_client=client,
-                    definition=self.kprove.definition,
-                )
-                yield KCFGExplore(
-                    id=id,
-                    cterm_symbolic=cterm_symbolic,
-                )
+        with cterm_symbolic(
+            self.kprove.definition,
+            self.haskell_dir,
+            llvm_definition_dir=self.llvm_lib_dir,
+            bug_report=self.bug_report,
+            id=id if self.bug_report else None,
+        ) as cts:
+            yield KCFGExplore(cts, id=id)
 
     def prove(
         self,
