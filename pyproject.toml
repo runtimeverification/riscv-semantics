@@ -12,6 +12,7 @@ authors = [
 
 [tool.poetry.scripts]
 kriscv = "kriscv.__main__:main"
+kriscv-asm = "kriscv.devtools:kriscv_asm"
 
 [tool.poetry.plugins.kdist]
 riscv-semantics = "kriscv.kdist.plugin"
