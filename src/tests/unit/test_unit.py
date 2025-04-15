@@ -7,6 +7,7 @@ from kriscv.build import semantics
 
 # isort: on
 import pytest
+from pyk.kast.inner import KToken, KVariable
 from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
 from pyk.kore.match import kore_int
 from pyk.prelude.kint import INT, intToken
@@ -316,3 +317,56 @@ def test_memory(memory: dict[int, bytes], addr: int, byte: int) -> None:
     load_actual = kore_int(_eval_call_to_kore(tools, load_call, INT))
 
     assert load_actual == byte
+
+
+SYMBOLIC_MEMORY_TEST_DATA: Final = (
+    (
+        'empty-bytes-2-3',
+        {2: b'\x7f\x7f\x7f\x7f\x7f'},
+        {3: (1, 'W0'), 2: (1, 'W1')},
+        # #empty(2) #bytes(W1 +Bytes +W0 +Bytes b'\x7f\x7f\x7f')
+        term_builder.sb_empty_cons(
+            term_builder.sb_empty(intToken(2)),
+            term_builder.sb_bytes_cons(
+                term_builder.sb_bytes(
+                    term_builder.add_bytes(
+                        term_builder.add_bytes(KVariable('W1', 'Bytes'), KVariable('W0', 'Bytes')),
+                        KToken('b"\\x7f\\x7f\\x7f"', 'Bytes'),
+                    )
+                ),
+                term_builder.dot_sb(),
+            ),
+        ),
+    ),
+    (
+        'empty-bytes-6',
+        {2: b'\x7f\x7f', 12: b'\x7f\x7f\x7f'},
+        {14: (1, 'W0')},
+        # #empty(2) #bytes(b'\x7f\x7f') #empty(8) #bytes(b'\x7f\x7f' +Bytes +W0)
+        term_builder.sb_empty_cons(
+            term_builder.sb_empty(intToken(2)),
+            term_builder.sb_bytes_cons(
+                term_builder.sb_bytes(KToken('b"\\x7f\\x7f"', 'Bytes')),
+                term_builder.sb_empty_cons(
+                    term_builder.sb_empty(intToken(8)),
+                    term_builder.sb_bytes_cons(
+                        term_builder.sb_bytes(
+                            term_builder.add_bytes(KToken('b"\\x7f\\x7f"', 'Bytes'), KVariable('W0', 'Bytes'))
+                        ),
+                        term_builder.dot_sb(),
+                    ),
+                ),
+            ),
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'memory,symdata,expected',
+    [(memory, symdata, expected) for (_, memory, symdata, expected) in SYMBOLIC_MEMORY_TEST_DATA],
+    ids=[test_id for test_id, *_ in SYMBOLIC_MEMORY_TEST_DATA],
+)
+def test_symbolic_memory(memory: dict[int, bytes], symdata: dict[int, tuple[int, str]], expected: int) -> None:
+    result = term_builder.sparse_bytes(memory, symdata)
+    assert result == expected
