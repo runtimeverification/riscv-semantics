@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from pyk.proof import ProofStatus
+from pyk.proof.show import APRProofShow
 
 from kriscv.symtools import SymTools
 
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 
 
 SPEC_DIR: Final = TEST_DATA_DIR / 'specs'
+SPEC_TESTS: Final = list(SPEC_DIR.glob('*.k'))
 
 
 @dataclass
@@ -31,28 +33,40 @@ class SpecLoader:
 
 
 @pytest.fixture
-def load_spec(tmp_path: Path) -> SpecLoader:
-    return SpecLoader(temp_dir=tmp_path)
+def load_spec(temp_dir: Path) -> SpecLoader:
+    return SpecLoader(temp_dir=temp_dir)
 
 
 @pytest.fixture
-def symtools(tmp_path: Path) -> SymTools:
-    return SymTools.default(proof_dir=tmp_path)
+def symtools(temp_dir: Path) -> SymTools:
+    return SymTools.default(proof_dir=temp_dir, bug_report=temp_dir / 'bug-reports')
 
 
-def test_add(
+@pytest.mark.parametrize(
+    'spec_file',
+    SPEC_TESTS,
+    ids=[str(test.relative_to(SPEC_DIR)) for test in SPEC_TESTS],
+)
+def test_specs(
     load_spec: SpecLoader,
     symtools: SymTools,
+    temp_dir: Path,
+    spec_file: Path,
 ) -> None:
     # Given
-    spec_file = load_spec('add-spec.k')
+    spec_file = load_spec(spec_file.name)
 
     # When
     proof = symtools.prove(
         spec_file=spec_file,
-        spec_module='ADD-SPEC',
-        claim_id='ADD-SPEC.add',
+        spec_module=spec_file.stem.upper(),
+        claim_id=f'{spec_file.stem.upper()}.id',
+        max_depth=1000,
     )
+
+    proof_show_file = temp_dir / f'{spec_file.stem}-proof.txt'
+    proof_show_lines = APRProofShow(symtools.kprove).show(proof, nodes=[node.id for node in proof.kcfg.nodes])
+    proof_show_file.write_text('\n'.join(proof_show_lines))
 
     # Then
     assert proof.status == ProofStatus.PASSED
