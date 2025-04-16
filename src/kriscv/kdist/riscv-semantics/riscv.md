@@ -17,6 +17,7 @@ requires "riscv-disassemble.md"
 requires "riscv-instructions.md"
 requires "sparse-bytes.md"
 requires "word.md"
+requires "lemmas/lemmas.k"
 
 module RISCV-CONFIGURATION
   imports BOOL
@@ -131,7 +132,7 @@ Registers should be manipulated with the `writeReg` and `readReg` functions, whi
   rule writeReg(REGS, 0 , _  ) => REGS
   rule writeReg(REGS, RD, VAL) => REGS[RD <- VAL] [owise]
 
-  syntax Word ::= readReg(regs: Map, rs: Int) [function]
+  syntax Word ::= readReg(regs: Map, rs: Int) [function, total]
   rule readReg(_   , 0 ) => W(0)
   rule readReg(REGS, RS) => { REGS[RS] } :>Word [owise]
 endmodule
@@ -147,6 +148,7 @@ module RISCV
   imports RISCV-MEMORY
   imports RISCV-TERMINATION
   imports WORD
+  imports LEMMAS
 ```
 `#EXECUTE` indicates that we should continuously fetch and execute instructions, loading the instruction into the `#NEXT[_]` operator.
 ```k
