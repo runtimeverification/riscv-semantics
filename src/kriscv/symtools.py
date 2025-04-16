@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pyk.cli.utils import bug_report_arg
-from pyk.cterm.symbolic import cterm_symbolic
+from pyk.cterm.symbolic import CTermSymbolic
 from pyk.kcfg.explore import KCFGExplore
 from pyk.ktool.kprove import KProve
 from pyk.proof.reachability import APRProof
@@ -44,14 +44,25 @@ class SymTools:
 
     @contextmanager
     def explore(self, *, id: str) -> Iterator[KCFGExplore]:
-        with cterm_symbolic(
-            self.kprove.definition,
-            self.haskell_dir,
-            llvm_definition_dir=self.llvm_lib_dir,
-            bug_report=self.bug_report,
-            id=id if self.bug_report else None,
-        ) as cts:
-            yield KCFGExplore(cts, id=id)
+        from pyk.kore.rpc import BoosterServer, KoreClient
+
+        with BoosterServer(
+            {
+                'kompiled_dir': self.haskell_dir,
+                'llvm_kompiled_dir': self.llvm_lib_dir,
+                'module_name': self.kprove.main_module,
+                'bug_report': self.bug_report,
+            }
+        ) as server:
+            with KoreClient('localhost', server.port, bug_report=self.bug_report, bug_report_id=id) as client:
+                cterm_symbolic = CTermSymbolic(
+                    kore_client=client,
+                    definition=self.kprove.definition,
+                )
+                yield KCFGExplore(
+                    id=id,
+                    cterm_symbolic=cterm_symbolic,
+                )
 
     def prove(
         self,
