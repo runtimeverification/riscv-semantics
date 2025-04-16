@@ -350,9 +350,7 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
                 tb.sb_empty_cons(
                     tb.sb_empty(intToken(8)),
                     tb.sb_bytes_cons(
-                        tb.sb_bytes(
-                            tb.add_bytes(KToken('b"\\x7f\\x7f"', 'Bytes'), KVariable('W0', 'Bytes'))
-                        ),
+                        tb.sb_bytes(tb.add_bytes(KToken('b"\\x7f\\x7f"', 'Bytes'), KVariable('W0', 'Bytes'))),
                         tb.dot_sb(),
                     ),
                 ),
