@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING, cast
 from pyk.kast.inner import KApply, KInner, KSort, KVariable
 from pyk.prelude.bytes import bytesToken
 from pyk.prelude.collections import map_of
-from pyk.prelude.kint import intToken
+from pyk.prelude.kint import eqInt, intToken
+from pyk.prelude.ml import mlEqualsTrue
 
 from kriscv.term_manip import normalize_memory
 
@@ -402,6 +403,19 @@ def sparse_bytes(data: dict[int, bytes], symdata: dict[int, tuple[int, KInner]] 
         combined_segments.extend(segments)
 
     return build_sparse_bytes(combined_segments)
+
+
+def sparse_bytes_constraints(symdata: dict[int, tuple[int, str]]) -> list[KInner]:
+    """
+    Build constraints for symbolic bytes.
+
+    Args:
+        symdata: Address -> (byte length, variable name)
+
+    Returns:
+        List of constraints, e.g., [lengthBytes(var) == size, ...]
+    """
+    return [mlEqualsTrue(eqInt(length_bytes(var), intToken(size))) for size, var in symdata.values()]
 
 
 def sort_memory() -> KSort:
