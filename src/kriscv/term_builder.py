@@ -267,8 +267,10 @@ def sb_bytes_cons(bs: KInner, rest_ef: KInner) -> KInner:
     return KApply('SparseBytes:BytesCons', bs, rest_ef)
 
 
-def length_bytes(var: str) -> KInner:
-    return KApply('lengthBytes(_)_BYTES-HOOKED_Int_Bytes', [KVariable(var, 'Bytes')])
+def length_bytes(k: KInner | str) -> KInner:
+    if isinstance(k, str):
+        k = KVariable(k, 'Bytes')
+    return KApply('lengthBytes(_)_BYTES-HOOKED_Int_Bytes', [k])
 
 
 def add_bytes(bytes1: KInner, bytes2: KInner) -> KInner:
