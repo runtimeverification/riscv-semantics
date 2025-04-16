@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 SPEC_DIR: Final = TEST_DATA_DIR / 'specs'
+SPEC_TESTS: Final = list(SPEC_DIR.glob('*.k'))
 
 
 @dataclass
@@ -40,19 +41,25 @@ def symtools(tmp_path: Path) -> SymTools:
     return SymTools.default(proof_dir=tmp_path)
 
 
-def test_add(
+@pytest.mark.parametrize(
+    'spec_file',
+    SPEC_TESTS,
+    ids=[str(test.relative_to(SPEC_DIR)) for test in SPEC_TESTS],
+)
+def test_specs(
     load_spec: SpecLoader,
     symtools: SymTools,
+    spec_file: Path,
 ) -> None:
     # Given
-    spec_file = load_spec('add-spec.k')
+    spec_file = load_spec(spec_file.name)
 
     # When
     proof = symtools.prove(
         spec_file=spec_file,
-        spec_module='ADD-SPEC',
-        claim_id='ADD-SPEC.add',
+        spec_module=spec_file.stem.upper(),
+        claim_id=f'{spec_file.stem.upper()}.id',
     )
 
     # Then
-    assert proof.status == ProofStatus.PASSED
+    assert proof.status == ProofStatus.PASSED, f'Proof failed: {proof.failure_info}'
