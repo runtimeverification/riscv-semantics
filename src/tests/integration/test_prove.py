@@ -69,4 +69,4 @@ def test_specs(
     proof_show_file.write_text('\n'.join(proof_show_lines))
 
     # Then
-    assert proof.status == ProofStatus.PASSED
+    assert proof.status == ProofStatus.PASSED, f'Proof failed: {proof.failure_info}'
