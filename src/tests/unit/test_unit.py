@@ -12,8 +12,8 @@ from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
 from pyk.kore.match import kore_int
 from pyk.prelude.kint import INT, intToken
 
-from kriscv import build, term_builder
-from kriscv.term_builder import register
+import kriscv.term_builder as tb
+from kriscv import build
 from kriscv.term_manip import kore_sparse_bytes, normalize_memory
 
 if TYPE_CHECKING:
@@ -40,208 +40,208 @@ DISASS_TEST_DATA: Final[tuple[tuple[str, str, KInner], ...]] = (
     (
         'addi x1, x2, 3',
         '00000000010100010000000010010011',
-        term_builder.addi_instr(register(1), register(2), intToken(5)),
+        tb.addi_instr(tb.register(1), tb.register(2), intToken(5)),
     ),
     (
         'slti x2, x3, 2047',
         '01111111111100011010000100010011',
-        term_builder.slti_instr(register(2), register(3), intToken(2047)),
+        tb.slti_instr(tb.register(2), tb.register(3), intToken(2047)),
     ),
     (
         'sltiu x3, x4, -2048',
         '10000000000000100011000110010011',
-        term_builder.sltiu_instr(register(3), register(4), intToken(-2048)),
+        tb.sltiu_instr(tb.register(3), tb.register(4), intToken(-2048)),
     ),
     (
         'andi x4, x5, -1',
         '11111111111100101111001000010011',
-        term_builder.andi_instr(register(4), register(5), intToken(-1)),
+        tb.andi_instr(tb.register(4), tb.register(5), intToken(-1)),
     ),
     (
         'ori x5, x6, -2',
         '11111111111000110110001010010011',
-        term_builder.ori_instr(register(5), register(6), intToken(-2)),
+        tb.ori_instr(tb.register(5), tb.register(6), intToken(-2)),
     ),
     (
         'xori x6, x7, 3',
         '00000000001100111100001100010011',
-        term_builder.xori_instr(register(6), register(7), intToken(3)),
+        tb.xori_instr(tb.register(6), tb.register(7), intToken(3)),
     ),
     (
         'slli x7, x8, 31',
         '00000001111101000001001110010011',
-        term_builder.slli_instr(register(7), register(8), intToken(31)),
+        tb.slli_instr(tb.register(7), tb.register(8), intToken(31)),
     ),
     (
         'srli x8, x9, 1',
         '00000000000101001101010000010011',
-        term_builder.srli_instr(register(8), register(9), intToken(1)),
+        tb.srli_instr(tb.register(8), tb.register(9), intToken(1)),
     ),
     (
         'srai x9, x10, 2',
         '01000000001001010101010010010011',
-        term_builder.srai_instr(register(9), register(10), intToken(2)),
+        tb.srai_instr(tb.register(9), tb.register(10), intToken(2)),
     ),
     (
         'beq x10, x11, 4094',
         '01111110101101010000111111100011',
-        term_builder.beq_instr(register(10), register(11), intToken(4094)),
+        tb.beq_instr(tb.register(10), tb.register(11), intToken(4094)),
     ),
     (
         'bne x11, x12, -4096',
         '10000000110001011001000001100011',
-        term_builder.bne_instr(register(11), register(12), intToken(-4096)),
+        tb.bne_instr(tb.register(11), tb.register(12), intToken(-4096)),
     ),
     (
         'blt x12, x13, 0',
         '00000000110101100100000001100011',
-        term_builder.blt_instr(register(12), register(13), intToken(0)),
+        tb.blt_instr(tb.register(12), tb.register(13), intToken(0)),
     ),
     (
         'bltu x13, x14, -100',
         '11111000111001101110111011100011',
-        term_builder.bltu_instr(register(13), register(14), intToken(-100)),
+        tb.bltu_instr(tb.register(13), tb.register(14), intToken(-100)),
     ),
     (
         'bge x14, x15, 2048',
         '00000000111101110101000011100011',
-        term_builder.bge_instr(register(14), register(15), intToken(2048)),
+        tb.bge_instr(tb.register(14), tb.register(15), intToken(2048)),
     ),
     (
         'bgeu x15, x15, -2050',
         '11111110111101111111111101100011',
-        term_builder.bgeu_instr(register(15), register(15), intToken(-2050)),
+        tb.bgeu_instr(tb.register(15), tb.register(15), intToken(-2050)),
     ),
     (
         'lui x1, 0xFFFFF',
         '11111111111111111111000010110111',
-        term_builder.lui_instr(register(1), intToken(int('FFFFF', 16))),
+        tb.lui_instr(tb.register(1), intToken(int('FFFFF', 16))),
     ),
     (
         'auipc x2, 0xA1',
         '00000000000010100001000100010111',
-        term_builder.auipc_instr(register(2), intToken(int('A1', 16))),
+        tb.auipc_instr(tb.register(2), intToken(int('A1', 16))),
     ),
-    ('jal x0, -1048576', '10000000000000000000000001101111', term_builder.jal_instr(register(0), intToken(-1048576))),
+    ('jal x0, -1048576', '10000000000000000000000001101111', tb.jal_instr(tb.register(0), intToken(-1048576))),
     (
         'add x0, x1, x2',
         '00000000001000001000000000110011',
-        term_builder.add_instr(register(0), register(1), register(2)),
+        tb.add_instr(tb.register(0), tb.register(1), tb.register(2)),
     ),
     (
         'sub x3, x4, x5',
         '01000000010100100000000110110011',
-        term_builder.sub_instr(register(3), register(4), register(5)),
+        tb.sub_instr(tb.register(3), tb.register(4), tb.register(5)),
     ),
     (
         'slt x6, x7, x8',
         '00000000100000111010001100110011',
-        term_builder.slt_instr(register(6), register(7), register(8)),
+        tb.slt_instr(tb.register(6), tb.register(7), tb.register(8)),
     ),
     (
         'sltu x9, x10, x11',
         '00000000101101010011010010110011',
-        term_builder.sltu_instr(register(9), register(10), register(11)),
+        tb.sltu_instr(tb.register(9), tb.register(10), tb.register(11)),
     ),
     (
         'and x12, x13, x14',
         '00000000111001101111011000110011',
-        term_builder.and_instr(register(12), register(13), register(14)),
+        tb.and_instr(tb.register(12), tb.register(13), tb.register(14)),
     ),
     (
         'or x15, x0, x1',
         '00000000000100000110011110110011',
-        term_builder.or_instr(register(15), register(0), register(1)),
+        tb.or_instr(tb.register(15), tb.register(0), tb.register(1)),
     ),
     (
         'xor x2, x3, x4',
         '00000000010000011100000100110011',
-        term_builder.xor_instr(register(2), register(3), register(4)),
+        tb.xor_instr(tb.register(2), tb.register(3), tb.register(4)),
     ),
     (
         'sll x5, x6, x7',
         '00000000011100110001001010110011',
-        term_builder.sll_instr(register(5), register(6), register(7)),
+        tb.sll_instr(tb.register(5), tb.register(6), tb.register(7)),
     ),
     (
         'srl x8, x9, x10',
         '00000000101001001101010000110011',
-        term_builder.srl_instr(register(8), register(9), register(10)),
+        tb.srl_instr(tb.register(8), tb.register(9), tb.register(10)),
     ),
     (
         'sra x11, x12, x13',
         '01000000110101100101010110110011',
-        term_builder.sra_instr(register(11), register(12), register(13)),
+        tb.sra_instr(tb.register(11), tb.register(12), tb.register(13)),
     ),
     (
         'jalr x0, -2048(x1)',
         '10000000000000001000000001100111',
-        term_builder.jalr_instr(register(0), intToken(-2048), register(1)),
+        tb.jalr_instr(tb.register(0), intToken(-2048), tb.register(1)),
     ),
     (
         'lw x2, 2047(x3)',
         '01111111111100011010000100000011',
-        term_builder.lw_instr(register(2), intToken(2047), register(3)),
+        tb.lw_instr(tb.register(2), intToken(2047), tb.register(3)),
     ),
     (
         'lh x4, 0(x5)',
         '00000000000000101001001000000011',
-        term_builder.lh_instr(register(4), intToken(0), register(5)),
+        tb.lh_instr(tb.register(4), intToken(0), tb.register(5)),
     ),
     (
         'lhu x6, 7(x7)',
         '00000000011100111101001100000011',
-        term_builder.lhu_instr(register(6), intToken(7), register(7)),
+        tb.lhu_instr(tb.register(6), intToken(7), tb.register(7)),
     ),
     (
         'lb x8, -10(x9)',
         '11111111011001001000010000000011',
-        term_builder.lb_instr(register(8), intToken(-10), register(9)),
+        tb.lb_instr(tb.register(8), intToken(-10), tb.register(9)),
     ),
     (
         'lbu x10, 2047(x11)',
         '01111111111101011100010100000011',
-        term_builder.lbu_instr(register(10), intToken(2047), register(11)),
+        tb.lbu_instr(tb.register(10), intToken(2047), tb.register(11)),
     ),
     (
         'sw x2, 2047(x3)',
         '01111110001000011010111110100011',
-        term_builder.sw_instr(register(2), intToken(2047), register(3)),
+        tb.sw_instr(tb.register(2), intToken(2047), tb.register(3)),
     ),
     (
         'sh x4, 0(x5)',
         '00000000010000101001000000100011',
-        term_builder.sh_instr(register(4), intToken(0), register(5)),
+        tb.sh_instr(tb.register(4), intToken(0), tb.register(5)),
     ),
     (
         'sb x8, -10(x9)',
         '11111110100001001000101100100011',
-        term_builder.sb_instr(register(8), intToken(-10), register(9)),
+        tb.sb_instr(tb.register(8), intToken(-10), tb.register(9)),
     ),
     (
         'fence ow, ir',
         '00000101101000000000000000001111',
-        term_builder.fence_instr(term_builder.fence_bits('ow'), term_builder.fence_bits('ir')),
+        tb.fence_instr(tb.fence_bits('ow'), tb.fence_bits('ir')),
     ),
     (
         'fence.tso',
         '10000011001100000000000000001111',
-        term_builder.fence_tso_instr(),
+        tb.fence_tso_instr(),
     ),
     (
         'ecall',
         '00000000000000000000000001110011',
-        term_builder.ecall_instr(),
+        tb.ecall_instr(),
     ),
     (
         'ebreak',
         '00000000000100000000000001110011',
-        term_builder.ebreak_instr(),
+        tb.ebreak_instr(),
     ),
     (
         'invalid instruction',
         '00000000000000000000000000000000',
-        term_builder.invalid_instr(),
+        tb.invalid_instr(),
     ),
 )
 
@@ -254,8 +254,8 @@ DISASS_TEST_DATA: Final[tuple[tuple[str, str, KInner], ...]] = (
 def test_disassemble(instr_bits: str, expected: KInner) -> None:
     assert len(instr_bits) == 32
     tools = semantics()
-    disass_call = term_builder.disassemble(intToken(int(instr_bits, 2)))
-    actual = _eval_call(tools, disass_call, term_builder.sort_instruction())
+    disass_call = tb.disassemble(intToken(int(instr_bits, 2)))
+    actual = _eval_call(tools, disass_call, tb.sort_instruction())
     assert actual == expected
 
 
@@ -302,18 +302,18 @@ def test_memory(memory: dict[int, bytes], addr: int, byte: int) -> None:
 
     # Execute storeByte to get the actual final memory state
     tools = semantics()
-    memory_sb = term_builder.sparse_bytes(memory)
-    addr_word = term_builder.word(addr)
+    memory_sb = tb.sparse_bytes(memory)
+    addr_word = tb.word(addr)
 
-    store_call = term_builder.store_byte(memory_sb, addr_word, intToken(byte))
-    memory_actual_sb_kore = _eval_call_to_kore(tools, store_call, term_builder.sort_memory())
+    store_call = tb.store_byte(memory_sb, addr_word, intToken(byte))
+    memory_actual_sb_kore = _eval_call_to_kore(tools, store_call, tb.sort_memory())
     memory_actual = kore_sparse_bytes(memory_actual_sb_kore)
 
     assert memory_actual == memory_expect
 
     # Also execute loadByte and check that we correctly read back the written value
     memory_actual_sb = tools.krun.kore_to_kast(memory_actual_sb_kore)
-    load_call = term_builder.load_byte(memory_actual_sb, addr_word)
+    load_call = tb.load_byte(memory_actual_sb, addr_word)
     load_actual = kore_int(_eval_call_to_kore(tools, load_call, INT))
 
     assert load_actual == byte
@@ -325,16 +325,16 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
         {2: b'\x7f\x7f\x7f\x7f\x7f'},
         {3: (1, 'W0'), 2: (1, 'W1')},
         # #empty(2) #bytes(W1 +Bytes +W0 +Bytes b'\x7f\x7f\x7f')
-        term_builder.sb_empty_cons(
-            term_builder.sb_empty(intToken(2)),
-            term_builder.sb_bytes_cons(
-                term_builder.sb_bytes(
-                    term_builder.add_bytes(
-                        term_builder.add_bytes(KVariable('W1', 'Bytes'), KVariable('W0', 'Bytes')),
+        tb.sb_empty_cons(
+            tb.sb_empty(intToken(2)),
+            tb.sb_bytes_cons(
+                tb.sb_bytes(
+                    tb.add_bytes(
+                        tb.add_bytes(KVariable('W1', 'Bytes'), KVariable('W0', 'Bytes')),
                         KToken('b"\\x7f\\x7f\\x7f"', 'Bytes'),
                     )
                 ),
-                term_builder.dot_sb(),
+                tb.dot_sb(),
             ),
         ),
     ),
@@ -343,17 +343,17 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
         {2: b'\x7f\x7f', 12: b'\x7f\x7f\x7f'},
         {14: (1, 'W0')},
         # #empty(2) #bytes(b'\x7f\x7f') #empty(8) #bytes(b'\x7f\x7f' +Bytes +W0)
-        term_builder.sb_empty_cons(
-            term_builder.sb_empty(intToken(2)),
-            term_builder.sb_bytes_cons(
-                term_builder.sb_bytes(KToken('b"\\x7f\\x7f"', 'Bytes')),
-                term_builder.sb_empty_cons(
-                    term_builder.sb_empty(intToken(8)),
-                    term_builder.sb_bytes_cons(
-                        term_builder.sb_bytes(
-                            term_builder.add_bytes(KToken('b"\\x7f\\x7f"', 'Bytes'), KVariable('W0', 'Bytes'))
+        tb.sb_empty_cons(
+            tb.sb_empty(intToken(2)),
+            tb.sb_bytes_cons(
+                tb.sb_bytes(KToken('b"\\x7f\\x7f"', 'Bytes')),
+                tb.sb_empty_cons(
+                    tb.sb_empty(intToken(8)),
+                    tb.sb_bytes_cons(
+                        tb.sb_bytes(
+                            tb.add_bytes(KToken('b"\\x7f\\x7f"', 'Bytes'), KVariable('W0', 'Bytes'))
                         ),
-                        term_builder.dot_sb(),
+                        tb.dot_sb(),
                     ),
                 ),
             ),
@@ -368,5 +368,5 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
     ids=[test_id for test_id, *_ in SYMBOLIC_MEMORY_TEST_DATA],
 )
 def test_symbolic_memory(memory: dict[int, bytes], symdata: dict[int, tuple[int, str]], expected: int) -> None:
-    result = term_builder.sparse_bytes(memory, symdata)
+    result = tb.sparse_bytes(memory, symdata)
     assert result == expected
