@@ -323,7 +323,7 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
     (
         'empty-bytes-2-3',
         {2: b'\x7f\x7f\x7f\x7f\x7f'},
-        {3: (1, 'W0'), 2: (1, 'W1')},
+        {3: (1, KVariable('W0', 'Bytes')), 2: (1, KVariable('W1', 'Bytes'))},
         # #empty(2) #bytes(W1 +Bytes +W0 +Bytes b'\x7f\x7f\x7f')
         tb.sb_empty_cons(
             tb.sb_empty(intToken(2)),
@@ -341,7 +341,7 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
     (
         'empty-bytes-6',
         {2: b'\x7f\x7f', 12: b'\x7f\x7f\x7f'},
-        {14: (1, 'W0')},
+        {14: (1, KVariable('W0', 'Bytes'))},
         # #empty(2) #bytes(b'\x7f\x7f') #empty(8) #bytes(b'\x7f\x7f' +Bytes +W0)
         tb.sb_empty_cons(
             tb.sb_empty(intToken(2)),
@@ -365,6 +365,6 @@ SYMBOLIC_MEMORY_TEST_DATA: Final = (
     [(memory, symdata, expected) for (_, memory, symdata, expected) in SYMBOLIC_MEMORY_TEST_DATA],
     ids=[test_id for test_id, *_ in SYMBOLIC_MEMORY_TEST_DATA],
 )
-def test_symbolic_memory(memory: dict[int, bytes], symdata: dict[int, tuple[int, str]], expected: int) -> None:
+def test_symbolic_memory(memory: dict[int, bytes], symdata: dict[int, tuple[int, KInner]], expected: int) -> None:
     result = tb.sparse_bytes(memory, symdata)
     assert result == expected

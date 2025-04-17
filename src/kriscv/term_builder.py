@@ -277,7 +277,92 @@ def add_bytes(bytes1: KInner, bytes2: KInner) -> KInner:
     return KApply('_+Bytes__BYTES-HOOKED_Bytes_Bytes_Bytes', bytes1, bytes2)
 
 
-def sparse_bytes(data: dict[int, bytes], symdata: dict[int, tuple[int, str]] | None = None) -> KInner:
+def build_sparse_bytes(data: Iterable[bytes | int | KInner]) -> KInner:
+    """
+    Build a sparse bytes term from pre-processed sequence of bytes, integers, or KInner.
+
+    Requirements:
+    - No consecutive bytes/integers
+    - Ascending address order
+
+    Interpretation:
+    - bytes → #bytes(bytes)
+    - int → #empty(int)
+    - KInner → #bytes(KInner)
+
+    Args:
+        data: Sequence of bytes, integers, or KInner objects
+
+    Returns:
+        Sparse bytes term
+    """
+    result = dot_sb()
+    processed_data: list[KInner | int] = []
+
+    # Merge consecutive byte-like items
+    for item in data:
+        if isinstance(item, (bytes, KInner)):
+            token = bytesToken(item) if isinstance(item, bytes) else item
+            if processed_data and isinstance(processed_data[-1], KInner):
+                processed_data[-1] = add_bytes(processed_data[-1], token)
+            else:
+                processed_data.append(token)
+        else:  # int
+            processed_data.append(item)
+
+    # Build term right-to-left
+    for item in reversed(processed_data):
+        if isinstance(item, int):
+            result = sb_empty_cons(sb_empty(intToken(item)), result)
+        else:
+            result = sb_bytes_cons(sb_bytes(item), result)
+
+    return result
+
+
+def _relevant_symdata(
+    symdata: dict[int, tuple[int, KInner]], addr: int, gap_or_val: bytes | int
+) -> list[tuple[int, int, KInner]]:
+    """Find symbolic data that intersects with the given address range."""
+    size = len(gap_or_val) if isinstance(gap_or_val, bytes) else gap_or_val
+    return [(symaddr, x, y) for symaddr, (x, y) in symdata.items() if addr <= symaddr < addr + size]
+
+
+def _split_sparse_byte(
+    addr: int, gap_or_val: bytes | int, relevant_syms: list[tuple[int, int, KInner]]
+) -> list[bytes | int | KInner]:
+    """Split a memory segment into parts based on symbolic data intersections."""
+    if not relevant_syms:
+        return [gap_or_val]
+
+    segments: list[bytes | int | KInner] = []
+    current_pos = addr
+    size = len(gap_or_val) if isinstance(gap_or_val, bytes) else gap_or_val
+
+    # Process each symbolic data in address order
+    for symaddr, symsize, kinner in sorted(relevant_syms):
+        # Add gap or bytes before symbolic data
+        if symaddr > current_pos:
+            if isinstance(gap_or_val, int):
+                segments.append(symaddr - current_pos)
+            else:
+                segments.append(gap_or_val[current_pos - addr : symaddr - addr])
+
+        # Add symbolic data
+        segments.append(kinner)
+        current_pos = symaddr + symsize
+
+    # Add remaining data after the last symbolic segment
+    if current_pos < addr + size:
+        if isinstance(gap_or_val, int):
+            segments.append(addr + size - current_pos)
+        else:
+            segments.append(gap_or_val[current_pos - addr :])
+
+    return segments
+
+
+def sparse_bytes(data: dict[int, bytes], symdata: dict[int, tuple[int, KInner]] | None = None) -> KInner:
     """
     Build a sparse bytes term from a dictionary of data and a dictionary of symbolic data.
 
@@ -307,43 +392,16 @@ def sparse_bytes(data: dict[int, bytes], symdata: dict[int, tuple[int, str]] | N
 
     # Merge segments and gaps into a list of sparse bytes items
     sparse_data: list[tuple[int, int | bytes]] = sorted(
-        cast('list[tuple[int, int | bytes]]', clean_data) + cast('list[tuple[int, int | bytes]]', gaps), reverse=True
+        cast('list[tuple[int, int | bytes]]', clean_data) + cast('list[tuple[int, int | bytes]]', gaps)
     )
 
-    sparse_k = dot_sb()
+    # Merge segments, gaps, and symbolic data into a single list
+    combined_segments: list[int | bytes | KInner] = []
     for addr, gap_or_val in sparse_data:
-        if isinstance(gap_or_val, int):
-            for symaddr, (symsize, _) in symdata.items():
-                if addr <= symaddr < addr + gap_or_val:
-                    assert symaddr + symsize <= addr + gap_or_val
-                    raise NotImplementedError('We do not support to make empty segments with partial symbolic bytes!')
-            sparse_k = sb_empty_cons(sb_empty(intToken(gap_or_val)), sparse_k)
-        elif isinstance(gap_or_val, bytes):
-            curr_addr = addr
-            curr_bytes: KInner | None = None
-            for symaddr, (symsize, symname) in symdata.items():
-                if addr <= symaddr < addr + len(gap_or_val):
-                    assert symaddr + symsize <= addr + len(gap_or_val)
-                    # Extract bytes before the variable
-                    if symaddr > curr_addr:
-                        temp_bytes = bytesToken(gap_or_val[curr_addr - addr : symaddr - addr])
-                        curr_bytes = add_bytes(curr_bytes, temp_bytes) if curr_bytes else temp_bytes
-                    # Add the variable
-                    curr_bytes = (
-                        add_bytes(curr_bytes, KVariable(symname, 'Bytes'))
-                        if curr_bytes
-                        else KVariable(symname, 'Bytes')
-                    )
-                    # Skip over the variable bytes
-                    curr_addr = symaddr + symsize
-            if curr_addr < addr + len(gap_or_val):
-                temp_bytes = bytesToken(gap_or_val[curr_addr - addr :])
-                curr_bytes = add_bytes(curr_bytes, temp_bytes) if curr_bytes else temp_bytes
-            assert curr_bytes is not None
-            sparse_k = sb_bytes_cons(sb_bytes(curr_bytes), sparse_k)
-        else:
-            raise AssertionError()
-    return sparse_k
+        segments = _split_sparse_byte(addr, gap_or_val, _relevant_symdata(symdata, addr, gap_or_val))
+        combined_segments.extend(segments)
+
+    return build_sparse_bytes(combined_segments)
 
 
 def sort_memory() -> KSort:
