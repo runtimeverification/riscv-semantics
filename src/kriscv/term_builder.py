@@ -405,7 +405,7 @@ def sparse_bytes(data: dict[int, bytes], symdata: dict[int, tuple[int, KInner]] 
     return build_sparse_bytes(combined_segments)
 
 
-def sparse_bytes_constraints(symdata: dict[int, tuple[int, str]]) -> list[KInner]:
+def sparse_bytes_constraints(symdata: dict[int, tuple[int, KInner]]) -> list[KInner]:
     """
     Build constraints for symbolic bytes.
 
