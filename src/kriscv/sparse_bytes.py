@@ -107,6 +107,7 @@ class SparseBytes:
         return SparseBytes([])
 
     def to_k(self) -> tuple[KInner, list[KInner]]:
+        """Generate a KInner and a list of constraints from a SparseBytes"""
         result = dot_sb()
         processed: list[KInner | int] = []
 
