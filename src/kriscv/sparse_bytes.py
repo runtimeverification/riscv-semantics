@@ -42,9 +42,9 @@ def _split(
         elif offset == data.size:
             return data, None
         else:
-            raise NotImplementedError("Splitting symbolic bytes is not implemented")
+            raise NotImplementedError('Splitting symbolic bytes is not implemented')
     else:
-        raise ValueError(f"Unexpected item type: {type(data)}")
+        raise ValueError(f'Unexpected item type: {type(data)}')
 
 
 @dataclass
@@ -74,7 +74,7 @@ class SparseBytes:
         clean_data: list[tuple[int, int | bytes]] = sorted(normalize_memory(data).items())
 
         if len(clean_data) == 0:
-            return dot_sb()
+            return SparseBytes([])
 
         # Collect all empty gaps between segements
         gaps: list[tuple[int, int | bytes]] = []
@@ -82,7 +82,7 @@ class SparseBytes:
         if start != 0:
             gaps.append((0, start))
         for (start1, val1), (start2, _) in pairwise(clean_data):
-            end1 = start1 + len(val1)
+            end1 = start1 + _size(val1)
             # normalize_memory should already have merged consecutive segments
             assert end1 < start2
             gaps.append((end1, start2 - end1))
@@ -97,14 +97,14 @@ class SparseBytes:
         symbolic_data = {k: v for k, v in data.items() if isinstance(v, SymBytes)}
         result = SparseBytes.from_concrete(concrete_data)
         for addr, sym in symbolic_data.items():
-            result[addr : addr + sym.size] = sym
+            result[addr : addr + sym.size] = SparseBytes([sym])
         return result
 
     @staticmethod
     def from_k(sparse_bytes: KInner, constraints: list[KInner]) -> SparseBytes:
         # > This will introduce more codes that make it hard to review.
         # > I want to implement in the next PR.
-        pass
+        return SparseBytes([])
 
     def to_k(self) -> tuple[KInner, list[KInner]]:
         result = dot_sb()
@@ -112,21 +112,23 @@ class SparseBytes:
 
         # Merge consecutive byte-like items
         for item in self.data:
-            if isinstance(item, (bytes, KInner)):
-                token = bytesToken(item) if isinstance(item, bytes) else item
+            if isinstance(item, (bytes, SymBytes)):
+                token = bytesToken(item) if isinstance(item, bytes) else item.data
                 if processed and isinstance(processed[-1], KInner):
                     processed[-1] = add_bytes(processed[-1], token)
                 else:
                     processed.append(token)
-            else:  # int
+            elif isinstance(item, int):
                 processed.append(item)
+            else:
+                raise ValueError(f'Unexpected item type: {type(item)}')
 
         # Build term right-to-left
-        for item in reversed(processed):
-            if isinstance(item, int):
-                result = sb_empty_cons(sb_empty(intToken(item)), result)
+        for data in reversed(processed):
+            if isinstance(data, int):
+                result = sb_empty_cons(sb_empty(intToken(data)), result)
             else:
-                result = sb_bytes_cons(sb_bytes(item), result)
+                result = sb_bytes_cons(sb_bytes(data), result)
 
         return result, [item.constraint() for item in self.data if isinstance(item, SymBytes)]
 
@@ -137,7 +139,7 @@ class SparseBytes:
             if addr < current_addr + _size(item):
                 return i, addr - current_addr
             current_addr += _size(item)
-        raise ValueError(f"Address {addr} is out of bounds")
+        raise ValueError(f'Address {addr} is out of bounds')
 
     def which_data_slice(self, start: int, end: int) -> tuple[tuple[int, int], tuple[int, int]]:
         """Return the start and end index of the data item that contains the address"""
@@ -151,18 +153,10 @@ class SparseBytes:
         right_data = list(self.data[idx + 1 :]) if right_item is None else [right_item] + list(self.data[idx + 1 :])
         return SparseBytes(left_data), SparseBytes(right_data)
 
-    def __setitem__(self, addr: int, value: bytes | int | SymBytes) -> None:
-        """Set one byte from the address"""
-        self.__setitem__(slice(addr, addr + 1), SparseBytes([value]))
-
     def __setitem__(self, addr: slice, value: SparseBytes) -> None:
         """Set a sub-bytes from the address"""
-        assert len(value) == addr.stop - addr.start, f"Expected length {addr.stop - addr.start}, got {value}"
+        assert len(value) == addr.stop - addr.start, f'Expected length {addr.stop - addr.start}, got {value}'
         self.data = self.split(addr.start)[0].data + value.data + self.split(addr.stop)[1].data
-
-    def __getitem__(self, addr: int) -> bytes | int | SymBytes:
-        """Return one byte from the address"""
-        return self.__getitem__(slice(addr, addr + 1))
 
     def __getitem__(self, addr: slice) -> SparseBytes:
         """Return a sub-bytes from the address"""
