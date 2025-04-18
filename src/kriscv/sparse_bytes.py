@@ -24,7 +24,7 @@ def _size(data: bytes | int | SymBytes) -> int:
     if isinstance(data, bytes):
         return len(data)
     elif isinstance(data, int):
-        return 1
+        return data
     else:
         return data.size
 
@@ -33,7 +33,9 @@ def _split(
     data: bytes | int | SymBytes, offset: int
 ) -> tuple[bytes | int | SymBytes | None, bytes | int | SymBytes | None]:
     if isinstance(data, bytes):
-        return data[:offset], data[offset:]
+        left = data[:offset] or None
+        right = data[offset:] or None
+        return left, right
     elif isinstance(data, int):
         return offset, data - offset
     elif isinstance(data, SymBytes):
@@ -91,12 +93,10 @@ class SparseBytes:
         return SparseBytes([gap_or_val for _, gap_or_val in sorted(clean_data + gaps)])
 
     @staticmethod
-    def from_data(data: dict[int, bytes | SymBytes]) -> SparseBytes:
-        """Create a SparseBytes from a {address: bytes | SymBytes} dictionary"""
-        concrete_data = {k: v for k, v in data.items() if isinstance(v, bytes)}
-        symbolic_data = {k: v for k, v in data.items() if isinstance(v, SymBytes)}
-        result = SparseBytes.from_concrete(concrete_data)
-        for addr, sym in symbolic_data.items():
+    def from_data(data: dict[int, bytes], symdata: dict[int, SymBytes]) -> SparseBytes:
+        """Create a SparseBytes from a {address: bytes} dictionary and a {address: SymBytes} dictionary"""
+        result = SparseBytes.from_concrete(data)
+        for addr, sym in symdata.items():
             result[addr : addr + sym.size] = SparseBytes([sym])
         return result
 
