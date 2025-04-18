@@ -7,7 +7,7 @@ This module contains lemmas specific to sparse bytes in `sparse-bytes.md`. If yo
 ```k
 requires "../sparse-bytes.md"
 module SPARSE-BYTES-SIMPLIFICATIONS
-imports SPARSE-BYTES
+  imports SPARSE-BYTES
 ```
 
 ## readByteBF
