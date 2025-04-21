@@ -37,7 +37,12 @@ def _split(
         right = data[offset:] or None
         return left, right
     elif isinstance(data, int):
-        return offset, data - offset
+        if offset == 0:
+            return None, data
+        elif offset == data:
+            return data, None
+        else:
+            return offset, data - offset
     elif isinstance(data, SymBytes):
         if offset == 0:
             return None, data
@@ -137,7 +142,7 @@ class SparseBytes:
         """Return the index and offset of the data item that contains the address"""
         current_addr = 0
         for i, item in enumerate(self.data):
-            if addr < current_addr + _size(item):
+            if addr <= current_addr + _size(item):
                 return i, addr - current_addr
             current_addr += _size(item)
         raise ValueError(f'Address {addr} is out of bounds')

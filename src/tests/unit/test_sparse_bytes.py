@@ -69,6 +69,17 @@ def test_which_data() -> None:
         sb.which_data(7)
 
 
+def test_split() -> None:
+    sb = SparseBytes([b'\xab\xab', 3, b'\xcd\xcd'])
+    assert sb.split(0) == (SparseBytes([]), SparseBytes([b'\xab\xab', 3, b'\xcd\xcd']))
+    assert sb.split(1) == (SparseBytes([b'\xab']), SparseBytes([b'\xab', 3, b'\xcd\xcd']))
+    assert sb.split(2) == (SparseBytes([b'\xab\xab']), SparseBytes([3, b'\xcd\xcd']))
+    assert sb.split(3) == (SparseBytes([b'\xab\xab', 1]), SparseBytes([2, b'\xcd\xcd']))
+    assert sb.split(4) == (SparseBytes([b'\xab\xab', 2]), SparseBytes([1, b'\xcd\xcd']))
+    assert sb.split(5) == (SparseBytes([b'\xab\xab', 3]), SparseBytes([b'\xcd\xcd']))
+    assert sb.split(6) == (SparseBytes([b'\xab\xab', 3, b'\xcd']), SparseBytes([b'\xcd']))
+    assert sb.split(7) == (SparseBytes([b'\xab\xab', 3, b'\xcd\xcd']), SparseBytes([]))
+    
 
 @pytest.mark.parametrize(
     'data,symdata,expected',
