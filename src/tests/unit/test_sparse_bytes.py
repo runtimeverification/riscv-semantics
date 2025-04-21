@@ -65,8 +65,9 @@ def test_which_data() -> None:
     assert sb.which_data(4) == (1, 2)
     assert sb.which_data(5) == (2, 0)
     assert sb.which_data(6) == (2, 1)
+    assert sb.which_data(7) == (2, 2)
     with pytest.raises(ValueError):
-        sb.which_data(7)
+        sb.which_data(8)
 
 
 def test_split() -> None:

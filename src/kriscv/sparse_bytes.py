@@ -32,26 +32,22 @@ def _size(data: bytes | int | SymBytes) -> int:
 def _split(
     data: bytes | int | SymBytes, offset: int
 ) -> tuple[bytes | int | SymBytes | None, bytes | int | SymBytes | None]:
-    if isinstance(data, bytes):
-        left = data[:offset] or None
-        right = data[offset:] or None
-        return left, right
-    elif isinstance(data, int):
-        if offset == 0:
-            return None, data
-        elif offset == data:
-            return data, None
-        else:
-            return offset, data - offset
-    elif isinstance(data, SymBytes):
-        if offset == 0:
-            return None, data
-        elif offset == data.size:
-            return data, None
-        else:
+    size = _size(data)
+    if offset == 0:
+        return None, data
+    elif offset == size:
+        return data, None
+    elif 0 < offset < size:
+        if isinstance(data, bytes):
+            return data[:offset], data[offset:]
+        elif isinstance(data, int):
+            return offset, size - offset
+        elif isinstance(data, SymBytes):
             raise NotImplementedError('Splitting symbolic bytes is not implemented')
+        else:
+            raise ValueError(f'Unexpected item type: {type(data)}')
     else:
-        raise ValueError(f'Unexpected item type: {type(data)}')
+        raise ValueError(f'Offset {offset} is out of bounds for size {size}')
 
 
 @dataclass
@@ -142,9 +138,11 @@ class SparseBytes:
         """Return the index and offset of the data item that contains the address"""
         current_addr = 0
         for i, item in enumerate(self.data):
-            if addr <= current_addr + _size(item):
+            if addr < current_addr + _size(item):
                 return i, addr - current_addr
             current_addr += _size(item)
+        if current_addr == addr:
+            return len(self.data) - 1, _size(self.data[-1])
         raise ValueError(f'Address {addr} is out of bounds')
 
     def which_data_slice(self, start: int, end: int) -> tuple[tuple[int, int], tuple[int, int]]:
