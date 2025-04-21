@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from itertools import pairwise
 
@@ -50,7 +51,7 @@ def _split(
         raise ValueError(f'Offset {offset} is out of bounds for size {size}')
 
 
-@dataclass
+@dataclass(frozen=True)
 class SymBytes:
     data: KInner
     size: int
@@ -70,6 +71,9 @@ class SparseBytes:
     """
 
     data: list[bytes | int | SymBytes]
+
+    def __init__(self, data: list[bytes | int | SymBytes]) -> None:
+        self.data = copy.deepcopy(data)
 
     @staticmethod
     def from_concrete(data: dict[int, bytes]) -> SparseBytes:
@@ -160,7 +164,7 @@ class SparseBytes:
     def __setitem__(self, addr: slice, value: SparseBytes) -> None:
         """Set a sub-bytes from the address"""
         assert len(value) == addr.stop - addr.start, f'Expected length {addr.stop - addr.start}, got {value}'
-        self.data = self.split(addr.start)[0].data + value.data + self.split(addr.stop)[1].data
+        self.data = (self.split(addr.start)[0] + value + self.split(addr.stop)[1]).data
 
     def __getitem__(self, addr: slice) -> SparseBytes:
         """Return a sub-bytes from the address"""
@@ -170,6 +174,10 @@ class SparseBytes:
 
     def __add__(self, other: SparseBytes) -> SparseBytes:
         """Concatenate two SparseBytes"""
+        if self.data == []:
+            return SparseBytes(other.data)
+        if other.data == []:
+            return SparseBytes(self.data)
         if isinstance(self.data[-1], int) and isinstance(other.data[0], int):
             self.data[-1] += other.data[0]
             return SparseBytes(self.data + other.data[1:])
