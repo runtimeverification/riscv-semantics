@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import copy
 from dataclasses import dataclass
 from itertools import pairwise
+from typing import NamedTuple
 
 from pyk.kast.inner import KInner
 from pyk.prelude.kint import eqInt, intToken
@@ -52,7 +52,7 @@ def _split(
 
 
 @dataclass(frozen=True)
-class SymBytes:
+class SymBytes(NamedTuple):
     data: KInner
     size: int
 
@@ -73,7 +73,7 @@ class SparseBytes:
     data: list[bytes | int | SymBytes]
 
     def __init__(self, data: list[bytes | int | SymBytes]) -> None:
-        self.data = copy.deepcopy(data)
+        self.data = list(data)
 
     @staticmethod
     def from_concrete(data: dict[int, bytes]) -> SparseBytes:
