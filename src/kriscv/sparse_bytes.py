@@ -36,19 +36,19 @@ def _split(
     size = _size(data)
     if offset == 0:
         return None, data
-    elif offset == size:
+    if offset == size:
         return data, None
-    elif 0 < offset < size:
-        if isinstance(data, bytes):
-            return data[:offset], data[offset:]
-        elif isinstance(data, int):
-            return offset, size - offset
-        elif isinstance(data, SymBytes):
-            raise NotImplementedError('Splitting symbolic bytes is not implemented')
-        else:
-            raise ValueError(f'Unexpected item type: {type(data)}')
-    else:
-        raise ValueError(f'Offset {offset} is out of bounds for size {size}')
+    if 0 < offset < size:
+        match data:
+            case bytes():
+                return data[:offset], data[offset:]
+            case int():
+                return offset, size - offset
+            case SymBytes():
+                raise NotImplementedError('Splitting symbolic bytes is not implemented')
+            case _:
+                raise ValueError(f'Unexpected item type: {type(data)}')
+    raise ValueError(f'Offset {offset} is out of bounds for size {size}')
 
 
 @dataclass(frozen=True)
@@ -63,7 +63,7 @@ class SymBytes:
 @dataclass
 class SparseBytes:
     """
-    Python binding for `SparseBytes` in sparse-bytes.md
+    Python representation for ``SparseBytes`` in sparse-bytes.md
 
     Invariants:
     - No consecutive bytes/integers
@@ -80,7 +80,7 @@ class SparseBytes:
         """Create a SparseBytes from a {address: bytes} dictionary"""
         clean_data: list[tuple[int, int | bytes]] = sorted(normalize_memory(data).items())
 
-        if len(clean_data) == 0:
+        if not clean_data:
             return SparseBytes([])
 
         # Collect all empty gaps between segements
@@ -109,7 +109,7 @@ class SparseBytes:
     def from_k(sparse_bytes: KInner, constraints: list[KInner]) -> SparseBytes:
         # > This will introduce more codes that make it hard to review.
         # > I want to implement in the next PR.
-        return SparseBytes([])
+        raise NotImplementedError('TODO')
 
     def to_k(self) -> tuple[KInner, list[KInner]]:
         """Generate a KInner and a list of constraints from a SparseBytes"""
@@ -181,10 +181,9 @@ class SparseBytes:
         if isinstance(self.data[-1], int) and isinstance(other.data[0], int):
             self.data[-1] += other.data[0]
             return SparseBytes(self.data + other.data[1:])
-        elif isinstance(self.data[-1], bytes) and isinstance(other.data[0], bytes):
+        if isinstance(self.data[-1], bytes) and isinstance(other.data[0], bytes):
             return SparseBytes(self.data[:-1] + [self.data[-1] + other.data[0]] + other.data[1:])
-        else:
-            return SparseBytes(self.data + other.data)
+        return SparseBytes(self.data + other.data)
 
     def __len__(self) -> int:
         """Return the length of the SparseBytes"""
