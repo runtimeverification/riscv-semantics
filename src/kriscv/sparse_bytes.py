@@ -163,7 +163,8 @@ class SparseBytes:
 
     def __setitem__(self, addr: slice, value: SparseBytes) -> None:
         """Set a sub-bytes from the address"""
-        assert len(value) == addr.stop - addr.start, f'Expected length {addr.stop - addr.start}, got {value}'
+        if len(value) != addr.stop - addr.start:
+            raise ValueError(f'Expected length {addr.stop - addr.start}, got {len(value)}')
         self.data = (self.split(addr.start)[0] + value + self.split(addr.stop)[1]).data
 
     def __getitem__(self, addr: slice) -> SparseBytes:
