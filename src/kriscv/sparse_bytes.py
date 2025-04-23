@@ -51,7 +51,6 @@ def _split(
     raise ValueError(f'Offset {offset} is out of bounds for size {size}')
 
 
-@dataclass(frozen=True)
 class SymBytes(NamedTuple):
     data: KInner
     size: int
