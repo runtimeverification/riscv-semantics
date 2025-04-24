@@ -21,6 +21,18 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
     requires I >=Int lengthBytes(B) [simplification(45)]
 ```
 
+
+## writeByteBF
+
+To write a byte to a symbolic sparse byte region, we need to:
+
+```k
+  rule writeByteBF(#bytes(B +Bytes BS) EF, I, V) => #bytes(B[ I <- V ] +Bytes BS) EF 
+    requires I >=Int 0 andBool I <Int lengthBytes(B) [simplification(45)]
+  rule writeByteBF(#bytes(B +Bytes BS) EF, I, V) => prepend(B, writeByteBF(#bytes(BS) EF, I -Int lengthBytes(B), V))
+    requires I >=Int lengthBytes(B) [simplification(45)]
+```
+
 ```k
 endmodule
 ```
