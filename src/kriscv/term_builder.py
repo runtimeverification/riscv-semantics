@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 from typing import TYPE_CHECKING, cast
 
-from pyk.kast.inner import KApply, KInner, KSort
+from pyk.kast.inner import KApply, KInner, KSort, KVariable
 from pyk.prelude.bytes import bytesToken
 from pyk.prelude.collections import map_of
 from pyk.prelude.kint import intToken
@@ -265,6 +265,16 @@ def sb_empty_cons(empty: KInner, rest_bf: KInner) -> KInner:
 
 def sb_bytes_cons(bs: KInner, rest_ef: KInner) -> KInner:
     return KApply('SparseBytes:BytesCons', bs, rest_ef)
+
+
+def length_bytes(k: KInner | str) -> KInner:
+    if isinstance(k, str):
+        k = KVariable(k, 'Bytes')
+    return KApply('lengthBytes(_)_BYTES-HOOKED_Int_Bytes', [k])
+
+
+def add_bytes(bytes1: KInner, bytes2: KInner) -> KInner:
+    return KApply('_+Bytes__BYTES-HOOKED_Bytes_Bytes_Bytes', bytes1, bytes2)
 
 
 def sparse_bytes(data: dict[int, bytes]) -> KInner:
