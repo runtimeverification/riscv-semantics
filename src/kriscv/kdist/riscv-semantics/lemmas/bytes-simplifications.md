@@ -13,7 +13,7 @@ module BYTES-SIMPLIFICATIONS
 ## Bytes Equality Lemmas
 
 ```k
-  rule[bytes-not-equal-length]:
+  rule [bytes-not-equal-length]:
     BA1:Bytes ==K BA2:Bytes => false
     requires lengthBytes(BA1) =/=Int lengthBytes(BA2)
     [simplification]
