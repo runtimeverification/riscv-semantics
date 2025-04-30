@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 from elftools.elf.elffile import ELFFile  # type: ignore
 from pyk.kast.inner import KSort, Subst
 from pyk.kast.manip import split_config_from
+from pyk.kast.prelude.k import GENERATED_TOP_CELL
 from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
-from pyk.prelude.k import GENERATED_TOP_CELL
 
 from kriscv import elf_parser, term_builder
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map

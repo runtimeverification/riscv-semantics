@@ -7,9 +7,9 @@ from kriscv.build import semantics
 
 # isort: on
 import pytest
+from pyk.kast.prelude.kint import INT, intToken
 from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
 from pyk.kore.match import kore_int
-from pyk.prelude.kint import INT, intToken
 
 from kriscv import build, term_builder
 from kriscv.term_builder import register

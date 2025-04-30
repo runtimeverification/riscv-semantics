@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Final
 
 import pytest
 from pyk.kast.inner import KToken, KVariable
-from pyk.prelude.kint import eqInt, intToken
-from pyk.prelude.ml import mlEqualsTrue
+from pyk.kast.prelude.kint import eqInt, intToken
+from pyk.kast.prelude.ml import mlEqualsTrue
 
 import kriscv.term_builder as tb
 from kriscv.sparse_bytes import SparseBytes, SymBytes

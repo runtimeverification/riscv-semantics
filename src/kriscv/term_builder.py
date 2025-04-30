@@ -4,9 +4,9 @@ import itertools
 from typing import TYPE_CHECKING, cast
 
 from pyk.kast.inner import KApply, KInner, KSort, KVariable
-from pyk.prelude.bytes import bytesToken
-from pyk.prelude.collections import map_of
-from pyk.prelude.kint import intToken
+from pyk.kast.prelude.bytes import bytesToken
+from pyk.kast.prelude.collections import map_of
+from pyk.kast.prelude.kint import intToken
 
 from kriscv.term_manip import normalize_memory
 
