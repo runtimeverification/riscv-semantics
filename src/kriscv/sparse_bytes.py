@@ -5,8 +5,8 @@ from itertools import pairwise
 from typing import NamedTuple
 
 from pyk.kast.inner import KInner
-from pyk.prelude.kint import eqInt, intToken
-from pyk.prelude.ml import mlEqualsTrue
+from pyk.kast.prelude.kint import eqInt, intToken
+from pyk.kast.prelude.ml import mlEqualsTrue
 
 from .term_builder import (
     add_bytes,
