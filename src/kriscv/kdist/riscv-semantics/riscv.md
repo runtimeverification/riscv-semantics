@@ -113,7 +113,7 @@ For multi-byte loads and stores, we presume a little-endian architecture.
   rule loadBytes(MEM, ADDR, 1  ) => loadByte(MEM, ADDR)
   rule loadBytes(MEM, ADDR, NUM) => (loadBytes(MEM, ADDR +Word W(1), NUM -Int 1) <<Int 8) |Int loadByte(MEM, ADDR) requires NUM >Int 1
 
-  syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function]
+  syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function, total]
   rule storeBytes(MEM, ADDR, BS, 1  ) => storeByte(MEM, ADDR, BS)
   rule storeBytes(MEM, ADDR, BS, NUM) => storeBytes(storeByte(MEM, ADDR, BS &Int 255), ADDR +Word W(1), BS >>Int 8, NUM -Int 1) requires NUM >Int 1
 ```

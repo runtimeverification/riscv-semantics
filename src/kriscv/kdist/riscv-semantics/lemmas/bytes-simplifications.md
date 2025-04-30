@@ -37,12 +37,37 @@ module BYTES-SIMPLIFICATIONS
 
     rule [bytes-concat-empty-right]: B:Bytes +Bytes .Bytes  => B [simplification]
     rule [bytes-concat-empty-left]:   .Bytes +Bytes B:Bytes => B [simplification]
+    rule [bytes-concat-concrete-empty-right]: B:Bytes +Bytes b"" => B [simplification]
+    rule [bytes-concat-concrete-empty-left]:   b"" +Bytes B:Bytes => B [simplification]
 
     rule [bytes-concat-right-assoc-symb-l]: (B1:Bytes +Bytes B2:Bytes) +Bytes B3:Bytes => B1 +Bytes (B2 +Bytes B3) [symbolic(B1), simplification(40)]
     rule [bytes-concat-right-assoc-symb-r]: (B1:Bytes +Bytes B2:Bytes) +Bytes B3:Bytes => B1 +Bytes (B2 +Bytes B3) [symbolic(B2), simplification(40)]
     rule [bytes-concat-left-assoc-conc]:    B1:Bytes +Bytes (B2:Bytes +Bytes B3:Bytes) => (B1 +Bytes B2) +Bytes B3 [concrete(B1, B2), symbolic(B3), simplification(40)]
 ```
 
+## Bytes Update Lemmas
+
+```k
+  rule [bytes-update-symbolic-value]:
+    B:Bytes [I <- V] => substrBytes(B, 0, I) +Bytes Int2Bytes(1, V, LE) +Bytes substrBytes(B, I +Int 1, lengthBytes(B) -Int I -Int 1)
+    requires I <Int lengthBytes(B)
+    [simplification, concrete(B, I), symbolic(V), preserves-definedness]
+```
+
+
+## Int2Bytes Lemmas
+
+```k
+  rule [int2bytes-length]:
+    lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N
+    [simplification]
+
+  rule [int2bytes-concat]:
+    Int2Bytes ( 1 , X:Int &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 >>Int 8 &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 >>Int 8 >>Int 8 , LE )
+    => Int2Bytes(4, X, LE)
+    [simplification]
+```
+    
 ```k
 endmodule
 ```
