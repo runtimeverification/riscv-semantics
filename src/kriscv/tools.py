@@ -38,10 +38,10 @@ class Tools:
         conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
         return Subst(config_vars)(conf)
 
-    def run_config(self, config: KInner) -> KInner:
+    def run_config(self, config: KInner, *, depth: int | None = None) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
         try:
-            final_config_kore = self.krun.run_pattern(config_kore, check=True)
+            final_config_kore = self.krun.run_pattern(config_kore, depth=depth, check=True)
         except CalledProcessError as e:
             path = Path.cwd()
             stdout_path = path / 'krun_stdout.txt'
@@ -63,6 +63,7 @@ class Tools:
         self,
         elf_file: Path,
         *,
+        depth: int | None = None,
         regs: dict[int, int] | None = None,
         end_symbol: str | None = None,
     ) -> KInner:
@@ -79,7 +80,7 @@ class Tools:
                 '$PC': elf_parser.entry_point(elf),
                 '$HALT': halt_cond,
             }
-            return self.run_config(self.init_config(config_vars))
+        return self.run_config(self.init_config(config_vars), depth=depth)
 
     def get_registers(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
