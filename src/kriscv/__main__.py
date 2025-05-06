@@ -23,6 +23,7 @@ class KRISCVOpts:
 @dataclass
 class RunOpts(KRISCVOpts):
     input_file: Path
+    depth: int | None
     end_symbol: str | None
     zero_init: bool | None
 
@@ -55,6 +56,7 @@ def _parse_args(args: Sequence[str]) -> KRISCVOpts:
             return RunOpts(
                 temp_dir=ns.temp_dir,
                 input_file=ns.input_file.resolve(strict=True),
+                depth=ns.depth if ns.depth is not None and ns.depth >= 0 else None,
                 end_symbol=ns.end_symbol,
                 zero_init=ns.zero_init,
             )
@@ -71,7 +73,12 @@ def _parse_args(args: Sequence[str]) -> KRISCVOpts:
 def _kriscv_run(opts: RunOpts) -> None:
     tools = semantics(temp_dir=opts.temp_dir)
     regs = dict.fromkeys(range(32), 0) if opts.zero_init else {}
-    final_conf = tools.run_elf(opts.input_file, regs=regs, end_symbol=opts.end_symbol)
+    final_conf = tools.run_elf(
+        opts.input_file,
+        depth=opts.depth,
+        regs=regs,
+        end_symbol=opts.end_symbol,
+    )
     print(tools.kprint.pretty_print(final_conf, sort_collections=True))
 
 
@@ -125,6 +132,7 @@ def _arg_parser() -> ArgumentParser:
 
     run_parser = command_parser.add_parser('run', help='execute a RISC-V ELF file', parents=[common_parser])
     run_parser.add_argument('input_file', type=Path, metavar='FILE', help='RISC-V ELF file to run')
+    run_parser.add_argument('-d', '--depth', type=int, help='execution depth (set negative for unbounded execution)')
     run_parser.add_argument('--end-symbol', type=str, help='symbol marking the address which terminates execution')
     run_parser.add_argument('-z', '--zero-init', action='store_true', help='initialize registers to zero')
 
