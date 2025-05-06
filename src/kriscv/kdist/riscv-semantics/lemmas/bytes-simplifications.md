@@ -62,10 +62,6 @@ module BYTES-SIMPLIFICATIONS
     lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N
     [simplification]
 
-  rule [int2bytes-concat]:
-    Int2Bytes ( 1 , X:Int &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 >>Int 8 &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 >>Int 8 >>Int 8 , LE )
-    => Int2Bytes(4, X, LE)
-    [simplification]
 ```
     
 ```k
