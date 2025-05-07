@@ -47,6 +47,17 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   rule prependEmpty(I, #empty(N) BF    ) => #empty(I +Int N) BF requires I >Int 0
   rule prependEmpty(I, BF:SparseBytesBF) => #empty(I) BF        requires I >Int 0
 ```
+`dropFront` is a helper function for dropping the first `N` bytes from a `SparseBytes` value.
+```k
+  syntax SparseBytes ::=  dropFront(SparseBytes, Int) [function, total]
+  rule dropFront(SBS, I) => SBS    requires I <=Int 0
+  rule dropFront(.SparseBytes, _) => .SparseBytes
+  rule dropFront(#empty(N) BF, I) => #empty(N -Int I) BF requires I >Int 0 andBool I <Int N
+  rule dropFront(#empty(N) BF, I) => dropFront(BF, I -Int N) requires I >=Int N
+  rule dropFront(#bytes(B) EF, I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B))) EF, 0) 
+    requires I >Int 0 andBool I <Int lengthBytes(B)
+  rule dropFront(#bytes(B) EF, I) => dropFront(EF, I -Int lengthBytes(B)) requires I >=Int lengthBytes(B)
+```
 `readByte` reads a single byte from a given index in `O(E)` time, where `E` is the number of `#empty(_)` or `#bytes(_)` entries in the list up to the location of the index. The result is either
 - an `Int` in the range `[0, 255)` giving the byte value at the index, or
 - `.Byte` if the index does not point to initialized data
@@ -76,28 +87,33 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   rule readByteBF(#bytes(B) EF, I) => readByteEF(EF, I -Int lengthBytes(B))
                                              requires I >=Int lengthBytes(B)
 ```
-`writeByte` writes a single byte to a given index. With regards to time complexity,
+`writeBytes` writes a single byte to a given index. With regards to time complexity,
 - If the index is in the middle of an existing `#empty(_)` or `#bytes(_)` region, time complexity is `O(E)` where `E` is the number of entries up to the index.
 - If the index happens to be the first or last index in an `#empty(_)` region directly boarding a `#bytes(_)` region, then the `#bytes(_)` region must be re-allocated to append the new value, giving worst-case `O(E + B)` time, where `E` is the number of entries up to the location of the index and `B` is the size of this existing `#bytes(_)`.
 ```k
   syntax SparseBytes ::=
-      writeByte  (SparseBytes  , Int, Int) [function, total]
-    | writeByteEF(SparseBytesEF, Int, Int) [function, total]
-    | writeByteBF(SparseBytesBF, Int, Int) [function, total]
+      writeBytes  (SparseBytes  , Int, Int, Int) [function, total]
+    | writeBytesEF(SparseBytesEF, Int, Int, Int) [function, total]
+    | writeBytesBF(SparseBytesBF, Int, Int, Int) [function, total]
 
-  rule writeByte(BF:SparseBytesBF, I, V) => writeByteBF(BF, I, V)
-  rule writeByte(EF:SparseBytesEF, I, V) => writeByteEF(EF, I, V)
+  rule writeBytes(BF:SparseBytesBF, I, V, NUM) => writeBytesBF(BF, I, V, NUM)
+  rule writeBytes(EF:SparseBytesEF, I, V, NUM) => writeBytesEF(EF, I, V, NUM)
 
-  rule writeByteEF(_           , I, _) => .SparseBytes                                       requires I <Int 0 // error case for totality
-  rule writeByteEF(.SparseBytes, I, V) => #bytes(Int2Bytes(1, V, BE)) .SparseBytes           requires I ==Int 0
-  rule writeByteEF(.SparseBytes, I, V) => #empty(I) #bytes(Int2Bytes(1, V, BE)) .SparseBytes requires I >Int 0
-  rule writeByteEF(#empty(N) BF, I, V) => prependEmpty(I, prepend(Int2Bytes(1, V, BE), prependEmpty((N -Int I) -Int 1, BF)))
-                                                                                             requires I >=Int 0 andBool I <Int N
-  rule writeByteEF(#empty(N) BF, I, V) => prependEmpty(N, writeByteBF(BF, I -Int N, V))      requires I >=Int N
+  rule writeBytesEF(_           , I, _, _) => .SparseBytes    requires I <Int 0 // error case for totality
+  rule writeBytesEF(.SparseBytes, I, V, NUM) => prependEmpty(I, #bytes(Int2Bytes(NUM, V, LE)) .SparseBytes)    requires I >=Int 0
+  rule writeBytesEF(#empty(N) BF, I, V, NUM) => prependEmpty(I, prepend(Int2Bytes(NUM, V, LE), prependEmpty(N -Int I -Int NUM, BF)))
+    requires I >=Int 0 andBool I +Int NUM <=Int N
+  rule writeBytesEF(#empty(N) BF, I, V, NUM) => prependEmpty(I, prepend(Int2Bytes(NUM, V, LE), dropFront(BF, I +Int NUM -Int N)))
+    requires I <Int N andBool I +Int NUM >Int N
+  rule writeBytesEF(#empty(N) BF, I, V, NUM) => prependEmpty(N, writeBytesBF(BF, I -Int N, V, NUM))
+    requires I >=Int N
 
-  rule writeByteBF(_           , I, _) => .SparseBytes           requires I <Int 0 // error case for totality
-  rule writeByteBF(#bytes(B) EF, I, V) => #bytes(B[ I <- V ]) EF requires I >=Int 0 andBool I <Int lengthBytes(B)
-  rule writeByteBF(#bytes(B) EF, I, V) => prepend(B, writeByteEF(EF, I -Int lengthBytes(B), V))
-                                                                 requires I >=Int lengthBytes(B)
+  rule writeBytesBF(_           , I, _, _  ) => .SparseBytes    requires I <Int 0 // error case for totality
+  rule writeBytesBF(#bytes(B) EF, I, V, NUM) => #bytes(replaceAtBytes(B, I, Int2Bytes(NUM, V, LE))) EF
+    requires I >=Int 0 andBool I +Int NUM <=Int lengthBytes(B)
+  rule writeBytesBF(#bytes(B) EF, I, V, NUM) => prepend(substrBytes(B, 0, I) +Bytes Int2Bytes(NUM, V, LE), dropFront(EF, I +Int NUM -Int lengthBytes(B)))
+    requires I <Int lengthBytes(B) andBool I +Int NUM >Int lengthBytes(B)
+  rule writeBytesBF(#bytes(B) EF, I, V, NUM) => prepend(B, writeBytesEF(EF, I -Int lengthBytes(B), V, NUM))
+    requires I >=Int lengthBytes(B)
 endmodule
 ```
