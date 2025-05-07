@@ -27,10 +27,12 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
 To write a byte to a symbolic sparse byte region, we need to:
 
 ```k
-  rule writeByteBF(#bytes(B +Bytes BS) EF, I, V) => #bytes(B[ I <- V ] +Bytes BS) EF 
-    requires I >=Int 0 andBool I <Int lengthBytes(B) [simplification(45)]
-  rule writeByteBF(#bytes(B +Bytes BS) EF, I, V) => prepend(B, writeByteBF(#bytes(BS) EF, I -Int lengthBytes(B), V))
-    requires I >=Int lengthBytes(B) [simplification(45)]
+  rule writeBytesBF(#bytes(B +Bytes BS) EF, I, V, NUM) => #bytes(replaceAtBytes(B, I, Int2Bytes(NUM, V, LE)) +Bytes BS) EF
+    requires I >=Int 0 andBool I +Int NUM <=Int lengthBytes(B)  [simplification(45)]
+  rule writeBytesBF(#bytes(B +Bytes BS) EF, I, V, NUM) => prepend(substrBytes(B, 0, I) +Bytes Int2Bytes(NUM, V, LE), dropFront(#bytes(BS) EF, I +Int NUM -Int lengthBytes(B)))
+    requires I <Int lengthBytes(B) andBool I +Int NUM >Int lengthBytes(B)    [simplification(45)]
+  rule writeBytesBF(#bytes(B +Bytes BS) EF, I, V, NUM) => prepend(B, writeBytesBF(#bytes(BS) EF, I -Int lengthBytes(B), V, NUM))
+    requires I >=Int lengthBytes(B)                             [simplification(45)]
 ```
 
 ```k

@@ -99,13 +99,10 @@ module RISCV-MEMORY
 
   syntax Memory = SparseBytes
 ```
-We abstract the particular memory representation behind `loadByte` and `storeByte` functions.
+We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions.
 ```k
   syntax Int ::= loadByte(memory: Memory, address: Word) [function, symbol(Memory:loadByte)]
   rule loadByte(MEM, W(ADDR)) => MaybeByte2Int(readByte(MEM, ADDR))
-
-  syntax Memory ::= storeByte(memory: Memory, address: Word, byte: Int) [function, total, symbol(Memory:storeByte)]
-  rule storeByte(MEM, W(ADDR), B) => writeByte(MEM, ADDR, B)
 ```
 For multi-byte loads and stores, we presume a little-endian architecture.
 ```k
@@ -113,9 +110,8 @@ For multi-byte loads and stores, we presume a little-endian architecture.
   rule loadBytes(MEM, ADDR, 1  ) => loadByte(MEM, ADDR)
   rule loadBytes(MEM, ADDR, NUM) => (loadBytes(MEM, ADDR +Word W(1), NUM -Int 1) <<Int 8) |Int loadByte(MEM, ADDR) requires NUM >Int 1
 
-  syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function]
-  rule storeBytes(MEM, ADDR, BS, 1  ) => storeByte(MEM, ADDR, BS)
-  rule storeBytes(MEM, ADDR, BS, NUM) => storeBytes(storeByte(MEM, ADDR, BS &Int 255), ADDR +Word W(1), BS >>Int 8, NUM -Int 1) requires NUM >Int 1
+  syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function, total, symbol(Memory:storeBytes)]
+  rule storeBytes(MEM, W(ADDR), BS, NUM) => writeBytes(MEM, ADDR, BS, NUM)
 ```
 Instructions are always 32-bits, and are stored in little-endian format regardless of the endianness of the overall architecture.
 ```k
@@ -352,7 +348,7 @@ Dually, `SB`, `SH`, and `SW` store the least-significant `1`, `2`, and `4` bytes
 ```k
   rule <instrs> SB RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 255) </mem>
+       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 255, 1) </mem>
 
   rule <instrs> SH RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>

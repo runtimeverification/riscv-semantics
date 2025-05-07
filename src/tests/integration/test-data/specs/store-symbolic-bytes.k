@@ -16,7 +16,7 @@ module STORE-SYMBOLIC-BYTES
         X:Int,
         4
     ) =>
-    #bytes ( Int2Bytes ( 1 , X:Int &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 >>Int 8 &Int 255 , LE ) +Bytes Int2Bytes ( 1 , X:Int >>Int 8 >>Int 8 >>Int 8 , LE ) +Bytes b"\x00\x00\x00\x00" ) .SparseBytes
+    #bytes ( Int2Bytes ( 4 , X , LE ) +Bytes b"\x00\x00\x00\x00\x00\x00\x00\x00" ) .SparseBytes
     </mem>
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
