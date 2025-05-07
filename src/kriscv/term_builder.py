@@ -318,8 +318,8 @@ def load_byte(mem: KInner, addr: KInner) -> KInner:
     return KApply('Memory:loadByte', mem, addr)
 
 
-def store_byte(mem: KInner, addr: KInner, value: KInner) -> KInner:
-    return KApply('Memory:storeByte', mem, addr, value)
+def store_bytes(mem: KInner, addr: KInner, value: KInner, num_bytes: KInner) -> KInner:
+    return KApply('Memory:storeBytes', mem, addr, value, num_bytes)
 
 
 def regs(dct: dict[int, int]) -> KInner:
