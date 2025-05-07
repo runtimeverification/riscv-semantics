@@ -99,10 +99,16 @@ module RISCV-MEMORY
 
   syntax Memory = SparseBytes
 ```
-We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions. For multi-byte loads and stores, we presume a little-endian architecture.
+We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions.
 ```k
-  syntax Int ::= loadBytes(memory: Memory, address: Word, numBytes: Int) [function, total, symbol(Memory:loadBytes)]
-  rule loadBytes(MEM, W(ADDR), NUM) => readBytes(MEM, ADDR, NUM)
+  syntax Int ::= loadByte(memory: Memory, address: Word) [function, symbol(Memory:loadByte)]
+  rule loadByte(MEM, W(ADDR)) => MaybeByte2Int(readByte(MEM, ADDR))
+```
+For multi-byte loads and stores, we presume a little-endian architecture.
+```k
+  syntax Int ::= loadBytes(memory: Memory, address: Word, numBytes: Int) [function]
+  rule loadBytes(MEM, ADDR, 1  ) => loadByte(MEM, ADDR)
+  rule loadBytes(MEM, ADDR, NUM) => (loadBytes(MEM, ADDR +Word W(1), NUM -Int 1) <<Int 8) |Int loadByte(MEM, ADDR) requires NUM >Int 1
 
   syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function, total, symbol(Memory:storeBytes)]
   rule storeBytes(MEM, W(ADDR), BS, NUM) => writeBytes(MEM, ADDR, BS, NUM)
