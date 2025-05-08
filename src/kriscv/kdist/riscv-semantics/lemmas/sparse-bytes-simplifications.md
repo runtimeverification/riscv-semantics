@@ -10,15 +10,20 @@ module SPARSE-BYTES-SIMPLIFICATIONS
   imports SPARSE-BYTES
 ```
 
-## readByteBF
+## pickFront and dropFront
 
-For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _` and `#bytes(B +Bytes BS) EF` to obtain as exact as possible values for `readByte`.
+For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _` and `#bytes(B +Bytes BS) EF` to obtain as exact as possible values for `pickFront`.
 
 ```k
-  rule readByteBF(#bytes(B +Bytes _) _ , I) => B[ I ] 
-    requires I >=Int 0 andBool I <Int lengthBytes(B) [simplification(45)]
-  rule readByteBF(#bytes(B +Bytes BS) EF , I) => readByteBF(#bytes(BS) EF , I -Int lengthBytes(B)) 
-    requires I >=Int lengthBytes(B) [simplification(45)]
+  rule pickFront(#bytes(B +Bytes _) _ , I) => substrBytes(B, 0, I)
+    requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45)]
+  rule pickFront(#bytes(B +Bytes BS) EF, I) => B +Bytes pickFront(#bytes(BS) EF, I -Int lengthBytes(B))
+    requires I >Int lengthBytes(B)                      [simplification(45)]
+
+  rule dropFront(#bytes(B +Bytes BS) EF , I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B)) +Bytes BS) EF, 0) 
+    requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45)]
+  rule dropFront(#bytes(B +Bytes BS) EF, I) => dropFront(#bytes(BS) EF, I -Int lengthBytes(B)) 
+    requires I >=Int lengthBytes(B)                     [simplification(45)]
 ```
 
 

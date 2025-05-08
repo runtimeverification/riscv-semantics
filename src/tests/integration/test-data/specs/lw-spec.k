@@ -7,7 +7,7 @@ module LW-SPEC
     <instrs> (.K => #HALT) ~> #EXECUTE ... </instrs>
     <regs>
       1 |-> (W(16) => W(1))
-      2 |-> (W(24) => signExtend (Y[3] <<Int 8 |Int Y[2] <<Int 8 |Int Y[1] <<Int 8 |Int Y[0], 32 ))
+      2 |-> (W(24) => signExtend ( ... bits: Bytes2Int ( substrBytes ( Y:Bytes , 0 , 4 ) , LE , Unsigned ) , signBitIdx: 32 ))
       3 |-> (W(28) => W(2))
     </regs>
     <pc> W ( 0 => 12 ) </pc>
