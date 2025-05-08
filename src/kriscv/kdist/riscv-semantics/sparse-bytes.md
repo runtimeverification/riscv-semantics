@@ -55,7 +55,7 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   rule pickFront(#empty(N) _, I) => padRightBytes(.Bytes, I, 0)
     requires I >Int 0 andBool I <=Int N
   rule pickFront(#empty(N) BF, I) => padRightBytes(.Bytes, I, 0) +Bytes pickFront(BF, I -Int N)
-    requires I >Int N
+    requires I >Int 0 andBool I >Int N
   rule pickFront(#bytes(B) _, I) => substrBytes(B, 0, I)
     requires I >Int 0 andBool I <=Int lengthBytes(B)
   rule pickFront(#bytes(B) EF, I) => B +Bytes pickFront(EF, I -Int lengthBytes(B))
