@@ -51,9 +51,9 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
 ```k
   syntax SparseBytes ::=  dropFront(SparseBytes, Int) [function, total]
   rule dropFront(SBS, I) => SBS    requires I <=Int 0
-  rule dropFront(.SparseBytes, _) => .SparseBytes
+  rule dropFront(.SparseBytes, I) => .SparseBytes requires I >Int 0
   rule dropFront(#empty(N) BF, I) => #empty(N -Int I) BF requires I >Int 0 andBool I <Int N
-  rule dropFront(#empty(N) BF, I) => dropFront(BF, I -Int N) requires I >=Int N
+  rule dropFront(#empty(N) BF, I) => dropFront(BF, I -Int N) requires I > 0 andBool I >=Int N 
   rule dropFront(#bytes(B) EF, I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B))) EF, 0) 
     requires I >Int 0 andBool I <Int lengthBytes(B)
   rule dropFront(#bytes(B) EF, I) => dropFront(EF, I -Int lengthBytes(B)) requires I >=Int lengthBytes(B)
