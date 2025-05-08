@@ -72,9 +72,7 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
     requires I >Int 0 andBool I <Int lengthBytes(B)
   rule dropFront(#bytes(B) EF, I) => dropFront(EF, I -Int lengthBytes(B)) requires I >=Int lengthBytes(B)
 ```
-`readByte` reads a single byte from a given index in `O(E)` time, where `E` is the number of `#empty(_)` or `#bytes(_)` entries in the list up to the location of the index. The result is either
-- an `Int` in the range `[0, 255)` giving the byte value at the index, or
-- `.Byte` if the index does not point to initialized data
+`readBytes(SBS, I, NUM)` reads `NUM` bytes from a given index `I` in `O(E)` time, where `E` is the number of `#empty(_)` or `#bytes(_)` entries in the list up to the location of the index.
 ```k
   syntax Int ::= readBytes(SparseBytes, Int, Int) [function, total]
 
