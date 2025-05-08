@@ -304,7 +304,7 @@ def test_memory(memory: dict[int, bytes], addr: int, byte: int) -> None:
     memory_sb = term_builder.sparse_bytes(memory)
     addr_word = term_builder.word(addr)
 
-    store_call = term_builder.store_byte(memory_sb, addr_word, intToken(byte))
+    store_call = term_builder.store_bytes(memory_sb, addr_word, intToken(byte), intToken(1))
     memory_actual_sb_kore = _eval_call_to_kore(tools, store_call, term_builder.sort_memory())
     memory_actual = kore_sparse_bytes(memory_actual_sb_kore)
 

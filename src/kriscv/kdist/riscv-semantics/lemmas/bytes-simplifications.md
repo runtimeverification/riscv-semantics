@@ -52,6 +52,11 @@ module BYTES-SIMPLIFICATIONS
     B:Bytes [I <- V] => substrBytes(B, 0, I) +Bytes Int2Bytes(1, V, LE) +Bytes substrBytes(B, I +Int 1, lengthBytes(B) -Int I -Int 1)
     requires I <Int lengthBytes(B)
     [simplification, concrete(B, I), symbolic(V), preserves-definedness]
+  
+  rule [multiple-bytes-update-symbolic-value]:
+    replaceAtBytes(B, I, V) => substrBytes(B, 0, I) +Bytes V +Bytes substrBytes(B, I +Int lengthBytes(V), lengthBytes(B))
+    requires I +Int lengthBytes(V) <Int lengthBytes(B)
+    [simplification, concrete(B, I), symbolic(V), preserves-definedness]
 ```
 
 
