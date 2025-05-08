@@ -51,7 +51,7 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
 ```k
   syntax Bytes ::= pickFront(SparseBytes, Int) [function, total]
   rule pickFront(_, I) => .Bytes requires I <=Int 0
-  rule pickFront(.SparseBytes, _) => .Bytes requires I >Int 0
+  rule pickFront(.SparseBytes, I) => .Bytes requires I >Int 0
   rule pickFront(#empty(N) _, I) => padRightBytes(.Bytes, I, 0)
     requires I >Int 0 andBool I <=Int N
   rule pickFront(#empty(N) BF, I) => padRightBytes(.Bytes, I, 0) +Bytes pickFront(BF, I -Int N)
