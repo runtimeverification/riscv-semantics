@@ -47,6 +47,20 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   rule prependEmpty(I, #empty(N) BF    ) => #empty(I +Int N) BF requires I >Int 0
   rule prependEmpty(I, BF:SparseBytesBF) => #empty(I) BF        requires I >Int 0
 ```
+`pickFront` is a helper function for picking the first `N` bytes from a `SparseBytes` value.
+```k
+  syntax Bytes ::= pickFront(SparseBytes, Int) [function, total]
+  rule pickFront(_, I) => .Bytes requires I <=Int 0
+  rule pickFront(.SparseBytes, _) => .Bytes
+  rule pickFront(#empty(N) _, I) => padRightBytes(.Bytes, I, 0)
+    requires I >Int 0 andBool I <=Int N
+  rule pickFront(#empty(N) BF, I) => padRightBytes(.Bytes, I, 0) +Bytes pickFront(BF, I -Int N)
+    requires I >Int N
+  rule pickFront(#bytes(B) _, I) => substrBytes(B, 0, I)
+    requires I >Int 0 andBool I <=Int lengthBytes(B)
+  rule pickFront(#bytes(B) EF, I) => B +Bytes pickFront(EF, I -Int lengthBytes(B))
+    requires I >Int lengthBytes(B)
+```
 `dropFront` is a helper function for dropping the first `N` bytes from a `SparseBytes` value.
 ```k
   syntax SparseBytes ::=  dropFront(SparseBytes, Int) [function, total]
@@ -62,17 +76,9 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
 - an `Int` in the range `[0, 255)` giving the byte value at the index, or
 - `.Byte` if the index does not point to initialized data
 ```k
-  syntax Bytes ::= pickFront(SparseBytes, Int) [function, total]
-  rule pickFront(_, I) => .Bytes requires I <=Int 0
-  rule pickFront(.SparseBytes, I) => .Bytes requires I >Int 0
-  rule pickFront(#empty(N) _, I) => padRightBytes(.Bytes, I, 0)
-    requires I >Int 0 andBool I <=Int N
-  rule pickFront(#empty(N) BF, I) => padRightBytes(.Bytes, I, 0) +Bytes pickFront(BF, I -Int N)
-    requires I >Int 0 andBool I >Int N
-  rule pickFront(#bytes(B) _, I) => substrBytes(B, 0, I)
-    requires I >Int 0 andBool I <=Int lengthBytes(B)
-  rule pickFront(#bytes(B) EF, I) => B +Bytes pickFront(EF, I -Int lengthBytes(B))
-    requires I >Int lengthBytes(B)
+  syntax Int ::= readBytes(SparseBytes, Int, Int) [function, total]
+
+  rule readBytes(SBS, I, NUM) => Bytes2Int(pickFront(dropFront(SBS, I), NUM), LE, Unsigned)
 ```
 `writeBytes` writes a single byte to a given index. With regards to time complexity,
 - If the index is in the middle of an existing `#empty(_)` or `#bytes(_)` region, time complexity is `O(E)` where `E` is the number of entries up to the index.
