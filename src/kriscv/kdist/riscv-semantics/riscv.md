@@ -197,13 +197,13 @@ We then provide rules to consume and execute each instruction from the top of th
 `SLLI`, `SRLI`, and `SRAI` perform logical left, logical right, and arithmetic right shifts respectively.
 ```k
   rule <instrs> SLLI RD , RS , SHAMT => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) <<Word SHAMT) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) <<Word W(SHAMT)) </regs>
 
   rule <instrs> SRLI RD , RS , SHAMT => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>lWord SHAMT) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>lWord W(SHAMT)) </regs>
 
   rule <instrs> SRAI RD , RS , SHAMT => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>aWord SHAMT) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>aWord W(SHAMT)) </regs>
 ```
 `LUI` builds a 32-bit constant from the 20-bit immediate by setting the 12 least-significant bits to `0`, then sign extends to `XLEN` bits and places the result in register `RD`.
 ```k
@@ -258,13 +258,13 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word readReg(REGS, RS2) &Word W(XLEN -Int 1)) </regs>
 
   rule <instrs> SRL RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord readReg(REGS, RS2) &Word W(XLEN -Int 1)) </regs>
 
   rule <instrs> SRA RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord Word2UInt(readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord readReg(REGS, RS2) &Word W(XLEN -Int 1)) </regs>
 ```
 `JAL` stores `PC + 4` in `RD`, then increments `PC` by `OFFSET`.
 ```k
