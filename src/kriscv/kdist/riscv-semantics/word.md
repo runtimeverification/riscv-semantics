@@ -11,7 +11,7 @@ module WORD
 ```
 Throughout the semantics, we use K's arbitrary-precision, infinitely sign-extended, two's-complement integer type `Int` to store arbitrary bit sequences. A `Word` consists of a single `Int`, with the `XLEN` least-signficant bits storing the desired bit sequence and all other bits zeroed.
 ```k
-  syntax Word ::= W(Int) [format(%3), symbol(W)]
+  syntax Word ::= W(Int) [symbol(W)]
 ```
 A `Word` can be interpreted as an unsigned integer by directly returning the underlying `Int`,
 ```k
