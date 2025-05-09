@@ -312,7 +312,7 @@ def test_memory(memory: dict[int, bytes], addr: int, byte: int) -> None:
 
     # Also execute loadByte and check that we correctly read back the written value
     memory_actual_sb = tools.krun.kore_to_kast(memory_actual_sb_kore)
-    load_call = term_builder.load_byte(memory_actual_sb, addr_word)
+    load_call = term_builder.load_bytes(memory_actual_sb, addr_word, intToken(1))
     load_actual = kore_int(_eval_call_to_kore(tools, load_call, INT))
 
     assert load_actual == byte

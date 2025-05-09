@@ -47,45 +47,36 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
   rule prependEmpty(I, #empty(N) BF    ) => #empty(I +Int N) BF requires I >Int 0
   rule prependEmpty(I, BF:SparseBytesBF) => #empty(I) BF        requires I >Int 0
 ```
+`pickFront` is a helper function for picking the first `N` bytes from a `SparseBytes` value.
+```k
+  syntax Bytes ::= pickFront(SparseBytes, Int) [function, total]
+  rule pickFront(_, I) => .Bytes requires I <=Int 0
+  rule pickFront(.SparseBytes, I) => .Bytes requires I >Int 0
+  rule pickFront(#empty(N) _, I) => padRightBytes(.Bytes, I, 0)
+    requires I >Int 0 andBool I <=Int N
+  rule pickFront(#empty(N) BF, I) => padRightBytes(.Bytes, I, 0) +Bytes pickFront(BF, I -Int N)
+    requires I >Int 0 andBool I >Int N
+  rule pickFront(#bytes(B) _, I) => substrBytes(B, 0, I)
+    requires I >Int 0 andBool I <=Int lengthBytes(B)
+  rule pickFront(#bytes(B) EF, I) => B +Bytes pickFront(EF, I -Int lengthBytes(B))
+    requires I >Int lengthBytes(B)
+```
 `dropFront` is a helper function for dropping the first `N` bytes from a `SparseBytes` value.
 ```k
   syntax SparseBytes ::=  dropFront(SparseBytes, Int) [function, total]
   rule dropFront(SBS, I) => SBS    requires I <=Int 0
   rule dropFront(.SparseBytes, I) => .SparseBytes requires I >Int 0
   rule dropFront(#empty(N) BF, I) => #empty(N -Int I) BF requires I >Int 0 andBool I <Int N
-  rule dropFront(#empty(N) BF, I) => dropFront(BF, I -Int N) requires I >Int 0 andBool I >=Int N 
+  rule dropFront(#empty(N) BF, I) => dropFront(BF, I -Int N) requires I >Int 0 andBool I >=Int N
   rule dropFront(#bytes(B) EF, I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B))) EF, 0) 
     requires I >Int 0 andBool I <Int lengthBytes(B)
   rule dropFront(#bytes(B) EF, I) => dropFront(EF, I -Int lengthBytes(B)) requires I >=Int lengthBytes(B)
 ```
-`readByte` reads a single byte from a given index in `O(E)` time, where `E` is the number of `#empty(_)` or `#bytes(_)` entries in the list up to the location of the index. The result is either
-- an `Int` in the range `[0, 255)` giving the byte value at the index, or
-- `.Byte` if the index does not point to initialized data
+`readBytes(SBS, I, NUM)` reads `NUM` bytes from a given index `I` in `O(E)` time, where `E` is the number of `#empty(_)` or `#bytes(_)` entries in the list up to the location of the index.
 ```k
-  syntax MaybeByte ::=
-      Int
-    | ".Byte"
-  
-  syntax Int ::= MaybeByte2Int(MaybeByte) [function, total]
-  rule MaybeByte2Int(I:Int) => I
-  rule MaybeByte2Int(.Byte) => 0
+  syntax Int ::= readBytes(SparseBytes, Int, Int) [function, total]
 
-  syntax MaybeByte ::=
-      readByte  (SparseBytes  , Int) [function, total]
-    | readByteEF(SparseBytesEF, Int) [function, total]
-    | readByteBF(SparseBytesBF, Int) [function, total]
-
-  rule readByte(EF:SparseBytesEF, I) => readByteEF(EF, I)
-  rule readByte(BF:SparseBytesBF, I) => readByteBF(BF, I)
-
-  rule readByteEF(.SparseBytes, _) => .Byte
-  rule readByteEF(#empty(N) _ , I) => .Byte                    requires I <Int N
-  rule readByteEF(#empty(N) BF, I) => readByteBF(BF, I -Int N) requires I >=Int N
-
-  rule readByteBF(#bytes(_) _ , I) => .Byte  requires I <Int 0 // error case for totality
-  rule readByteBF(#bytes(B) _ , I) => B[ I ] requires I >=Int 0 andBool I <Int lengthBytes(B)
-  rule readByteBF(#bytes(B) EF, I) => readByteEF(EF, I -Int lengthBytes(B))
-                                             requires I >=Int lengthBytes(B)
+  rule readBytes(SBS, I, NUM) => Bytes2Int(pickFront(dropFront(SBS, I), NUM), LE, Unsigned)
 ```
 `writeBytes(SBS, I, V, NUM)` writes value `V` with length `NUM` bytes to a given index `I`. With regards to time complexity,
 - If the index is in the middle of an existing `#empty(_)` or `#bytes(_)` region, time complexity is `O(E)` where `E` is the number of entries up to the index.

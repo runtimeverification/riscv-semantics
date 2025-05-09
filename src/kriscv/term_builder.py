@@ -314,8 +314,8 @@ def sort_memory() -> KSort:
     return KSort('SparseBytes')
 
 
-def load_byte(mem: KInner, addr: KInner) -> KInner:
-    return KApply('Memory:loadByte', mem, addr)
+def load_bytes(mem: KInner, addr: KInner, num_bytes: KInner) -> KInner:
+    return KApply('Memory:loadBytes', mem, addr, num_bytes)
 
 
 def store_bytes(mem: KInner, addr: KInner, value: KInner, num_bytes: KInner) -> KInner:

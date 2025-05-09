@@ -99,32 +99,22 @@ module RISCV-MEMORY
 
   syntax Memory = SparseBytes
 ```
-We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions.
+We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions. For multi-byte loads and stores, we presume a little-endian architecture.
 ```k
-  syntax Int ::= loadByte(memory: Memory, address: Word) [function, symbol(Memory:loadByte)]
-  rule loadByte(MEM, W(ADDR)) => MaybeByte2Int(readByte(MEM, ADDR))
-```
-For multi-byte loads and stores, we presume a little-endian architecture.
-```k
-  syntax Int ::= loadBytes(memory: Memory, address: Word, numBytes: Int) [function]
-  rule loadBytes(MEM, ADDR, 1  ) => loadByte(MEM, ADDR)
-  rule loadBytes(MEM, ADDR, NUM) => (loadBytes(MEM, ADDR +Word W(1), NUM -Int 1) <<Int 8) |Int loadByte(MEM, ADDR) requires NUM >Int 1
+  syntax Int ::= loadBytes(memory: Memory, address: Word, numBytes: Int) [function, total, symbol(Memory:loadBytes)]
+  rule loadBytes(MEM, W(ADDR), NUM) => readBytes(MEM, ADDR, NUM)
 
   syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function, total, symbol(Memory:storeBytes)]
   rule storeBytes(MEM, W(ADDR), BS, NUM) => writeBytes(MEM, ADDR, BS, NUM)
 ```
 Instructions are always 32-bits, and are stored in little-endian format regardless of the endianness of the overall architecture.
 ```k
-  syntax Instruction ::= fetchInstr(memory: Memory, address: Word) [function]
-  rule fetchInstr(MEM, ADDR) =>
-    disassemble((loadByte(MEM, ADDR +Word W(3)) <<Int 24) |Int
-                (loadByte(MEM, ADDR +Word W(2)) <<Int 16) |Int
-                (loadByte(MEM, ADDR +Word W(1)) <<Int 8 ) |Int
-                 loadByte(MEM, ADDR       ))
+  syntax Instruction ::= fetchInstr(memory: Memory, address: Word) [function, total]
+  rule fetchInstr(MEM, ADDR) => disassemble(loadBytes(MEM, ADDR, 4))
 ```
 Registers should be manipulated with the `writeReg` and `readReg` functions, which account for `x0` always being hard-wired to contain all `0`s.
 ```k
-  syntax Map ::= writeReg(regs: Map, rd: Int, value: Word) [function]
+  syntax Map ::= writeReg(regs: Map, rd: Int, value: Word) [function, total]
   rule writeReg(REGS, 0 , _  ) => REGS
   rule writeReg(REGS, RD, VAL) => REGS[RD <- VAL] [owise]
 
@@ -323,7 +313,7 @@ The remaining branch instructions proceed analogously, but performing different 
 `LB`, `LH`, and `LW` load `1`, `2`, and `4` bytes respectively from the memory address which is `OFFSET` greater than the value in register `RS1`, then sign extends the loaded bytes and places them in register `RD`.
 ```k
   rule <instrs> LB RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, signExtend(loadByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET)), 8)) </regs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 1), 8)) </regs>
        <mem> MEM </mem>
 
   rule <instrs> LH RD , OFFSET ( RS1 ) => .K ...</instrs>
@@ -337,7 +327,7 @@ The remaining branch instructions proceed analogously, but performing different 
 `LBU` and `LHU` are analogous to `LB` and `LH`, but zero-extending rather than sign-extending.
 ```k
    rule <instrs> LBU RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, W(loadByte(MEM, readReg(REGS, RS1) +Word chop(OFFSET)))) </regs>
+       <regs> REGS => writeReg(REGS, RD, W(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 1))) </regs>
        <mem> MEM </mem>
 
   rule <instrs> LHU RD , OFFSET ( RS1 ) => .K ...</instrs>
