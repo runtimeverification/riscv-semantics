@@ -18,16 +18,16 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
   
   rule pickFront(#bytes(substrBytes(B, I0, N) +Bytes _) _ , I1) => substrBytes(substrBytes(B, I0, N), 0, I1)
     requires I1 >Int 0 andBool I1 <=Int lengthBytes(substrBytes(B, I0, N)) 
-    [simplification(44)]  // TODO: this should be solved by the backend
+    [simplification(44), preserves-definedness]  // TODO: this should be solved by the backend
   rule pickFront(#bytes(B +Bytes _) _ , I) => substrBytes(B, 0, I)
-    requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45)]
+    requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45), preserves-definedness]
   rule pickFront(#bytes(B +Bytes BS) EF, I) => B +Bytes pickFront(#bytes(BS) EF, I -Int lengthBytes(B))
-    requires I >Int lengthBytes(B)                      [simplification(45)]
+    requires I >Int lengthBytes(B)                      [simplification(45), preserves-definedness]
 
   rule dropFront(#bytes(B +Bytes BS) EF , I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B)) +Bytes BS) EF, 0) 
-    requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45)]
+    requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45), preserves-definedness]
   rule dropFront(#bytes(B +Bytes BS) EF, I) => dropFront(#bytes(BS) EF, I -Int lengthBytes(B)) 
-    requires I >=Int lengthBytes(B)                     [simplification(45)]
+    requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
 ```
 
 
