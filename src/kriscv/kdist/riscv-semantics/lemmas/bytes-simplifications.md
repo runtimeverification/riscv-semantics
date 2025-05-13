@@ -77,6 +77,13 @@ module BYTES-SIMPLIFICATIONS
     requires I +Int N0 <=Int lengthBytes(B) [simplification, preserves-definedness]
 ```
 
+## Bytes2Int Lemmas
+
+```k
+  rule [bytes2int-substr-ff00]: Bytes2Int (substrBytes(B, S, _E), LE, Unsigned) &Int 65280 => B[S +Int 1] <<Int 8
+    [simplification, preserves-definedness]
+```
+
 ```k
 endmodule
 ```
