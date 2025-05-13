@@ -72,9 +72,10 @@ module BYTES-SIMPLIFICATIONS
 ## substrBytes Lemmas
 
 ```k
-  rule [substr-bytes-length]: lengthBytes(substrBytes(_, I, N)) => N -Int I [simplification, preserves-definedness]
+  rule [substr-bytes-length]: lengthBytes(substrBytes(B, I, N)) => N -Int I 
+    requires I +Int N <=Int lengthBytes(B)  [simplification, preserves-definedness]
   rule [substr-substr]: substrBytes(substrBytes(B, I, _), I0, N0) => substrBytes(B, I +Int I0, I +Int N0) 
-    requires I +Int N0 <=Int lengthBytes(B) [simplification, preserves-definedness]
+    requires N0 <=Int N -Int I              [simplification, preserves-definedness]
 ```
 
 ```k
