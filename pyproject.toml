@@ -17,6 +17,9 @@ kriscv-asm = "kriscv.devtools:kriscv_asm"
 [tool.poetry.plugins.kdist]
 riscv-semantics = "kriscv.kdist.plugin"
 
+[tool.poetry.plugins.kprovex]
+riscv = "kriscv.symtools:KRiscVPlugin"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 kframework = "7.1.257"
