@@ -77,6 +77,14 @@ module BYTES-SIMPLIFICATIONS
     requires I +Int N0 <=Int lengthBytes(B) [simplification, preserves-definedness]
 ```
 
+## Bytes lookup Lemmas
+
+```k
+  rule [bytes-lookup-range]: (W:Bytes)[I:Int] => X?:Int 
+    ensures W[I] ==Int X? andBool 0 <=Int X? andBool X? <Int 256 [simplification, symbolic(W)]
+```
+
+
 ## Bytes2Int Lemmas
 
 ```k
