@@ -48,6 +48,20 @@ module INT-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
 ```
 
+### |Int for Bytes
+
+```k
+  rule [int-or-bytes-1]: Bytes2Int(b"\x00" +Bytes X, LE, Unsigned) |Int Bytes2Int(Y, LE, Unsigned) => Bytes2Int(Y +Bytes X, LE, Unsigned)
+    requires lengthBytes(Y) ==Int 1
+    [simplification, preserves-definedness]
+  rule [int-or-bytes-2]: Bytes2Int(b"\x00\x00" +Bytes X, LE, Unsigned) |Int Bytes2Int(Y, LE, Unsigned) => Bytes2Int(Y +Bytes X, LE, Unsigned)
+    requires lengthBytes(Y) ==Int 2
+    [simplification, preserves-definedness]
+  rule [int-or-bytes-3]: Bytes2Int(b"\x00\x00\x00" +Bytes X, LE, Unsigned) |Int Bytes2Int(Y, LE, Unsigned) => Bytes2Int(Y +Bytes X, LE, Unsigned)
+    requires lengthBytes(Y) ==Int 3
+    [simplification, preserves-definedness]
+```
+
 ```k
 endmodule
 ```
