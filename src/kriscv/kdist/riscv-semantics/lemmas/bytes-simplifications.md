@@ -63,9 +63,9 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 ## Bytes Length Lemmas
 
 ```k
-  rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N [simplification]
+  rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N [simplification, preserves-definedness]
   rule [bytes-length-substr]: lengthBytes(substrBytes(_, I, N)) => N -Int I [simplification, preserves-definedness]
-  rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) [simplification]
+  rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) [simplification, preserves-definedness]
 ```
 
 ## Bytes Substr Lemmas
@@ -76,7 +76,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
   rule [substr-concat-1]: substrBytes(A +Bytes _, I, J) => substrBytes(A, I, J)
     requires J <Int lengthBytes(A)
     [simplification, preserves-definedness]
-  rule [substr-concat-2]: substrBytes(A +Bytes B, I, J) => A +Bytes substrBytes(B, I -Int lengthBytes(A), J -Int lengthBytes(A))
+  rule [substr-concat-2]: substrBytes(A +Bytes B, I, J) => A +Bytes substrBytes(B, 0, J -Int lengthBytes(A))
     requires I <Int lengthBytes(A) andBool lengthBytes(A) <=Int J
     [simplification, preserves-definedness]
   rule [substr-concat-3]: substrBytes(A +Bytes B, I, J) => substrBytes(B, I -Int lengthBytes(A), J -Int lengthBytes(A))
@@ -93,6 +93,15 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     requires 2 ^Int lengthBytes(B) <=Int X
     [simplification, preserves-definedness]
   rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, LE, Unsigned) => true [simplification, preserves-definedness]
+
+  rule [int2bytes-bytes2int-0]: Int2Bytes(Num, Bytes2Int(B, LE, Unsigned), LE) => substrBytes(B, 0, Num)
+    [simplification(45), preserves-definedness]
+  //rule [int2bytes-bytes2int-1]: Int2Bytes(Num, Bytes2Int(B, LE, Unsigned), LE) => substrBytes(B, 0, Num)
+  //  requires Num <Int lengthBytes(B)
+  //  [simplification(55), preserves-definedness]
+  // rule [int2bytes-bytes2int-concat]: Int2Bytes(Num, Bytes2Int(B1 +Bytes B2, LE, Unsigned), LE) => B1 +Bytes Int2Bytes(Num -Int lengthBytes(B1), Bytes2Int(B2, LE, Unsigned), LE)
+  //  requires lengthBytes(B1) <Int Num
+  //  [simplification, preserves-definedness]
 ```
 
 ```k
