@@ -14,14 +14,13 @@ module INT-SPEC
      5 |-> (W(W2 <<Int 16 &Int 4294967295) => W(W2 <<Int 16))
      6 |-> (W(b"\x12"[0] <<Int 16 &Int 4294967295) => W(1179648))
      7 |-> (W(Bytes2Int(b"\x00\x00\x12", LE, Unsigned)) => W(1179648))
-     // 6 |-> (W(W3:Bytes [0] <<Int 16 &Int 4294967295) => W(W3[0] <<Int 16))
-     // 7 |-> (W( W3:Bytes [ 1 ] <<Int 16 &Int 4294967295) => W(W3:Bytes [ 1 ] <<Int 16))
+     8 |-> (W(Bytes2Int(W3, LE, Unsigned) &Int 4294967295) => W(Bytes2Int(W3, LE, Unsigned)))
+     9 |-> (W(W3[0] <<Int 16 &Int 4294967295) => W(Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 0, 1 ), LE, Unsigned)))
     </regs>
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
     </test>
-requires 0 <=Int W1 andBool W1 <Int 4294967295
+requires 0 <=Int W1 andBool W1 <Int 4294967296
  andBool 0 <=Int W2 andBool W2 <Int 256
- andBool 0 <=Int W3[0] andBool W3[0] <Int 256
  andBool lengthBytes(W3) ==Int 32
 endmodule

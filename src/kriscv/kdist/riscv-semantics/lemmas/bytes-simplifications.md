@@ -60,19 +60,17 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 ```
 
 
-## Int2Bytes Lemmas
+## Bytes Length Lemmas
 
 ```k
-  rule [int2bytes-length]:
-    lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N
-    [simplification]
-
+  rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N [simplification]
+  rule [bytes-length-substr]: lengthBytes(substrBytes(_, I, N)) => N -Int I [simplification, preserves-definedness]
+  rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) [simplification]
 ```
 
-## substrBytes Lemmas
+## Bytes Substr Lemmas
 
 ```k
-  rule [substr-bytes-length]: lengthBytes(substrBytes(_, I, N)) => N -Int I [simplification, preserves-definedness]
   rule [substr-substr]: substrBytes(substrBytes(B, I, _), I0, N0) => substrBytes(B, I +Int I0, I +Int N0) 
     requires I +Int N0 <=Int lengthBytes(B) [simplification, preserves-definedness]
 ```
@@ -82,6 +80,10 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 ```k
   rule [bytes2int-substr-ff00]: Bytes2Int (substrBytes(B, S, _E), LE, Unsigned) &Int 65280 => B[S +Int 1] <<Int 8
     [simplification, preserves-definedness]
+  rule [bytes2int-upperbound]: Bytes2Int(B, LE, Unsigned) <Int X => true
+    requires 2 ^Int lengthBytes(B) <=Int X
+    [simplification, preserves-definedness]
+  rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, LE, Unsigned) => true [simplification, preserves-definedness]
 ```
 
 ```k

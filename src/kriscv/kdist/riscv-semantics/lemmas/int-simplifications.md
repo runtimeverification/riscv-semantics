@@ -18,9 +18,6 @@ module INT-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   rule [int-lsh-non-negative]: 0 <=Int (X <<Int Y) => true
     requires 0 <=Int X andBool 0 <=Int Y [simplification]
-  // rule [int-lsh-less-than-32bits-bytes-update]: (_:Bytes[_:Int] <<Int Y) <Int 4294967296 => true
-  //   requires 0 <=Int Y andBool Y <Int 32 andBool 256 <Int 2 ^Int (32 -Int Y)
-  //   [simplification, preserves-definedness]
 ```
 
 ## Chop Lemmas
@@ -34,9 +31,9 @@ module INT-SIMPLIFICATIONS [symbolic]
 ### Shift Left for Bytes
 
 ```k
-  // rule [int-lsh-bytes-lookup]: B:Bytes[I:Int] <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes substrBytes(B, I, I +Int 1), LE, Unsigned)
-  //   requires 0 <=Int Y andBool Y modInt 8 ==Int 0
-  //   [simplification, preserves-definedness]
+  rule [int-lsh-bytes-lookup]: B:Bytes[I:Int] <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes substrBytes(B, I, I +Int 1), LE, Unsigned)
+    requires 0 <=Int Y andBool Y modInt 8 ==Int 0
+    [simplification, preserves-definedness]
 ```
 
 ```k
