@@ -1,7 +1,7 @@
 # Int Simplifications
 
 ```k
-module INT-SIMPLIFICATIONS
+module INT-SIMPLIFICATIONS [symbolic]
   imports INT
   imports BYTES
   imports K-EQUAL
@@ -13,20 +13,30 @@ module INT-SIMPLIFICATIONS
 ```k
   rule [int-lsh-lsh]: (W0 <<Int N0) <<Int N1 => W0 <<Int (N0 +Int N1)
     [simplification, preserves-definedness]
-  rule [int-lsh-less-than-32bits]: (X <<Int Y) <Int 4294967295 => true
+  rule [int-lsh-less-than-32bits]: (X <<Int Y) <Int 4294967296 => true
     requires 0 <=Int X andBool 0 <=Int Y andBool Y <Int 32 andBool X <Int 2 ^Int (32 -Int Y)
     [simplification, preserves-definedness]
   rule [int-lsh-non-negative]: 0 <=Int (X <<Int Y) => true
     requires 0 <=Int X andBool 0 <=Int Y [simplification]
-  rule [int-lsh-less-than-32bits-bytes-update]: (B[I] <<Int Y) <Int 4294967295 => true
-    requires 0 <=Int I andBool I <Int lengthBytes(B) andBool 0 <=Int Y andBool 256 <Int 2 ^Int (32 -Int Y)
-    [simplification, preserves-definedness]
+  // rule [int-lsh-less-than-32bits-bytes-update]: (_:Bytes[_:Int] <<Int Y) <Int 4294967296 => true
+  //   requires 0 <=Int Y andBool Y <Int 32 andBool 256 <Int 2 ^Int (32 -Int Y)
+  //   [simplification, preserves-definedness]
 ```
 
 ## Chop Lemmas
 
 ```k
-  rule [chop-32bits]: X &Int 4294967295 => X requires 0 <=Int X andBool X <Int 4294967295 [simplification]
+  rule [chop-32bits]: X &Int 4294967295 => X requires 0 <=Int X andBool X <Int 4294967296 [simplification]
+```
+
+## Int Expression Simplifications for Bytes
+
+### Shift Left for Bytes
+
+```k
+  // rule [int-lsh-bytes-lookup]: B:Bytes[I:Int] <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes substrBytes(B, I, I +Int 1), LE, Unsigned)
+  //   requires 0 <=Int Y andBool Y modInt 8 ==Int 0
+  //   [simplification, preserves-definedness]
 ```
 
 ```k

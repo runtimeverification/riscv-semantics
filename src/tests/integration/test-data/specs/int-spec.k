@@ -12,8 +12,10 @@ module INT-SPEC
      3 |-> (W(W0 <<Int 8 <<Int 8) => W(W0 <<Int 16))
      4 |-> (W(W1 &Int 4294967295) => W(W1))
      5 |-> (W(W2 <<Int 16 &Int 4294967295) => W(W2 <<Int 16))
-     6 |-> (W(W3:Bytes [0] <<Int 16 &Int 4294967295) => W(W3[0] <<Int 16))
-     7 |-> (W( W3:Bytes [ 1 ] <<Int 16 &Int 4294967295) => W(W3:Bytes [ 1 ] <<Int 16))
+     6 |-> (W(b"\x12"[0] <<Int 16 &Int 4294967295) => W(1179648))
+     7 |-> (W(Bytes2Int(b"\x00\x00\x12", LE, Unsigned)) => W(1179648))
+     // 6 |-> (W(W3:Bytes [0] <<Int 16 &Int 4294967295) => W(W3[0] <<Int 16))
+     // 7 |-> (W( W3:Bytes [ 1 ] <<Int 16 &Int 4294967295) => W(W3:Bytes [ 1 ] <<Int 16))
     </regs>
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>

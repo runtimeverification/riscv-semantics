@@ -3,7 +3,7 @@
 ## Preliminaries
 
 ```k
-module BYTES-SIMPLIFICATIONS
+module BYTES-SIMPLIFICATIONS [symbolic]
   imports BYTES
   imports INT
   imports K-EQUAL
@@ -76,14 +76,6 @@ module BYTES-SIMPLIFICATIONS
   rule [substr-substr]: substrBytes(substrBytes(B, I, _), I0, N0) => substrBytes(B, I +Int I0, I +Int N0) 
     requires I +Int N0 <=Int lengthBytes(B) [simplification, preserves-definedness]
 ```
-
-## Bytes lookup Lemmas
-
-```k
-  rule [bytes-lookup-range]: (W:Bytes)[I:Int] => X?:Int 
-    ensures W[I] ==Int X? andBool 0 <=Int X? andBool X? <Int 256 [simplification, symbolic(W)]
-```
-
 
 ## Bytes2Int Lemmas
 
