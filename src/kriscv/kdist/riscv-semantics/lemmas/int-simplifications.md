@@ -35,6 +35,20 @@ module INT-SIMPLIFICATIONS [symbolic]
   rule [int-lsh-bytes-lookup]: B:Bytes[I:Int] <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes substrBytes(B, I, I +Int 1), LE, Unsigned)
     requires 0 <=Int Y andBool Y modInt 8 ==Int 0
     [simplification, preserves-definedness]
+  rule [int-lsh-bytes2int]: Bytes2Int(B, LE, Unsigned) <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes B, LE, Unsigned)
+    requires 0 <=Int Y andBool Y modInt 8 ==Int 0
+    [simplification, preserves-definedness]
+```
+
+### Shift Right for Bytes
+
+```k
+  rule [int-rsh-substrbytes]: Bytes2Int(substrBytes(B, I, J), LE, Unsigned) >>Int Y => Bytes2Int(substrBytes(B, I +Int Y /Int 8, J), LE, Unsigned)
+    requires 0 <=Int Y andBool Y modInt 8 ==Int 0 andBool I +Int Y /Int 8 <Int J
+    [simplification, preserves-definedness]
+  rule [int-rsh-substrbytes-0]: Bytes2Int(substrBytes(_, I, J), LE, Unsigned) >>Int Y => 0
+    requires 0 <=Int Y andBool Y modInt 8 ==Int 0 andBool I +Int Y /Int 8 ==Int J
+    [simplification, preserves-definedness]
 ```
 
 ```k
