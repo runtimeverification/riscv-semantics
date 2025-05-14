@@ -15,6 +15,10 @@ module SPARSE-BYTES-SIMPLIFICATIONS
 For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _` and `#bytes(B +Bytes BS) EF` to obtain as exact as possible values for `pickFront`.
 
 ```k
+  rule pickFront(#bytes(substrBytes(B, I, J) +Bytes _) _ , J0) => substrBytes(substrBytes(B, I, J), 0, J0)
+    requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
+     andBool J0 <=Int lengthBytes(substrBytes(B, I, J))
+  [simplification(44), preserves-definedness]
   rule pickFront(#bytes(B +Bytes _) _ , I) => substrBytes(B, 0, I)
     requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45)]
   rule pickFront(#bytes(B +Bytes BS) EF, I) => B +Bytes pickFront(#bytes(BS) EF, I -Int lengthBytes(B))
