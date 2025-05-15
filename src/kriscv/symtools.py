@@ -12,10 +12,23 @@ from pyk.kcfg.explore import KCFGExplore
 from pyk.ktool.kprove import KProve
 from pyk.proof.reachability import APRProof
 
+from .kprovex.api import Dist, Plugin
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
 
     from pyk.utils import BugReport
+
+
+class KRiscVPlugin(Plugin):
+    def dist(self) -> Dist:
+        from pyk.kdist import kdist
+
+        return Dist(
+            haskell_dir=kdist.get('riscv-semantics.haskell'),
+            llvm_lib_dir=kdist.get('riscv-semantics.llvm-lib'),
+            source_dirs=(kdist.get('riscv-semantics.source'),),
+        )
 
 
 @dataclass
