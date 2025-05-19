@@ -72,7 +72,7 @@ module BYTES-SIMPLIFICATIONS
 ## substrBytes Lemmas
 
 ```k
-  rule [substr-bytes-length]: lengthBytes(substrBytes(B, I, J)) => J -Int I 
+  rule [substr-bytes-length]: lengthBytes(substrBytes(B:Bytes, I, J)) => J -Int I 
     requires 0 <=Int I
      andBool I <=Int J
      andBool J <=Int lengthBytes(B)

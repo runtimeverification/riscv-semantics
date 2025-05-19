@@ -14,5 +14,5 @@ module SIGNEXTEND
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
     </test>
-// requires lengthBytes(W0) ==Int 32
+  requires lengthBytes(W0) ==Int 32
 endmodule
