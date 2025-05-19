@@ -103,6 +103,14 @@ module BYTES-SIMPLIFICATIONS
     [simplification, preserves-definedness]
 ```
 
+## ReplaceAtBytes Lemmas
+
+```k
+  rule [replace-at-bytes]: replaceAtBytes(B0, I, B1) => substrBytes(B0, 0, I) +Bytes B1 +Bytes substrBytes(B0, I +Int lengthBytes(B1), lengthBytes(B0))
+    requires I +Int lengthBytes(B1) <Int lengthBytes(B0)
+    [simplification, preserves-definedness]
+```
+
 ```k
 endmodule
 ```
