@@ -261,13 +261,13 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word readReg(REGS, RS2) &Word W(XLEN -Int 1)) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word (readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
 
   rule <instrs> SRL RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord readReg(REGS, RS2) &Word W(XLEN -Int 1)) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord (readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
 
   rule <instrs> SRA RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord readReg(REGS, RS2) &Word W(XLEN -Int 1)) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord (readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
 ```
 `JAL` stores `PC + 4` in `RD`, then increments `PC` by `OFFSET`.
 ```k
