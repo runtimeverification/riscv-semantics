@@ -198,12 +198,15 @@ We then provide rules to consume and execute each instruction from the top of th
 ```k
   rule <instrs> SLLI RD , RS , SHAMT => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) <<Word SHAMT) </regs>
+    requires 0 <=Int SHAMT
 
   rule <instrs> SRLI RD , RS , SHAMT => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>lWord SHAMT) </regs>
+    requires 0 <=Int SHAMT
 
   rule <instrs> SRAI RD , RS , SHAMT => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>aWord SHAMT) </regs>
+    requires 0 <=Int SHAMT
 ```
 `LUI` builds a 32-bit constant from the 20-bit immediate by setting the 12 least-significant bits to `0`, then sign extends to `XLEN` bits and places the result in register `RD`.
 ```k
