@@ -64,23 +64,23 @@ The `s` prefix denotes a signed operation while `u` denotes an unsigned operatio
 To avoid syntax conflicts, we define the following syntax with `left` associativity and clear precedence over the bitwise operations.
 ```k
   syntax Word ::= left:
-                  Word "*Word" Word [function, total, symbol(mulWord)]
-                | Word "*hWord" Word [function, total, symbol(mulhWord)]
-                | Word "*huWord" Word [function, total, symbol(mulhuWord)]
+                  Word "*Word"    Word [function, total, symbol(mulWord)]
+                | Word "*hWord"   Word [function, total, symbol(mulhWord)]
+                | Word "*huWord"  Word [function, total, symbol(mulhuWord)]
                 | Word "*hsuWord" Word [function, total, symbol(mulhsuWord)]
                 > left:
-                  Word "+Word" Word [function, total, symbol(addWord)]
-                | Word "-Word" Word [function, total, symbol(subWord)]
+                  Word "+Word"    Word [function, total, symbol(addWord)]
+                | Word "-Word"    Word [function, total, symbol(subWord)]
                 > left:
-                  Word ">>lWord" Word [function, total, symbol(rshWord)]
-                | Word ">>aWord" Word [function, total, symbol(ashWord)]
-                | Word "<<Word" Word [function, total, symbol(lshWord)]
+                  Word ">>lWord"  Word [function, total, symbol(rshWord)]
+                | Word ">>aWord"  Word [function, total, symbol(ashWord)]
+                | Word "<<Word"   Word [function, total, symbol(lshWord)]
                 > left:
-                  Word "&Word" Word [function, total, symbol(andWord)]
+                  Word "&Word"    Word [function, total, symbol(andWord)]
                 > left:
-                  Word "xorWord" Word [function, total, symbol(xorWord)]
+                  Word "xorWord"  Word [function, total, symbol(xorWord)]
                 > left:
-                  Word "|Word" Word [function, total, symbol(orWord)]
+                  Word "|Word"    Word [function, total, symbol(orWord)]
 ```
 
 Note that two's complement enables us to use a single addition or subtraction operation for both signed and unsigned values.
