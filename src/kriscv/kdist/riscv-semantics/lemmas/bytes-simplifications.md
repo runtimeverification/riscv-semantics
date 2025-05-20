@@ -81,33 +81,16 @@ module BYTES-SIMPLIFICATIONS
     requires 0 <=Int I  andBool I  <=Int J  andBool J  <=Int lengthBytes(B)
      andBool 0 <=Int I0 andBool I0 <=Int J0 andBool J0 <=Int J -Int I
   [simplification, preserves-definedness]
-  rule [substr-concat-0]: substrBytes(A +Bytes _, I, J) => substrBytes(A, I, J)
-    requires J <=Int lengthBytes(A)
-    [simplification, preserves-definedness]
-  rule [substr-concat-1]: substrBytes(A +Bytes B, I, J) => substrBytes(A, I, lengthBytes(A)) +Bytes substrBytes(B, 0, J -Int lengthBytes(A))
-    requires I <Int lengthBytes(A) andBool lengthBytes(A) <Int J
-    [simplification, preserves-definedness]
-  rule [substr-concat-2]: substrBytes(A +Bytes B, I, J) => substrBytes(B, I -Int lengthBytes(A), J -Int lengthBytes(A))
-    requires lengthBytes(A) <=Int I
-    [simplification, preserves-definedness]
-```
-
-## Bytes2Int Lemmas
-
-```k
-  rule [bytes2int-substr-ff00-0]: Bytes2Int (substrBytes(B, I, J), LE, Unsigned) &Int 65280 => 0
-    requires 0 <=Int I andBool I <=Int J andBool J <=Int I +Int 1 andBool J <=Int lengthBytes(B)
-    [simplification, preserves-definedness]
-  rule [bytes2int-substr-ff00-1]: Bytes2Int (substrBytes(B, I, J), LE, Unsigned) &Int 65280 => B[I +Int 1] <<Int 8
-    requires 0 <=Int I andBool I +Int 1 <Int J andBool J <=Int lengthBytes(B)
-    [simplification, preserves-definedness]
+  rule [substr-bytes-eq-ij]: substrBytes(B, I, J) => b""
+    requires I ==Int J andBool 0 <=Int I andBool J <=Int lengthBytes(B)
+  [simplification, preserves-definedness]
 ```
 
 ## ReplaceAtBytes Lemmas
 
 ```k
-  rule [replace-at-bytes]: replaceAtBytes(B0, I, B1) => substrBytes(B0, 0, I) +Bytes B1 +Bytes substrBytes(B0, I +Int lengthBytes(B1), lengthBytes(B0))
-    requires I +Int lengthBytes(B1) <Int lengthBytes(B0)
+  rule [replace-at-bytes]: replaceAtBytes(B0:Bytes, I:Int, B1:Bytes) => substrBytes(B0, 0, I) +Bytes B1 +Bytes substrBytes(B0, I +Int lengthBytes(B1), lengthBytes(B0))
+    requires 0 <=Int I andBool I +Int lengthBytes(B1) <=Int lengthBytes(B0)
     [simplification, preserves-definedness]
 ```
 
