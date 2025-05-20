@@ -929,14 +929,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "kframework"
-version = "7.1.255"
+version = "7.1.256"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "kframework-7.1.255-py3-none-any.whl", hash = "sha256:2c414b1529ae813db5c4f9b123c7b2b5feffa90771b0f2ce31945f4241bfbc2a"},
-    {file = "kframework-7.1.255.tar.gz", hash = "sha256:14594e34d03389a10893e05d5e4b5e8e9af3e76205cea8035cb9a3f2ebe1ba93"},
+    {file = "kframework-7.1.256-py3-none-any.whl", hash = "sha256:1a072ae190fd0edd06c629cae9408d4e222c7728d3ca4686b6baf1b364da8202"},
+    {file = "kframework-7.1.256.tar.gz", hash = "sha256:11f75b1f21e7fdb1a045c9657a3602715f5808c098d2f1b9e8a91e7a5f4a25a2"},
 ]
 
 [package.dependencies]
@@ -2159,4 +2159,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "0c5f3106bfd3b7a482fcc3413301ea34305c2a74c4647806e011118b89aa7380"
+content-hash = "33b7e4c563d746c71ebebaeee676f64c08a48f2a36fb0325c68285b09c43c122"
