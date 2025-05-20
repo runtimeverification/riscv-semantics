@@ -20,14 +20,14 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
      andBool J0 <=Int lengthBytes(substrBytes(B, I, J))
   [simplification(44), preserves-definedness]
   rule pickFront(#bytes(B +Bytes _) _ , I) => substrBytes(B, 0, I)
-    requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45)]
+    requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45), preserves-definedness]
   rule pickFront(#bytes(B +Bytes BS) EF, I) => B +Bytes pickFront(#bytes(BS) EF, I -Int lengthBytes(B))
-    requires I >Int lengthBytes(B)                      [simplification(45)]
+    requires I >Int lengthBytes(B)                      [simplification(45), preserves-definedness]
 
   rule dropFront(#bytes(B +Bytes BS) EF , I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B)) +Bytes BS) EF, 0) 
-    requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45)]
+    requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45), preserves-definedness]
   rule dropFront(#bytes(B +Bytes BS) EF, I) => dropFront(#bytes(BS) EF, I -Int lengthBytes(B)) 
-    requires I >=Int lengthBytes(B)                     [simplification(45)]
+    requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
 ```
 
 
