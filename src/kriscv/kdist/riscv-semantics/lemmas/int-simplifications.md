@@ -44,10 +44,7 @@ module INT-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [int-rsh-substrbytes]: Bytes2Int(substrBytes(B, I, J), LE, Unsigned) >>Int Y => Bytes2Int(substrBytes(B, I +Int Y /Int 8, J), LE, Unsigned)
-    requires 0 <=Int Y andBool Y modInt 8 ==Int 0 andBool I +Int Y /Int 8 <Int J
-    [simplification, preserves-definedness]
-  rule [int-rsh-substrbytes-0]: Bytes2Int(substrBytes(_, I, J), LE, Unsigned) >>Int Y => 0
-    requires 0 <=Int Y andBool Y modInt 8 ==Int 0 andBool I +Int Y /Int 8 ==Int J
+    requires 0 <=Int Y andBool Y modInt 8 ==Int 0 andBool I +Int Y /Int 8 <=Int J
     [simplification, preserves-definedness]
 ```
 
