@@ -17,7 +17,7 @@ module INT-SPEC
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
     </test>
-requires 0 <=Int W1 andBool W1 <Int 4294967295
+requires 0 <=Int W1 andBool W1 <Int 4294967296
  andBool 0 <=Int W2 andBool W2 <Int 256
  andBool lengthBytes(W3) ==Int 32
 endmodule
