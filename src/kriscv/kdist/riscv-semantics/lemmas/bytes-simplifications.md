@@ -83,6 +83,17 @@ module BYTES-SIMPLIFICATIONS
   [simplification, preserves-definedness]
 ```
 
+## Bytes2Int Lemmas
+
+```k
+  rule [bytes2int-substr-ff00-0]: Bytes2Int (substrBytes(B, I, J), LE, Unsigned) &Int 65280 => 0
+    requires 0 <=Int I andBool I <=Int J andBool J <=Int I +Int 1 andBool J <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
+  rule [bytes2int-substr-ff00-1]: Bytes2Int (substrBytes(B, I, J), LE, Unsigned) &Int 65280 => B[I +Int 1] <<Int 8
+    requires 0 <=Int I andBool I +Int 1 <Int J andBool J <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
+```
+
 ```k
 endmodule
 ```
