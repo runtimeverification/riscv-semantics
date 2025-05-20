@@ -111,6 +111,13 @@ module BYTES-SIMPLIFICATIONS [symbolic]
   rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, _, Unsigned) => true [simplification]
 ```
 
+## PadBytes
+
+```k
+  rule [simp-padleftbytes]: padLeftBytes(B, L, V) => padLeftBytes(.Bytes, L, V) +Bytes B
+    [simplification, preserves-definedness, concrete(L,V), symbolic(B)]
+```
+
 ```k
 endmodule
 ```
