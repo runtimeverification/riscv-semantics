@@ -63,13 +63,16 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 ## Bytes Length Lemmas
 
 ```k
-  rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N [simplification]
+  rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N 
+    [simplification]   
   rule [bytes-length-substr]: lengthBytes(substrBytes(B, I, J)) => J -Int I
-    requires 0 <=Int I
-     andBool I <=Int J
-     andBool J <=Int lengthBytes(B)
+    requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
     [simplification, preserves-definedness]
-  rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) [simplification]
+  rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) 
+    [simplification]
+  rule [substr-bytes-length]: lengthBytes(substrBytes(B, I, J)) => J -Int I 
+    requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
 ```
 
 ## Bytes Substr Lemmas
