@@ -64,7 +64,11 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N [simplification]
-  rule [bytes-length-substr]: lengthBytes(substrBytes(_, I, N)) => N -Int I [simplification, preserves-definedness]
+  rule [bytes-length-substr]: lengthBytes(substrBytes(B, I, J)) => J -Int I
+    requires 0 <=Int I
+     andBool I <=Int J
+     andBool J <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
   rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) [simplification]
 ```
 
