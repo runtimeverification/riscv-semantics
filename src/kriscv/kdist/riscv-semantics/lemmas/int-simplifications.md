@@ -10,6 +10,7 @@ module INT-SIMPLIFICATIONS
 
 ```k
   rule [int-lsh-lsh]: (W0 <<Int N0) <<Int N1 => W0 <<Int (N0 +Int N1)
+    requires 0 <=Int N0 andBool 0 <=Int N1
     [simplification, preserves-definedness]
 ```
 
