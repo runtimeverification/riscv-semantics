@@ -82,7 +82,7 @@ module BYTES-SIMPLIFICATIONS
      andBool 0 <=Int I0 andBool I0 <=Int J0 andBool J0 <=Int J -Int I
   [simplification, preserves-definedness]
   rule [substr-concat-0]: substrBytes(A +Bytes _, I, J) => substrBytes(A, I, J)
-    requires J <Int lengthBytes(A)
+    requires J <=Int lengthBytes(A)
     [simplification, preserves-definedness]
   rule [substr-concat-1]: substrBytes(A +Bytes B, I, J) => substrBytes(A, I, lengthBytes(A)) +Bytes substrBytes(B, 0, J -Int lengthBytes(A))
     requires I <Int lengthBytes(A) andBool lengthBytes(A) <=Int J
