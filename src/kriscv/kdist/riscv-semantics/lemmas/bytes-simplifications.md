@@ -101,7 +101,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 ```k
   rule [bytes2int-substr-ff00]: Bytes2Int (substrBytes(B, S, _E), LE, Unsigned) &Int 65280 => B[S +Int 1] <<Int 8
     [simplification, preserves-definedness]
-  rule [bytes2int-upperbound]: Bytes2Int(B, LE, Unsigned) <Int X => true
+  rule [bytes2int-upperbound]: Bytes2Int(B, _, _) <Int X => true
     requires 2 ^Int lengthBytes(B) <=Int X
     [simplification, preserves-definedness]
   rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, LE, Unsigned) => true [simplification, preserves-definedness]
