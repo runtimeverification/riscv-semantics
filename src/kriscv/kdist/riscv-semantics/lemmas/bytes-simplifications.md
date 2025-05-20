@@ -70,9 +70,6 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) 
     [simplification]
-  rule [substr-bytes-length]: lengthBytes(substrBytes(B, I, J)) => J -Int I 
-    requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
-    [simplification, preserves-definedness]
 ```
 
 ## Bytes Substr Lemmas
