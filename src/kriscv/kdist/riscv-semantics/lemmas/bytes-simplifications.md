@@ -99,8 +99,6 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 ## Bytes2Int Lemmas
 
 ```k
-  rule [bytes2int-substr-ff00]: Bytes2Int (substrBytes(B, S, _E), LE, Unsigned) &Int 65280 => B[S +Int 1] <<Int 8
-    [simplification, preserves-definedness]
   rule [bytes2int-upperbound]: Bytes2Int(B, _, _) <Int X => true
     requires 2 ^Int lengthBytes(B) <=Int X
     [simplification]
