@@ -19,6 +19,5 @@ module INT-SPEC
     </test>
 requires 0 <=Int W1 andBool W1 <Int 4294967295
  andBool 0 <=Int W2 andBool W2 <Int 256
- andBool 0 <=Int W3[0] andBool W3[0] <Int 256
  andBool lengthBytes(W3) ==Int 32
 endmodule
