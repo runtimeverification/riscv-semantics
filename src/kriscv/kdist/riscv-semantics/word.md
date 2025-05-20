@@ -90,7 +90,7 @@ Note that two's complement enables us to use a single addition or subtraction op
 ```
 The same is true for the `XLEN` least-significant bits of the result of multiplication.
 ```k
-  rule W(I1) *Word W(I2) => chop(I1 *Int I2) 
+  rule W(I1) *Word W(I2) => chop(I1 *Int I2)
 ```
 The value of the upper `XLEN` bits however depends on signedness of the operands, as reflected by the followig functions.
 ```k
