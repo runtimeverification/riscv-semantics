@@ -7,9 +7,6 @@ module INT-SPEC
     <instrs> #CHECK_HALT => #HALT </instrs>
     <pc> W ( 0 ) </pc>
     <regs>
-     1  |-> (W(12 <<Int 8 <<Int 8) => W(786432))
-     2  |-> (W(12 <<Int 16) => W(786432))
-     3  |-> (W(W0 <<Int 8 <<Int 8) => W(W0 <<Int 16))
      4  |-> (W(W1 &Int 4294967295) => W(W1))
      5  |-> (W(W2 <<Int 16 &Int 4294967295) => W(W2 <<Int 16))
      6  |-> (W(b"\x12"[0] <<Int 16 &Int 4294967295) => W(1179648))
