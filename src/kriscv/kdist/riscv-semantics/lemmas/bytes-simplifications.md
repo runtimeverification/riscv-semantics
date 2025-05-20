@@ -102,7 +102,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
   rule [bytes2int-upperbound]: Bytes2Int(B, _, _) <Int X => true
     requires 2 ^Int lengthBytes(B) <=Int X
     [simplification]
-  rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, LE, Unsigned) => true [simplification, preserves-definedness]
+  rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, _, Unsigned) => true [simplification]
 ```
 
 ```k
