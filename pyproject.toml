@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kriscv"
-version = "0.1.78"
+version = "0.1.79"
 description = "K tooling for the RISC-V architecture"
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -19,12 +19,11 @@ riscv-semantics = "kriscv.kdist.plugin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-kframework = "7.1.249"
-pyyaml = "^6.0.1"
-types-pyyaml = "^6.0.12.20240311"
+kframework = "7.1.256"
 filelock = "^3.14.0"
-riscof = "^1.25.3"
 pyelftools = "^0.26"
+pyyaml = "^6.0.1"
+riscof = "^1.25.3"
 riscv-assembler = "^1.2.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -43,6 +42,7 @@ pytest-cov = "*"
 pytest-mock = "*"
 pytest-xdist = "*"
 pyupgrade = "*"
+types-pyyaml = "^6.0.12.20240311"
 
 [tool.isort]
 profile = "black"
