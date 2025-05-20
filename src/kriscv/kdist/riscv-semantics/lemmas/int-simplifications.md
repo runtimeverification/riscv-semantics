@@ -4,6 +4,7 @@
 module INT-SIMPLIFICATIONS
   imports INT
   imports K-EQUAL
+  imports BOOL
 ```
 
 ## Shift Lemmas
