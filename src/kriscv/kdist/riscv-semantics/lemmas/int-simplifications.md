@@ -32,7 +32,7 @@ module INT-SIMPLIFICATIONS [symbolic]
 ### Shift Left for Bytes
 
 ```k
-  rule [int-lsh-bytes-lookup]: B:Bytes[I:Int] <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes substrBytes(B, I, I +Int 1), LE, Unsigned)
+  rule [int-lsh-bytes-lookup]: B:Bytes[I:Int] <<Int Y => Bytes2Int(padLeftBytes(substrBytes(B, I, I +Int 1), Y /Int 8, 0), LE, Unsigned)
     requires 0 <=Int Y andBool Y modInt 8 ==Int 0
     [simplification, preserves-definedness]
   rule [int-lsh-bytes2int]: Bytes2Int(B, LE, Unsigned) <<Int Y => Bytes2Int(padRightBytes(.Bytes, Y /Int 8, 0) +Bytes B, LE, Unsigned)
