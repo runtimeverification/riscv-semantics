@@ -13,7 +13,7 @@ module BYTES-INT
      4 |-> (W(Bytes2Int(substrBytes(b"\x01\x02", 0, 1), LE, Unsigned) &Int 65280) => W(0))
      5 |-> (W(Bytes2Int(substrBytes(W0, 0, 1), LE, Unsigned) &Int 65280) => W(0))
      6 |-> (W(Bytes2Int(substrBytes( W0 +Bytes b"\x12\x34\x56\x78", 0, 4), LE, Unsigned)) => W(Bytes2Int(substrBytes( W0, 0, 4), LE, Unsigned)))
-     7 |-> (W(Bytes2Int(substrBytes( W0 +Bytes b"\x01\x00\x00\x00", 32, 36), LE, Unsigned)) => W(1))
+     7 |-> (W(Bytes2Int(substrBytes( W0 +Bytes b"\x01\x00\x00\x00", 32, 36), LE, Unsigned)) => W(1)) 
     </regs>
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
