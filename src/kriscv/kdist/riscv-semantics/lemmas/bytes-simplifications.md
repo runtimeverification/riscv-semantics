@@ -82,8 +82,8 @@ module BYTES-SIMPLIFICATIONS
   rule [substr-bytes-eq-ij]: substrBytes(B, I, I) => b""
     requires 0 <=Int I andBool I <=Int lengthBytes(B)
   [simplification, preserves-definedness]
-  rule [substr-bytes-self]: substrBytes(B, I, J) => B
-    requires I ==Int 0 andBool J ==Int lengthBytes(B)
+  rule [substr-bytes-self]: substrBytes(B, 0, J) => B
+    requires J ==Int lengthBytes(B)
     [simplification, preserves-definedness]
   rule [substr-concat-0]: substrBytes(A +Bytes _, I, J) => substrBytes(A, I, J)
     requires J <=Int lengthBytes(A)
