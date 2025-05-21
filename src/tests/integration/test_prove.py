@@ -65,7 +65,9 @@ def test_specs(
     )
 
     proof_show_file = temp_dir / f'{spec_file.stem}-proof.txt'
-    proof_show_lines = APRProofShow(symtools.kprove).show(proof, nodes=[node.id for node in proof.kcfg.nodes])
+    proof_show_lines = APRProofShow(symtools.kprove.definition).show(
+        proof, nodes=[node.id for node in proof.kcfg.nodes]
+    )
     proof_show_file.write_text('\n'.join(proof_show_lines))
 
     # Then
