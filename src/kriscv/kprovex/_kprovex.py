@@ -10,7 +10,6 @@ from pyk.proof.reachability import APRProof, APRProver
 from .api import Config
 
 if TYPE_CHECKING:
-    from pyk.kcfg import KCFG
     from pyk.proof import ProofStatus
     from pyk.proof.show import APRProofNodePrinter
     from pyk.utils import BugReport
@@ -115,7 +114,7 @@ class KProveX:
 
         proof = self._load_proof(proof_id)
         node_printer = self._proof_node_printer(proof, show_id=show_id, full_printer=True)
-        proof_show = APRProofShow(self.config.kprove, node_printer=node_printer)
+        proof_show = APRProofShow(self.config.definition, node_printer=node_printer)
         lines = proof_show.show(proof)
         if truncate:
             lines = [_truncate(line, 120) for line in lines]
@@ -192,32 +191,19 @@ class KProveX:
         *,
         show_id: str | None = None,
         full_printer: bool = False,
-        minimize: bool = False,
     ) -> APRProofNodePrinter:
-        from pyk.kast.manip import minimize_term
+        from pyk.cterm.show import CTermShow
         from pyk.proof.show import APRProofNodePrinter
 
         show = self._load_show(show_id=show_id)
-        config = self.config
-
-        class _NodePrinter(APRProofNodePrinter):
-            def print_node(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
-                attrs = self.node_attrs(kcfg, node)
-                attr_str = ' (' + ', '.join(attrs) + ')' if attrs else ''
-                node_strs = [f'{node.id}{attr_str}']
-                if self.full_printer:
-                    kast = node.cterm.kast
-                    if self.minimize:
-                        kast = minimize_term(kast)
-                    show_res = show(config, kast)
-                    node_strs.extend('  ' + line for line in show_res.split('\n'))
-                return node_strs
-
-        return _NodePrinter(
+        printer = lambda kast: show(self.config, kast)
+        return APRProofNodePrinter(
             proof=proof,
-            kprint=None,  # type: ignore [arg-type]
+            cterm_show=CTermShow(
+                printer=printer,
+                minimize=False,
+            ),
             full_printer=full_printer,
-            minimize=minimize,
         )
 
 
