@@ -6,7 +6,7 @@ module PICK-DROP0
   claim [id]:
     <instrs> #CHECK_HALT => #HALT </instrs>
     <regs>
-        1 |-> (signExtend ( ... bits: Bytes2Int ( pickFront ( dropFront ( #bytes ( W1:Bytes +Bytes b"\x00\x00\x00\x00" ) #empty ( 4 ) #bytes ( Int2Bytes ( 4 , Word2UInt ( signExtend ( ... bits: Bytes2Int ( substrBytes ( W0:Bytes , 28 , 32 ) , LE , Unsigned ) , signBitIdx: 32 ) ) &Int 4294967295 , LE )  ) .SparseBytes , 20 ) , 4 ) , LE , Unsigned ) , signBitIdx: 32 ) => signExtend ( Bytes2Int ( substrBytes ( W1 , 20 , 24 ) , LE , Unsigned ) , 32 ))
+        1 |-> (signExtend ( ... bits: Bytes2Int ( pickFront ( dropFront ( #bytes ( W1:Bytes +Bytes b"\x00\x00\x00\x00" ) #empty ( 4 ) #bytes ( Int2Bytes ( 4 , Word2UInt ( signExtend ( ... bits: Bytes2Int ( substrBytes ( W0:Bytes , 28 , 32 ) , LE , Unsigned ) , signBitIdx: 32 ) ) &Int 4294967295 , LE )  ) .SparseBytes , 20 ) , 4 ) , LE , Unsigned ) , signBitIdx: 32 ) => W(Bytes2Int ( substrBytes ( W1 , 20 , 24 ) , LE , Unsigned )))
     </regs>
     <pc> W ( 0 ) </pc>
     <test>

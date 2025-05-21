@@ -3,7 +3,7 @@
 ## Preliminaries
 
 ```k
-module BYTES-SIMPLIFICATIONS
+module BYTES-SIMPLIFICATIONS [symbolic]
   imports BYTES
   imports INT
   imports K-EQUAL
@@ -60,19 +60,19 @@ module BYTES-SIMPLIFICATIONS
 ```
 
 
-## Length Bytes Lemmas
+## Bytes Length Lemmas
 
 ```k
-  rule [length-bytes-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N 
+  rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N 
     [simplification]   
-  rule [length-bytes-substr]: lengthBytes(substrBytes(B, I, J)) => J -Int I
+  rule [bytes-length-substr]: lengthBytes(substrBytes(B, I, J)) => J -Int I
     requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
     [simplification, preserves-definedness]
-  rule [length-bytes-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) 
+  rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) 
     [simplification]
 ```
 
-## substrBytes Lemmas
+## Bytes Substr Lemmas
 
 ```k
   rule [substr-substr]: substrBytes(substrBytes(B, I, J), I0, J0) => substrBytes(B, I +Int I0, I +Int J0) 
@@ -105,6 +105,17 @@ module BYTES-SIMPLIFICATIONS
   rule [bytes2int-substr-ff00-1]: Bytes2Int (substrBytes(B, I, J), LE, Unsigned) &Int 65280 => B[I +Int 1] <<Int 8
     requires 0 <=Int I andBool I +Int 1 <Int J andBool J <=Int lengthBytes(B)
     [simplification, preserves-definedness]
+  rule [bytes2int-upperbound]: Bytes2Int(B, _, _) <Int X => true
+    requires 2 ^Int lengthBytes(B) <=Int X
+    [simplification]
+  rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, _, Unsigned) => true [simplification]
+```
+
+## PadBytes
+
+```k
+  rule [simp-padleftbytes]: padLeftBytes(B, L, V) => padLeftBytes(.Bytes, L, V) +Bytes B
+    [simplification, preserves-definedness, concrete(L,V), symbolic(B)]
 ```
 
 ```k
