@@ -51,7 +51,7 @@ module INT-SIMPLIFICATIONS [symbolic]
 ### |Int for Bytes
 
 ```k
-  rule [int-or-bytes-1]: Bytes2Int(b"\x00" +Bytes X, LE, Unsigned) |Int Bytes2Int(Y, LE, Unsigned) => Bytes2Int(Y +Bytes X, LE, Unsigned)
+  rule [int-or-bytes-1]: Bytes2Int(b"\x00" +Bytes X, LE, Unsigned) |Int Bytes2Int(Y, _, Unsigned) => Bytes2Int(Y +Bytes X, LE, Unsigned)
     requires lengthBytes(Y) ==Int 1
     [simplification, preserves-definedness]
   rule [int-or-bytes-2]: Bytes2Int(b"\x00\x00" +Bytes X, LE, Unsigned) |Int Bytes2Int(Y, LE, Unsigned) => Bytes2Int(Y +Bytes X, LE, Unsigned)
