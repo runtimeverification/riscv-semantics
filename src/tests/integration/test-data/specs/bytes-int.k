@@ -26,4 +26,5 @@ module BYTES-INT
     </test>
 requires lengthBytes(W0) ==Int 32
  andBool lengthBytes(W1) ==Int 4
+ andBool lengthBytes(W3) ==Int 32
 endmodule
