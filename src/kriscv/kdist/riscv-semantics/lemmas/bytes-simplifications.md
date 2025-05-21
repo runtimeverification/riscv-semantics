@@ -51,36 +51,40 @@ module BYTES-SIMPLIFICATIONS
   rule [bytes-update-symbolic-value]:
     B:Bytes [I <- V] => substrBytes(B, 0, I) +Bytes Int2Bytes(1, V, LE) +Bytes substrBytes(B, I +Int 1, lengthBytes(B) -Int I -Int 1)
     requires I <Int lengthBytes(B)
-    [simplification, concrete(B, I), symbolic(V), preserves-definedness]
+    [simplification, preserves-definedness]
   
   rule [multiple-bytes-update-symbolic-value]:
     replaceAtBytes(B, I, V) => substrBytes(B, 0, I) +Bytes V +Bytes substrBytes(B, I +Int lengthBytes(V), lengthBytes(B))
-    requires I +Int lengthBytes(V) <Int lengthBytes(B)
-    [simplification, concrete(B, I), symbolic(V), preserves-definedness]
+    requires I +Int lengthBytes(V) <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
 ```
 
 
-## Int2Bytes Lemmas
+## Length Bytes Lemmas
 
 ```k
-  rule [int2bytes-length]:
-    lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N
+  rule [length-bytes-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N 
+    [simplification]   
+  rule [length-bytes-substr]: lengthBytes(substrBytes(B, I, J)) => J -Int I
+    requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
+  rule [length-bytes-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) 
     [simplification]
-
 ```
 
 ## substrBytes Lemmas
 
 ```k
-  rule [substr-bytes-length]: lengthBytes(substrBytes(B, I, J)) => J -Int I 
-    requires 0 <=Int I
-     andBool I <=Int J
-     andBool J <=Int lengthBytes(B)
-  [simplification, preserves-definedness]
   rule [substr-substr]: substrBytes(substrBytes(B, I, J), I0, J0) => substrBytes(B, I +Int I0, I +Int J0) 
     requires 0 <=Int I  andBool I  <=Int J  andBool J  <=Int lengthBytes(B)
      andBool 0 <=Int I0 andBool I0 <=Int J0 andBool J0 <=Int J -Int I
   [simplification, preserves-definedness]
+  rule [substr-bytes-eq-ij]: substrBytes(B, I, I) => b""
+    requires 0 <=Int I andBool I <=Int lengthBytes(B)
+  [simplification, preserves-definedness]
+  rule [substr-bytes-self]: substrBytes(B, 0, J) => B
+    requires J ==Int lengthBytes(B)
+    [simplification, preserves-definedness]
   rule [substr-concat-0]: substrBytes(A +Bytes _, I, J) => substrBytes(A, I, J)
     requires J <=Int lengthBytes(A)
     [simplification, preserves-definedness]
