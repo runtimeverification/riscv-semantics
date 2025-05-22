@@ -47,3 +47,18 @@ def read_symbol(elf: ELFFile, symbol: str) -> list[int]:
     if syms is None:
         return []
     return [sym['st_value'] for sym in syms]
+
+
+def read_symbols(elf: ELFFile) -> dict[str, list[tuple[int, int]]]:
+    from elftools.elf.sections import SymbolTableSection
+
+    symtab = elf.get_section_by_name('.symtab')
+    if not symtab:
+        return {}
+
+    assert isinstance(symtab, SymbolTableSection)
+
+    res = {}
+    for sym in symtab.iter_symbols():
+        res.setdefault(sym.name, []). append((sym['st_value'], sym['st_size']))
+    return res
