@@ -18,6 +18,8 @@ module BYTES-INT
      9  |-> (W(Bytes2Int(replaceAtBytes (b"\x00\x00", 0, b"\x01\x02"), LE, Unsigned)) => W(513))
      10 |-> (W(Bytes2Int(replaceAtBytes (W1, 2, b"\x01\x02"), LE, Unsigned)) => W(Bytes2Int(substrBytes ( W1:Bytes , 0 , 2 ) +Bytes b"\x01\x02", LE, Unsigned)))
      11 |-> (W(Bytes2Int(substrBytes(b"\x00", 1, 1), LE, Unsigned)) => W(0))
+     12 |-> (W(Bytes2Int(Int2Bytes ( 4 , Bytes2Int (W1, LE, Unsigned), LE ), LE, Unsigned)) => W(Bytes2Int(W1, LE, Unsigned)))
+     13 |-> (W(Bytes2Int(Int2Bytes ( 4 , Bytes2Int ( substrBytes ( W0:Bytes , 31 , 32 ) +Bytes substrBytes ( W0:Bytes , 30 , 31 ) +Bytes substrBytes ( W0:Bytes , 29 , 30 ) +Bytes substrBytes ( W0:Bytes , 28 , 32 ) , LE , Unsigned ) , LE ), LE, Unsigned)) => W(Bytes2Int(substrBytes ( W0:Bytes , 31 , 32 ) +Bytes substrBytes ( W0:Bytes , 30 , 31 ) +Bytes substrBytes ( W0:Bytes , 29 , 30 ) +Bytes substrBytes ( W0:Bytes , 28 , 29), LE, Unsigned)))
     </regs>
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>

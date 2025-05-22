@@ -118,6 +118,15 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness, concrete(L,V), symbolic(B)]
 ```
 
+## Bytes2Int Lemmas
+
+```k
+  rule [int2bytes-bytes2int]: Int2Bytes(LEN:Int, Bytes2Int(B:Bytes, LE, Unsigned), LE) => substrBytes(B, 0, LEN)
+    requires 0 <=Int LEN
+     andBool LEN <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
+```
+
 ```k
 endmodule
 ```
