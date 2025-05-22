@@ -283,35 +283,33 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 ```
 `BEQ` increments `PC` by `OFFSET` so long as the values in registers `RS1` and `RS2` are equal. Otherwise, `PC` is incremented by `4`.
 ```k
-  syntax Word ::= branchPC(oldPC: Word, offset: Int, branchCond: Bool) [function, total]
-  rule branchPC(PC,  OFFSET, COND) => PC +Word chop(OFFSET) requires COND
-  rule branchPC(PC, _OFFSET, COND) => PC +Word W(4)         requires notBool COND
+  syntax KItem ::= "#PC_BRANCH" "(" Int "," Bool ")"
+  rule <instrs> #PC_BRANCH(  OFFSET, COND) => .K ...</instrs>
+       <pc> PC => PC +Word chop(OFFSET) </pc>
+       requires COND
+  rule <instrs> #PC_BRANCH( _OFFSET, COND) => .K ...</instrs>
+       <pc> PC => PC +Word W(4) </pc>
+       requires notBool COND
 
-  rule <instrs> BEQ RS1 , RS2 , OFFSET => .K ...</instrs>
+  rule <instrs> BEQ RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) ==Word readReg(REGS, RS2)) ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => branchPC(PC, OFFSET, readReg(REGS, RS1) ==Word readReg(REGS, RS2)) </pc>
 ```
 The remaining branch instructions proceed analogously, but performing different comparisons between `RS1` and `RS2`.
 ```k
-  rule <instrs> BNE RS1 , RS2 , OFFSET => .K ...</instrs>
+  rule <instrs> BNE RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) =/=Word readReg(REGS, RS2)) ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => branchPC(PC, OFFSET, readReg(REGS, RS1) =/=Word readReg(REGS, RS2)) </pc>
 
-  rule <instrs> BLT RS1 , RS2 , OFFSET => .K ...</instrs>
+  rule <instrs> BLT RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) <sWord readReg(REGS, RS2)) ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => branchPC(PC, OFFSET, readReg(REGS, RS1) <sWord readReg(REGS, RS2)) </pc>
 
-  rule <instrs> BGE RS1 , RS2 , OFFSET => .K ...</instrs>
+  rule <instrs> BGE RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) >=sWord readReg(REGS, RS2)) ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => branchPC(PC, OFFSET, readReg(REGS, RS1) >=sWord readReg(REGS, RS2)) </pc>
 
-  rule <instrs> BLTU RS1 , RS2 , OFFSET => .K ...</instrs>
+  rule <instrs> BLTU RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) <uWord readReg(REGS, RS2)) ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => branchPC(PC, OFFSET, readReg(REGS, RS1) <uWord readReg(REGS, RS2)) </pc>
 
-  rule <instrs> BGEU RS1 , RS2 , OFFSET => .K ...</instrs>
+  rule <instrs> BGEU RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) >=uWord readReg(REGS, RS2)) ...</instrs>
        <regs> REGS </regs>
-       <pc> PC => branchPC(PC, OFFSET, readReg(REGS, RS1) >=uWord readReg(REGS, RS2)) </pc>
 ```
 `LB`, `LH`, and `LW` load `1`, `2`, and `4` bytes respectively from the memory address which is `OFFSET` greater than the value in register `RS1`, then sign extends the loaded bytes and places them in register `RD`.
 ```k
