@@ -34,7 +34,13 @@ class Tools:
     def kprint(self) -> KPrint:
         return self.__krun
 
-    def init_config(self, config_vars: dict[str, KInner]) -> KInner:
+    def init_config(self, *, regs: KInner, mem: KInner, pc: KInner, halt: KInner) -> KInner:
+        config_vars = {
+            '$REGS': regs,
+            '$MEM': mem,
+            '$PC': pc,
+            '$HALT': halt,
+        }
         conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
         return Subst(config_vars)(conf)
 
@@ -69,18 +75,22 @@ class Tools:
     ) -> KInner:
         with open(elf_file, 'rb') as f:
             elf = ELFFile(f)
+            mem = elf_parser.memory(elf)
+            pc = elf_parser.entry_point(elf)
+
             if end_symbol is not None:
                 end_addr = elf_parser.read_unique_symbol(elf, end_symbol, error_loc=str(elf_file))
-                halt_cond = term_builder.halt_at_address(term_builder.word(end_addr))
+                halt = term_builder.halt_at_address(term_builder.word(end_addr))
             else:
-                halt_cond = term_builder.halt_never()
-            config_vars = {
-                '$REGS': term_builder.regs(regs or {}),
-                '$MEM': elf_parser.memory(elf),
-                '$PC': elf_parser.entry_point(elf),
-                '$HALT': halt_cond,
-            }
-        return self.run_config(self.init_config(config_vars), depth=depth)
+                halt = term_builder.halt_never()
+
+        config = self.init_config(
+            regs=term_builder.regs(regs or {}),
+            mem=mem,
+            pc=pc,
+            halt=halt,
+        )
+        return self.run_config(config=config, depth=depth)
 
     def get_registers(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
