@@ -20,6 +20,10 @@ module INT-SPEC
      11 |-> (W(Bytes2Int(b"\x34\x56\x78", LE, Unsigned)) => W(7886388))
      12 |-> (W(Bytes2Int(substrBytes(W3, 4, 8), LE, Unsigned) >>Int 8) => W(Bytes2Int(substrBytes(W3, 5, 8), LE, Unsigned)))
      13 |-> (W(Bytes2Int(b"\x00" +Bytes substrBytes(W3, 5, 6), LE, Unsigned) <<Int 8 &Int 4294967295) => W(Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 5 , 6 ), LE, Unsigned)))
+     14 |-> (W(Bytes2Int(b"\x00\x12", LE, Unsigned) |Int Bytes2Int(b"\x34", LE, Unsigned)) => W(4660))
+     15 |-> (W(Bytes2Int(reverseBytes(b"\x12\x34"), LE, Unsigned)) => W(4660))
+     16 |-> (W(Bytes2Int(b"\x00" +Bytes substrBytes(W3, 6, 7), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8), LE, Unsigned)) => W(Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7), LE, Unsigned)))
+     17 |-> (W(Bytes2Int(b"\x00\x00\x00" +Bytes substrBytes(W3, 4, 8), LE, Unsigned) |Int Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 5, 6), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7), LE, Unsigned)) => W(Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7) +Bytes substrBytes(W3, 5, 6) +Bytes substrBytes(W3, 4, 8), LE, Unsigned)))
     </regs>
     <test>
       <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
