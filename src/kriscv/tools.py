@@ -10,11 +10,11 @@ from pyk.kast.prelude.k import GENERATED_TOP_CELL
 from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
 
-from kriscv import elf_parser, term_builder
+from kriscv import term_builder
+from kriscv.term_builder import word
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
-
     from pyk.kast.inner import KInner
     from pyk.ktool.kprint import KPrint
 
@@ -57,7 +57,7 @@ class Tools:
 
         _regs = term_builder.regs(regs or {})
         mem, _cnstrs = SparseBytes.from_concrete(elf.memory).to_k()
-        pc = elf_parser.entry_point(elf)
+        pc = word(elf.entry_point)
 
         halt: KInner
         if end_symbol is not None:
