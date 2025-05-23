@@ -6,12 +6,14 @@ from typing import TYPE_CHECKING
 from kriscv.build import semantics
 
 # isort: on
+
 import pytest
 from pyk.kast.prelude.kint import INT, intToken
 from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
 from pyk.kore.match import kore_int
 
 from kriscv import build, term_builder
+from kriscv.sparse_bytes import SparseBytes
 from kriscv.term_builder import register
 from kriscv.term_manip import kore_sparse_bytes, normalize_memory
 
@@ -301,7 +303,7 @@ def test_memory(memory: dict[int, bytes], addr: int, byte: int) -> None:
 
     # Execute storeByte to get the actual final memory state
     tools = semantics()
-    memory_sb = term_builder.sparse_bytes(memory)
+    memory_sb, _constraints = SparseBytes.from_concrete(memory).to_k()
     addr_word = term_builder.word(addr)
 
     store_call = term_builder.store_bytes(memory_sb, addr_word, intToken(byte), intToken(1))
