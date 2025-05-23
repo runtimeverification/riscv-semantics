@@ -100,7 +100,7 @@ class SparseBytes:
         return SparseBytes([gap_or_val for _, gap_or_val in sorted(clean_data + gaps)])
 
     @staticmethod
-    def from_data(data: dict[int, bytes], symdata: dict[int, SymBytes]) -> SparseBytes:
+    def from_data(data: Mapping[int, bytes], symdata: dict[int, SymBytes]) -> SparseBytes:
         """Create a SparseBytes from a {address: bytes} dictionary and a {address: SymBytes} dictionary"""
         result = SparseBytes.from_concrete(data)
         for addr, sym in symdata.items():

@@ -4,7 +4,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
-from pyk.kast.inner import KSort, Subst
+from pyk.kast.inner import KSort, KVariable, Subst
 from pyk.kast.manip import split_config_from
 from pyk.kast.prelude.k import GENERATED_TOP_CELL
 from pyk.kore.match import kore_int
@@ -15,7 +15,9 @@ from kriscv.term_builder import word
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
-    from pyk.kast.inner import KInner
+    from collections.abc import Iterable
+
+    from pyk.kast import KInner
     from pyk.ktool.kprint import KPrint
 
 
@@ -49,14 +51,27 @@ class Tools:
         *,
         regs: dict[int, int] | None = None,
         end_symbol: str | None = None,
+        symbolic_names: Iterable[str] | None = None,
     ) -> KInner:
-        from kriscv.elf_parser import ELF
-        from kriscv.sparse_bytes import SparseBytes
+        from pyk.kast.prelude.ml import mlAnd, mlEqualsTrue
+
+        from .elf_parser import ELF
+        from .sparse_bytes import SparseBytes, SymBytes
 
         elf = ELF.load(elf_file)
 
+        def _symdata(symbolic_names: Iterable[str]) -> dict[int, SymBytes]:
+            res = {}
+            for name in symbolic_names:
+                symbol = elf.unique_symbol(name)
+                var = KVariable(name.upper(), 'Bytes')
+                res[symbol.addr] = SymBytes(var, symbol.size)
+            return res
+
+        symdata = _symdata(symbolic_names) if symbolic_names else {}
+        mem, cnstrs = SparseBytes.from_data(data=elf.memory, symdata=symdata).to_k()
+
         _regs = term_builder.regs(regs or {})
-        mem, _cnstrs = SparseBytes.from_concrete(elf.memory).to_k()
         pc = word(elf.entry_point)
 
         halt: KInner
@@ -66,7 +81,9 @@ class Tools:
         else:
             halt = term_builder.halt_never()
 
-        return self.config(regs=_regs, mem=mem, pc=pc, halt=halt)
+        config = self.config(regs=_regs, mem=mem, pc=pc, halt=halt)
+        config = mlAnd([config] + [mlEqualsTrue(cnstr) for cnstr in cnstrs])
+        return config
 
     def run_config(self, config: KInner, *, depth: int | None = None) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
