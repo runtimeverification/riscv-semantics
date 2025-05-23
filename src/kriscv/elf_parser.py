@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 
 from pyk.utils import FrozenDict, check_file_path
 
-from kriscv.term_builder import sparse_bytes, word
+from kriscv.term_builder import word
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -103,7 +103,3 @@ class ELF:
 
 def entry_point(elf: ELF) -> KInner:
     return word(elf.entry_point)
-
-
-def memory(elf: ELF) -> KInner:
-    return sparse_bytes(elf.memory)

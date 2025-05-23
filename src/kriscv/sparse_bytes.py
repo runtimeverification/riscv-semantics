@@ -5,20 +5,20 @@ from itertools import pairwise
 from typing import TYPE_CHECKING, NamedTuple
 
 from pyk.kast.inner import KInner
+from pyk.kast.prelude.bytes import bytesToken
 from pyk.kast.prelude.kint import eqInt, intToken
 from pyk.kast.prelude.ml import mlEqualsTrue
 
 from .term_builder import (
     add_bytes,
-    bytesToken,
     dot_sb,
     length_bytes,
-    normalize_memory,
     sb_bytes,
     sb_bytes_cons,
     sb_empty,
     sb_empty_cons,
 )
+from .term_manip import normalize_memory
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
