@@ -34,7 +34,7 @@ class Tools:
     def kprint(self) -> KPrint:
         return self.__krun
 
-    def init_config(self, *, regs: KInner, mem: KInner, pc: KInner, halt: KInner) -> KInner:
+    def config(self, *, regs: KInner, mem: KInner, pc: KInner, halt: KInner) -> KInner:
         config_vars = {
             '$REGS': regs,
             '$MEM': mem,
@@ -81,7 +81,7 @@ class Tools:
         else:
             halt = term_builder.halt_never()
 
-        config = self.init_config(
+        config = self.config(
             regs=term_builder.regs(regs or {}),
             mem=elf_parser.memory(elf),
             pc=elf_parser.entry_point(elf),
