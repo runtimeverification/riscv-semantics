@@ -41,8 +41,8 @@ class Tools:
             '$PC': pc,
             '$HALT': halt,
         }
-        conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
-        return Subst(config_vars)(conf)
+        config = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
+        return Subst(config_vars)(config)
 
     def config_from_elf(
         self,
