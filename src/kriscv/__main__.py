@@ -71,19 +71,20 @@ def _parse_args(args: Sequence[str]) -> KRISCVOpts:
 def _kriscv_run(opts: RunOpts) -> None:
     tools = semantics(temp_dir=opts.temp_dir)
     regs = dict.fromkeys(range(32), 0) if opts.zero_init else {}
-    final_conf = tools.run_elf(
+    init_conf = tools.config_from_elf(
         opts.input_file,
-        depth=opts.depth,
         regs=regs,
         end_symbol=opts.end_symbol,
     )
+    final_conf = tools.run_config(init_conf, depth=opts.depth)
     print(tools.kprint.pretty_print(final_conf, sort_collections=True))
 
 
 def _kriscv_run_arch_test(opts: RunArchTestOpts) -> None:
     input = opts.input_file
     tools = semantics(temp_dir=opts.temp_dir)
-    final_conf = tools.run_elf(input, end_symbol='_halt')
+    init_conf = tools.config_from_elf(input, end_symbol='_halt')
+    final_conf = tools.run_config(init_conf)
     memory = tools.get_memory(final_conf)
 
     elf = ELF.load(input)

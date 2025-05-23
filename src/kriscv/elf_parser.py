@@ -6,13 +6,10 @@ from typing import TYPE_CHECKING, NamedTuple, final
 
 from pyk.utils import FrozenDict, check_file_path
 
-from kriscv.term_builder import sparse_bytes, word
-
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
     from elftools.elf.elffile import ELFFile
-    from pyk.kast.inner import KInner
 
 
 class Symbol(NamedTuple):
@@ -99,11 +96,3 @@ class ELF:
         if len(symbols) > 1:
             raise AssertionError(f'{error_loc}Symbol not unique: {name!r}')
         return symbols[0]
-
-
-def entry_point(elf: ELF) -> KInner:
-    return word(elf.entry_point)
-
-
-def memory(elf: ELF) -> KInner:
-    return sparse_bytes(elf.memory)
