@@ -11,7 +11,7 @@ from pyk.kast.prelude.kint import intToken
 from kriscv.term_manip import normalize_memory
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
     from typing import TypeVar
 
     T = TypeVar('T')
@@ -277,7 +277,7 @@ def add_bytes(bytes1: KInner, bytes2: KInner) -> KInner:
     return KApply('_+Bytes__BYTES-HOOKED_Bytes_Bytes_Bytes', bytes1, bytes2)
 
 
-def sparse_bytes(data: dict[int, bytes]) -> KInner:
+def sparse_bytes(data: Mapping[int, bytes]) -> KInner:
     clean_data: list[tuple[int, bytes]] = sorted(normalize_memory(data).items())
 
     if len(clean_data) == 0:

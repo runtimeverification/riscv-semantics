@@ -6,6 +6,8 @@ from pyk.kore.match import kore_bytes, kore_int, match_app, match_symbol
 from pyk.kore.syntax import App, SortApp
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from pyk.kore.syntax import Pattern
 
 
@@ -80,7 +82,7 @@ def kore_sparse_bytes(sb: Pattern) -> dict[int, bytes]:
     return sparse_dict
 
 
-def normalize_memory(memory: dict[int, bytes]) -> dict[int, bytes]:
+def normalize_memory(memory: Mapping[int, bytes]) -> dict[int, bytes]:
     # normalize sparse bytes data by merging contiguous segments
     raw_memory = sorted(memory.items())
     merged_memory: dict[int, bytes] = {}

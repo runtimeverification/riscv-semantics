@@ -6,10 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from elftools.elf.elffile import ELFFile  # type: ignore
-
-from kriscv import elf_parser
 from kriscv.build import semantics
+from kriscv.elf_parser import ELF
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -88,10 +86,9 @@ def _kriscv_run_arch_test(opts: RunArchTestOpts) -> None:
     final_conf = tools.run_elf(input, end_symbol='_halt')
     memory = tools.get_memory(final_conf)
 
-    with open(input, 'rb') as f:
-        elf = ELFFile(f)
-        begin_sig_addr = elf_parser.read_unique_symbol(elf, 'begin_signature', error_loc=str(input))
-        end_sig_addr = elf_parser.read_unique_symbol(elf, 'end_signature', error_loc=str(input))
+    elf = ELF.load(input)
+    begin_sig_addr = elf.unique_symbol('begin_signature', error_loc=str(input)).addr
+    end_sig_addr = elf.unique_symbol('end_signature', error_loc=str(input)).addr
 
     if begin_sig_addr % 4 != 0:
         raise AssertionError(
