@@ -44,6 +44,29 @@ class Tools:
         conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
         return Subst(config_vars)(conf)
 
+    def config_from_elf(
+        self,
+        elf_file: str | Path,
+        *,
+        regs: dict[int, int] | None = None,
+        end_symbol: str | None = None,
+    ) -> KInner:
+        elf = ELF.load(elf_file)
+
+        if end_symbol is not None:
+            end_addr = elf.unique_symbol(end_symbol, error_loc=str(elf_file)).addr
+            halt = term_builder.halt_at_address(term_builder.word(end_addr))
+        else:
+            halt = term_builder.halt_never()
+
+        config = self.config(
+            regs=term_builder.regs(regs or {}),
+            mem=elf_parser.memory(elf),
+            pc=elf_parser.entry_point(elf),
+            halt=halt,
+        )
+        return config
+
     def run_config(self, config: KInner, *, depth: int | None = None) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
         try:
@@ -64,30 +87,6 @@ class Tools:
             print(f'- {input_path.resolve()}: Input configuration in Kore format')
             raise
         return self.krun.kore_to_kast(final_config_kore)
-
-    def run_elf(
-        self,
-        elf_file: Path,
-        *,
-        depth: int | None = None,
-        regs: dict[int, int] | None = None,
-        end_symbol: str | None = None,
-    ) -> KInner:
-        elf = ELF.load(elf_file)
-
-        if end_symbol is not None:
-            end_addr = elf.unique_symbol(end_symbol, error_loc=str(elf_file)).addr
-            halt = term_builder.halt_at_address(term_builder.word(end_addr))
-        else:
-            halt = term_builder.halt_never()
-
-        config = self.config(
-            regs=term_builder.regs(regs or {}),
-            mem=elf_parser.memory(elf),
-            pc=elf_parser.entry_point(elf),
-            halt=halt,
-        )
-        return self.run_config(config=config, depth=depth)
 
     def get_registers(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
