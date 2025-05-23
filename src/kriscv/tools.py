@@ -51,11 +51,12 @@ class Tools:
         end_symbol: str | None = None,
     ) -> KInner:
         from kriscv.elf_parser import ELF
+        from kriscv.sparse_bytes import SparseBytes
 
         elf = ELF.load(elf_file)
 
         _regs = term_builder.regs(regs or {})
-        mem = elf_parser.memory(elf)
+        mem, _cnstrs = SparseBytes.from_concrete(elf.memory).to_k()
         pc = elf_parser.entry_point(elf)
 
         halt: KInner

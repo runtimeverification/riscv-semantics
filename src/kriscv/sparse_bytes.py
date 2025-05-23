@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from pyk.kast.inner import KInner
 from pyk.kast.prelude.kint import eqInt, intToken
@@ -19,6 +19,9 @@ from .term_builder import (
     sb_empty,
     sb_empty_cons,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 def _size(data: bytes | int | SymBytes) -> int:
@@ -75,7 +78,7 @@ class SparseBytes:
         self.data = list(data)
 
     @staticmethod
-    def from_concrete(data: dict[int, bytes]) -> SparseBytes:
+    def from_concrete(data: Mapping[int, bytes]) -> SparseBytes:
         """Create a SparseBytes from a {address: bytes} dictionary"""
         clean_data: list[tuple[int, int | bytes]] = sorted(normalize_memory(data).items())
 
