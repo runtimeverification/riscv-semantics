@@ -6,10 +6,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 import yaml
-from elftools.elf.elffile import ELFFile  # type: ignore
 
-from kriscv import elf_parser
 from kriscv.build import semantics
+from kriscv.elf_parser import ELF
 
 from ..utils import TESTS_DIR
 
@@ -105,18 +104,9 @@ def _test_simple(tools: Tools, elf_file: Path, assert_file: Path, final_config_o
     if 'mem' not in asserts:
         return
 
-    with open(elf_file, 'rb') as f:
-        mem_symbol_vals = elf_parser.read_symbol(ELFFile(f), '_mem')
+    elf = ELF.load(elf_file)
+    mem_symbol = elf.unique_symbol('_mem', error_loc=str(elf_file)).addr
 
-    if len(mem_symbol_vals) == 0:
-        raise AssertionError(
-            f"{assert_file}: Found 'mem' assertion entry, but test file does not contain '_mem' symbol."
-        )
-    if len(mem_symbol_vals) > 1:
-        raise AssertionError(
-            f"{assert_file}: Found 'mem' assertion entry, but test file contains multiple instances of '_mem' symbol."
-        )
-    mem_symbol = mem_symbol_vals[0]
     for addr, val in asserts.get('mem', {}).items():
         if not isinstance(addr, int):
             raise AssertionError(f"{assert_file}: Unexpected key {reg} in 'mem'. Expected an integer address.")

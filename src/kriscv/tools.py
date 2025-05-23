@@ -4,7 +4,6 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
-from elftools.elf.elffile import ELFFile  # type: ignore
 from pyk.kast.inner import KSort, Subst
 from pyk.kast.manip import split_config_from
 from pyk.kast.prelude.k import GENERATED_TOP_CELL
@@ -12,6 +11,7 @@ from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
 
 from kriscv import elf_parser, term_builder
+from kriscv.elf_parser import ELF
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
@@ -73,21 +73,18 @@ class Tools:
         regs: dict[int, int] | None = None,
         end_symbol: str | None = None,
     ) -> KInner:
-        with open(elf_file, 'rb') as f:
-            elf = ELFFile(f)
-            mem = elf_parser.memory(elf)
-            pc = elf_parser.entry_point(elf)
+        elf = ELF.load(elf_file)
 
-            if end_symbol is not None:
-                end_addr = elf_parser.read_unique_symbol(elf, end_symbol, error_loc=str(elf_file))
-                halt = term_builder.halt_at_address(term_builder.word(end_addr))
-            else:
-                halt = term_builder.halt_never()
+        if end_symbol is not None:
+            end_addr = elf.unique_symbol(end_symbol, error_loc=str(elf_file)).addr
+            halt = term_builder.halt_at_address(term_builder.word(end_addr))
+        else:
+            halt = term_builder.halt_never()
 
         config = self.init_config(
             regs=term_builder.regs(regs or {}),
-            mem=mem,
-            pc=pc,
+            mem=elf_parser.memory(elf),
+            pc=elf_parser.entry_point(elf),
             halt=halt,
         )
         return self.run_config(config=config, depth=depth)
