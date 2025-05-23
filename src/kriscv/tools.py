@@ -53,19 +53,18 @@ class Tools:
     ) -> KInner:
         elf = ELF.load(elf_file)
 
+        _regs = term_builder.regs(regs or {})
+        mem = elf_parser.memory(elf)
+        pc = elf_parser.entry_point(elf)
+
+        halt: KInner
         if end_symbol is not None:
             end_addr = elf.unique_symbol(end_symbol, error_loc=str(elf_file)).addr
             halt = term_builder.halt_at_address(term_builder.word(end_addr))
         else:
             halt = term_builder.halt_never()
 
-        config = self.config(
-            regs=term_builder.regs(regs or {}),
-            mem=elf_parser.memory(elf),
-            pc=elf_parser.entry_point(elf),
-            halt=halt,
-        )
-        return config
+        return self.config(regs=_regs, mem=mem, pc=pc, halt=halt)
 
     def run_config(self, config: KInner, *, depth: int | None = None) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
