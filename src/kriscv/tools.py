@@ -11,7 +11,6 @@ from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
 
 from kriscv import elf_parser, term_builder
-from kriscv.elf_parser import ELF
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
@@ -51,6 +50,8 @@ class Tools:
         regs: dict[int, int] | None = None,
         end_symbol: str | None = None,
     ) -> KInner:
+        from kriscv.elf_parser import ELF
+
         elf = ELF.load(elf_file)
 
         _regs = term_builder.regs(regs or {})
