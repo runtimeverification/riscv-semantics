@@ -284,10 +284,10 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 `BEQ` increments `PC` by `OFFSET` so long as the values in registers `RS1` and `RS2` are equal. Otherwise, `PC` is incremented by `4`.
 ```k
   syntax KItem ::= "#PC_BRANCH" "(" Int "," Bool ")"
-  rule <instrs> #PC_BRANCH(  OFFSET, COND) => .K ...</instrs>
-       <pc> PC => PC +Word chop(OFFSET) </pc>
+  rule <instrs> #PC_BRANCH(OFFSET, COND) => .K ...</instrs>
+       <pc> PC => PC +Word OFFSET </pc>
        requires COND
-  rule <instrs> #PC_BRANCH( _OFFSET, COND) => .K ...</instrs>
+  rule <instrs> #PC_BRANCH(_, COND) => .K ...</instrs>
        <pc> PC => PC +Word W(4) </pc>
        requires notBool COND
 
