@@ -285,7 +285,7 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 ```k
   syntax KItem ::= "#PC_BRANCH" "(" Int "," Bool ")"
   rule <instrs> #PC_BRANCH(OFFSET, COND) => .K ...</instrs>
-       <pc> PC => PC +Word OFFSET </pc>
+       <pc> PC => PC +Word W(OFFSET) </pc>
        requires COND
   rule <instrs> #PC_BRANCH(_, COND) => .K ...</instrs>
        <pc> PC => PC +Word W(4) </pc>
