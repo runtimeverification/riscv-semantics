@@ -21,7 +21,7 @@ module RISCV-CONFIGURATION
   imports SPARSE-BYTES
   imports WORD
 
-  syntax KItem ::= "#EXECUTE"
+  syntax KItem ::= "#EXECUTE" [symbol(#EXECUTE)]
 
   configuration
     <riscv>
@@ -51,7 +51,7 @@ module RISCV-TERMINATION
   imports INT
 
   syntax KItem ::=
-      "#HALT"
+      "#HALT"       [symbol(#HALT)]
     | "#CHECK_HALT"
 
   syntax HaltCondition ::=

@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from pyk.kast import KInner
     from pyk.ktool.kprint import KPrint
 
+    from .elf_parser import ELF
+
 
 class Tools:
     __krun: KRun
@@ -47,18 +49,19 @@ class Tools:
 
     def config_from_elf(
         self,
-        elf_file: str | Path,
+        elf: str | Path | ELF,
         *,
         regs: dict[int, int] | None = None,
         end_symbol: str | None = None,
         symbolic_names: Iterable[str] | None = None,
     ) -> KInner:
-        from pyk.kast.prelude.ml import mlAnd, mlEqualsTrue
+        from pyk.kast.prelude.ml import mlAnd
 
         from .elf_parser import ELF
         from .sparse_bytes import SparseBytes, SymBytes
 
-        elf = ELF.load(elf_file)
+        if not isinstance(elf, ELF):
+            elf = ELF.load(elf)
 
         def _symdata(symbolic_names: Iterable[str]) -> dict[int, SymBytes]:
             res = {}
@@ -76,13 +79,13 @@ class Tools:
 
         halt: KInner
         if end_symbol is not None:
-            end_addr = elf.unique_symbol(end_symbol, error_loc=str(elf_file)).addr
+            end_addr = elf.unique_symbol(end_symbol).addr
             halt = term_builder.halt_at_address(term_builder.word(end_addr))
         else:
             halt = term_builder.halt_never()
 
         config = self.config(regs=_regs, mem=mem, pc=pc, halt=halt)
-        config = mlAnd([config] + [mlEqualsTrue(cnstr) for cnstr in cnstrs])
+        config = mlAnd([config] + cnstrs)
         return config
 
     def run_config(self, config: KInner, *, depth: int | None = None) -> KInner:
