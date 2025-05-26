@@ -19,7 +19,7 @@ riscv-semantics = "kriscv.kdist.plugin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-kframework = "7.1.259"
+kframework = "7.1.261"
 filelock = "^3.14.0"
 pyelftools = "^0.26"
 pyyaml = "^6.0.1"
