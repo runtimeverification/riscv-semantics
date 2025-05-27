@@ -76,7 +76,8 @@ def _check_mem_entry(assert_file: Path, mem_symbol: int, memory: dict[int, int],
 
 
 def _test_simple(tools: Tools, elf_file: Path, assert_file: Path, final_config_output: Path | None) -> None:
-    final_config = tools.run_elf(elf_file, end_symbol='_halt')
+    init_config = tools.config_from_elf(elf_file, end_symbol='_halt')
+    final_config = tools.run_config(init_config)
 
     if final_config_output is not None:
         final_config_output.touch()

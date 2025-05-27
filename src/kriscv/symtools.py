@@ -105,3 +105,20 @@ class SymTools:
             prover.advance_proof(proof, max_iterations=max_iterations)
 
         return proof
+
+    def show_proof(self, proof: APRProof) -> str:
+        from pyk.cterm.show import CTermShow
+        from pyk.kcfg.show import NodePrinter
+        from pyk.proof.show import APRProofShow
+
+        show = APRProofShow(
+            definition=self.kprove.definition,
+            node_printer=NodePrinter(
+                cterm_show=CTermShow(
+                    printer=self.kprove.pretty_print,
+                    minimize=False,
+                ),
+                full_printer=True,
+            ),
+        )
+        return '\n'.join(show.show(proof))

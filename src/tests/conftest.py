@@ -5,8 +5,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from kriscv.symtools import SymTools
+
 if TYPE_CHECKING:
     from pytest import FixtureRequest, Parser
+
+    from kriscv.tools import Tools
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -34,3 +38,15 @@ def temp_dir(request: FixtureRequest, tmp_path: Path) -> Path:
     if temp_dir is not None:
         return temp_dir
     return tmp_path
+
+
+@pytest.fixture
+def tools(temp_dir: Path) -> Tools:
+    from kriscv import build
+
+    return build.semantics(temp_dir=temp_dir)
+
+
+@pytest.fixture
+def symtools(temp_dir: Path) -> SymTools:
+    return SymTools.default(proof_dir=temp_dir, bug_report=temp_dir / 'bug-reports')

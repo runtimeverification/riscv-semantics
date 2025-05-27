@@ -7,13 +7,13 @@ import pytest
 from pyk.proof import ProofStatus
 from pyk.proof.show import APRProofShow
 
-from kriscv.symtools import SymTools
-
 from .utils import TEST_DATA_DIR
 
 if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
+
+    from kriscv.symtools import SymTools
 
 
 SPEC_DIR: Final = TEST_DATA_DIR / 'specs'
@@ -35,11 +35,6 @@ class SpecLoader:
 @pytest.fixture
 def load_spec(temp_dir: Path) -> SpecLoader:
     return SpecLoader(temp_dir=temp_dir)
-
-
-@pytest.fixture
-def symtools(temp_dir: Path) -> SymTools:
-    return SymTools.default(proof_dir=temp_dir, bug_report=temp_dir / 'bug-reports')
 
 
 @pytest.mark.parametrize(

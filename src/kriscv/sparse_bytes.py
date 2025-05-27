@@ -2,23 +2,26 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from pyk.kast.inner import KInner
+from pyk.kast.prelude.bytes import bytesToken
 from pyk.kast.prelude.kint import eqInt, intToken
 from pyk.kast.prelude.ml import mlEqualsTrue
 
 from .term_builder import (
     add_bytes,
-    bytesToken,
     dot_sb,
     length_bytes,
-    normalize_memory,
     sb_bytes,
     sb_bytes_cons,
     sb_empty,
     sb_empty_cons,
 )
+from .term_manip import normalize_memory
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 def _size(data: bytes | int | SymBytes) -> int:
@@ -75,7 +78,7 @@ class SparseBytes:
         self.data = list(data)
 
     @staticmethod
-    def from_concrete(data: dict[int, bytes]) -> SparseBytes:
+    def from_concrete(data: Mapping[int, bytes]) -> SparseBytes:
         """Create a SparseBytes from a {address: bytes} dictionary"""
         clean_data: list[tuple[int, int | bytes]] = sorted(normalize_memory(data).items())
 
@@ -97,7 +100,7 @@ class SparseBytes:
         return SparseBytes([gap_or_val for _, gap_or_val in sorted(clean_data + gaps)])
 
     @staticmethod
-    def from_data(data: dict[int, bytes], symdata: dict[int, SymBytes]) -> SparseBytes:
+    def from_data(data: Mapping[int, bytes], symdata: dict[int, SymBytes]) -> SparseBytes:
         """Create a SparseBytes from a {address: bytes} dictionary and a {address: SymBytes} dictionary"""
         result = SparseBytes.from_concrete(data)
         for addr, sym in symdata.items():

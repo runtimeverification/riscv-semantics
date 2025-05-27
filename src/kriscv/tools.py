@@ -4,20 +4,23 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
-from pyk.kast.inner import KSort, Subst
+from pyk.kast.inner import KSort, KVariable, Subst
 from pyk.kast.manip import split_config_from
 from pyk.kast.prelude.k import GENERATED_TOP_CELL
 from pyk.kore.match import kore_int
 from pyk.ktool.krun import KRun
 
-from kriscv import elf_parser, term_builder
-from kriscv.elf_parser import ELF
+from kriscv import term_builder
+from kriscv.term_builder import word
 from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
 
-    from pyk.kast.inner import KInner
+    from pyk.kast import KInner
     from pyk.ktool.kprint import KPrint
+
+    from .elf_parser import ELF
 
 
 class Tools:
@@ -34,15 +37,56 @@ class Tools:
     def kprint(self) -> KPrint:
         return self.__krun
 
-    def init_config(self, *, regs: KInner, mem: KInner, pc: KInner, halt: KInner) -> KInner:
+    def config(self, *, regs: KInner, mem: KInner, pc: KInner, halt: KInner) -> KInner:
         config_vars = {
             '$REGS': regs,
             '$MEM': mem,
             '$PC': pc,
             '$HALT': halt,
         }
-        conf = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
-        return Subst(config_vars)(conf)
+        config = self.krun.definition.init_config(sort=GENERATED_TOP_CELL)
+        return Subst(config_vars)(config)
+
+    def config_from_elf(
+        self,
+        elf: str | Path | ELF,
+        *,
+        regs: dict[int, int] | None = None,
+        end_symbol: str | None = None,
+        symbolic_names: Iterable[str] | None = None,
+    ) -> KInner:
+        from pyk.kast.prelude.ml import mlAnd
+
+        from .elf_parser import ELF
+        from .sparse_bytes import SparseBytes, SymBytes
+
+        if not isinstance(elf, ELF):
+            elf = ELF.load(elf)
+
+        def _symdata(symbolic_names: Iterable[str]) -> dict[int, SymBytes]:
+            res = {}
+            for name in symbolic_names:
+                symbol = elf.unique_symbol(name)
+                var = KVariable(name.upper(), 'Bytes')
+                res[symbol.addr] = SymBytes(var, symbol.size)
+            return res
+
+        symdata = _symdata(symbolic_names) if symbolic_names else {}
+        mem, cnstrs = SparseBytes.from_data(data=elf.memory, symdata=symdata).to_k()
+
+        _regs = term_builder.regs(regs or {})
+        pc = word(elf.entry_point)
+
+        halt: KInner
+        if end_symbol is not None:
+            end_addr = elf.unique_symbol(end_symbol).addr
+            halt = term_builder.halt_at_address(term_builder.word(end_addr))
+        else:
+            halt = term_builder.halt_never()
+
+        config = self.config(regs=_regs, mem=mem, pc=pc, halt=halt)
+        config = mlAnd([config] + cnstrs)
+        return config
 
     def run_config(self, config: KInner, *, depth: int | None = None) -> KInner:
         config_kore = self.krun.kast_to_kore(config, sort=GENERATED_TOP_CELL)
@@ -64,30 +108,6 @@ class Tools:
             print(f'- {input_path.resolve()}: Input configuration in Kore format')
             raise
         return self.krun.kore_to_kast(final_config_kore)
-
-    def run_elf(
-        self,
-        elf_file: Path,
-        *,
-        depth: int | None = None,
-        regs: dict[int, int] | None = None,
-        end_symbol: str | None = None,
-    ) -> KInner:
-        elf = ELF.load(elf_file)
-
-        if end_symbol is not None:
-            end_addr = elf.unique_symbol(end_symbol, error_loc=str(elf_file)).addr
-            halt = term_builder.halt_at_address(term_builder.word(end_addr))
-        else:
-            halt = term_builder.halt_never()
-
-        config = self.init_config(
-            regs=term_builder.regs(regs or {}),
-            mem=elf_parser.memory(elf),
-            pc=elf_parser.entry_point(elf),
-            halt=halt,
-        )
-        return self.run_config(config=config, depth=depth)
 
     def get_registers(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
