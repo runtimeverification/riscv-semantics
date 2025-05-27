@@ -11,8 +11,6 @@ module SIGNEXTEND
      2 |-> (signExtend (Bytes2Int (b"\xff\xff\xff\xff", LE, Unsigned), 32) => W(4294967295))
      3 |-> (signExtend (Bytes2Int (substrBytes(W0:Bytes, 4, 8), LE, Unsigned) , 32) => W(Bytes2Int(substrBytes(W0:Bytes ,4 , 8), LE, Unsigned )))
     </regs>
-    <test>
-      <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
-    </test>
+    <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
   requires lengthBytes(W0) ==Int 32
 endmodule

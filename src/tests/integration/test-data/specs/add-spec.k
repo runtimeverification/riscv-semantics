@@ -15,7 +15,5 @@ module ADD-SPEC
       #bytes ( b"\xb3\x01\x11\x00" )  // add x3, x2, x1
       .SparseBytes
     </mem>
-    <test>
-      <haltCond> ADDRESS ( W ( 4 ) ) </haltCond>
-    </test>
+    <haltCond> ADDRESS ( W ( 4 ) ) </haltCond>
 endmodule
