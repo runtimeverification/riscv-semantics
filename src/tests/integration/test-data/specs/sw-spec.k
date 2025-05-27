@@ -19,8 +19,6 @@ module SW-SPEC
        #bytes ( b"\x04\x00\x00\x00" +Bytes X +Bytes b"\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00"))
       .SparseBytes
     </mem>
-    <test>
-      <haltCond> ADDRESS ( W ( 8 ) ) </haltCond>
-    </test>
+    <haltCond> ADDRESS ( W ( 8 ) ) </haltCond>
     requires lengthBytes(X) ==Int 4
 endmodule
