@@ -114,7 +114,7 @@ class Tools:
         regs_kore = self.krun.kast_to_kore(cells['REGS_CELL'], sort=KSort('Map'))
         regs = {}
         for reg, val in match_map(regs_kore):
-            regs[kore_int(reg)] = kore_word(val)
+            regs[kore_int(reg)] = kore_int(val)
         if 0 not in regs:
             regs[0] = 0
         return regs

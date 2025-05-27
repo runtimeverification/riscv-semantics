@@ -11,7 +11,7 @@ module WORD-SIMPLIFICATIONS
 ## SignExtend
 
 ```k
-  rule signExtend ( Bytes2Int ( B , LE , Unsigned ) , NumBits ) => W(Bytes2Int ( B , LE , Unsigned ))
+  rule signExtend ( Bytes2Int ( B , LE , Unsigned ) , NumBits ) => Bytes2Int ( B , LE , Unsigned )
     requires NumBits ==Int lengthBytes(B) *Int 8 [simplification(45), preserves-definedness]
 ```
 

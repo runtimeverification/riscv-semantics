@@ -116,13 +116,10 @@ def _test_mul(
     op2: int,
     res: int,
 ) -> None:
-    def w(x: int) -> App:
-        return App('LblW', (), (int_dv(x),))
-
     _test_function(
         definition_dir=definition_dir,
-        app=inj(SortApp('SortWord'), SORT_K_ITEM, App(symbol, (), (w(op1), w(op2)))),
-        res=inj(SortApp('SortWord'), SORT_K_ITEM, w(res)),
+        app=inj(SortApp('SortInt'), SORT_K_ITEM, App(symbol, (), (int_dv(op1), int_dv(op2)))),
+        res=inj(SortApp('SortInt'), SORT_K_ITEM, int_dv(res)),
     )
 
 

@@ -240,7 +240,7 @@ def word(bits: KInner | int | str | bytes) -> KInner:
             val = intToken(int(bits, 2))
         case bytes():
             val = intToken(int.from_bytes(bits, 'big', signed=False))
-    return KApply('W', val)
+    return val
 
 
 def dot_sb() -> KInner:

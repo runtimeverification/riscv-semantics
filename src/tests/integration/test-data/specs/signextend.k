@@ -5,12 +5,12 @@ module SIGNEXTEND
 
   claim [id]:
     <instrs> #CHECK_HALT => #HALT </instrs>
-    <pc> W ( 0 ) </pc>
+    <pc> 0 </pc>
     <regs>
-     1 |-> (W(Bytes2Int (b"\xff\xff\xff\xff", LE, Unsigned)) => W(4294967295))
-     2 |-> (signExtend (Bytes2Int (b"\xff\xff\xff\xff", LE, Unsigned), 32) => W(4294967295))
-     3 |-> (signExtend (Bytes2Int (substrBytes(W0:Bytes, 4, 8), LE, Unsigned) , 32) => W(Bytes2Int(substrBytes(W0:Bytes ,4 , 8), LE, Unsigned )))
+     1 |-> (Bytes2Int (b"\xff\xff\xff\xff", LE, Unsigned) => 4294967295)
+     2 |-> (signExtend (Bytes2Int (b"\xff\xff\xff\xff", LE, Unsigned), 32) => 4294967295)
+     3 |-> (signExtend (Bytes2Int (substrBytes(W0:Bytes, 4, 8), LE, Unsigned) , 32) => Bytes2Int(substrBytes(W0:Bytes ,4 , 8), LE, Unsigned ))
     </regs>
-    <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
+    <haltCond> ADDRESS ( 0 ) </haltCond>
   requires lengthBytes(W0) ==Int 32
 endmodule
