@@ -25,9 +25,7 @@ module INT-SPEC
      16 |-> (W(Bytes2Int(b"\x00" +Bytes substrBytes(W3, 6, 7), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8), LE, Unsigned)) => W(Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7), LE, Unsigned)))
      17 |-> (W(Bytes2Int(b"\x00\x00\x00" +Bytes substrBytes(W3, 4, 8), LE, Unsigned) |Int Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 5, 6), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7), LE, Unsigned)) => W(Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7) +Bytes substrBytes(W3, 5, 6) +Bytes substrBytes(W3, 4, 8), LE, Unsigned)))
     </regs>
-    <test>
-      <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
-    </test>
+    <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
 requires 0 <=Int W1 andBool W1 <Int 4294967296
  andBool 0 <=Int W2 andBool W2 <Int 256
  andBool lengthBytes(W3) ==Int 32

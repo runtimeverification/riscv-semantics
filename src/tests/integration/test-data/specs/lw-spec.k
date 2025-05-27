@@ -17,8 +17,6 @@ module LW-SPEC
       #bytes ( b"\x01\x00\x00\x00" +Bytes X +Bytes Y +Bytes b"\x02\x00\x00\x00")
       .SparseBytes
     </mem>
-    <test>
-      <haltCond> ADDRESS ( W ( 12 ) ) </haltCond>
-    </test>
+    <haltCond> ADDRESS ( W ( 12 ) ) </haltCond>
     requires lengthBytes(X) ==Int 4 andBool lengthBytes(Y) ==Int 4
 endmodule

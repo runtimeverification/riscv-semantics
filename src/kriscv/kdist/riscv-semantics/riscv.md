@@ -1,16 +1,10 @@
 # RISC-V Execution
 ## Configuration
-The configuration is divided into two sections:
-- `<riscv>`, containing the state of the abstract machine.
-- `<test>`, containing any additional state needed to run tests.
-
-The `<riscv>` section contain the following cells:
+The root of the configuration is the `<riscv>` cell. It contains the following cells:
 - `<instrs>`, a K-sequence denoting a pipeline of operations to be executed. Initially, we load the `#EXECUTE` operation, which indicates that instructions should be continually fetched and executed.
 - `<regs>`, a map from each initialized `Register` to its current value.
 - `<pc>`, the program counter register.
 - `<mem>`, a map from initialized `Word` addresses to the byte stored at the address.
-
-The `<test>` section currently contains on a single cell:
 - `<haltCond>`, a value indicating under which conditions the program should be halted.
 ```k
 requires "riscv-disassemble.md"
@@ -35,10 +29,8 @@ module RISCV-CONFIGURATION
       <regs> $REGS:Map </regs> // Map{Register, Word}
       <pc> $PC:Word </pc>
       <mem> $MEM:SparseBytes </mem>
-    </riscv>
-    <test>
       <haltCond> $HALT:HaltCondition </haltCond>
-    </test>
+    </riscv>
 
   syntax HaltCondition
 endmodule

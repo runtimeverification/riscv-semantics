@@ -18,8 +18,6 @@ module STORE-SYMBOLIC-BYTES
     ) =>
     #bytes ( Int2Bytes ( 4 , X , LE ) +Bytes b"\x00\x00\x00\x00\x00\x00\x00\x00" ) .SparseBytes
     </mem>
-    <test>
-      <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
-    </test>
+    <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
 requires lengthBytes(W0) ==Int 4
 endmodule
