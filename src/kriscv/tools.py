@@ -12,7 +12,7 @@ from pyk.ktool.krun import KRun
 
 from kriscv import term_builder
 from kriscv.term_builder import word
-from kriscv.term_manip import kore_sparse_bytes, kore_word, match_map
+from kriscv.term_manip import kore_sparse_bytes, match_map
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
