@@ -1,5 +1,5 @@
-# `XLEN`-bit Word Datatype
-In this file, we define a `Word` datatype representing a sequence of `XLEN` bits, where `XLEN=32` for `RV32*` ISAs and `XLEN=64` for `RV64*` ISAs.
+# XLEN-bit Word Datatype
+In this file, we define a word datatype representing a sequence of `XLEN` bits, where `XLEN=32` for `RV32*` ISAs and `XLEN=64` for `RV64*` ISAs.
 ```k
 module WORD
   imports BOOL
@@ -9,9 +9,9 @@ module WORD
   syntax Int ::= "XLEN" [macro]
   rule XLEN => 32
 ```
-In our semantics, we represent bit sequences using K's `Int` type, which supports arbitrary precision and infinite sign extension in two's complement format. The `Word` type is essentially an unsigned integer wrapper around `Int`, where only the `XLEN` least significant bits contain meaningful data and all higher bits are set to zero.
+In our semantics, we represent bit sequences using K's `Int` type, which supports arbitrary precision and infinite sign extension in two's complement format. A word is essentially an unsigned integer wrapper around `Int`, where only the XLEN least significant bits contain meaningful data and all higher bits are set to zero.
 
-A `Word` can be interpreted as an `XLEN`-bit signed two's complement integer by infinitely sign extending.
+A word can be interpreted as an `XLEN`-bit signed two's complement integer by infinitely sign extending.
 ```k
   syntax Int ::= Word2SInt(Int) [function, total]
   rule Word2SInt(I) => infSignExtend(I, XLEN)
@@ -26,13 +26,13 @@ A `Word` can be interpreted as an `XLEN`-bit signed two's complement integer by 
   rule signExtend(B, L) => ((2 ^Int (XLEN -Int L) -Int 1) <<Int L) |Int B requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
   rule signExtend(B, _) => B [owise]
 ```
-Booleans can be encoded as `Word`s in the obvious way
+Booleans can be encoded as words in the obvious way
 ```k
   syntax Int ::= Bool2Word(Bool) [function, total]
   rule Bool2Word(false) => 0
   rule Bool2Word(true ) => 1
 ```
-The rest of this file defines various numeric and bitwise operations over `Word`. Most of these are straightforward operations on the underlying `Int`.
+The rest of this file defines various numeric and bitwise operations over words. Most of these are straightforward operations on the underlying `Int`.
 ```k
   syntax Bool ::= Int "==Word" Int [function, total]
   rule W1 ==Word W2 => W1 ==Int W2
@@ -119,7 +119,7 @@ Therefore, applying `>>Int` to a word will always pad with `0`s, correctly imple
   rule W1 >>lWord W2 => W1 >>Int W2 requires 0 <=Int W2
   rule _  >>lWord W2 => 0           requires W2 <Int 0
 ```
-For arithmetic right shift (`>>aWord`), we first convert to an infinitely sign-extended `Int` using `Word2SInt`, ensuring `>>Int` will pad with `1`s for a negative `Word`. The result is then chopped back to a `Word`.
+For arithmetic right shift (`>>aWord`), we first convert to an infinitely sign-extended `Int` using `Word2SInt`, ensuring `>>Int` will pad with `1`s for a negative word. The result is then chopped back to a word.
 ```k
   rule W1 >>aWord W2 => chop(Word2SInt(W1) >>Int W2) requires 0 <=Int W2
   rule _  >>aWord W2 => 0                         requires W2 <Int 0
