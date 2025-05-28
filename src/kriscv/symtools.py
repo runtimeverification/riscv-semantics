@@ -15,6 +15,7 @@ from pyk.proof.reachability import APRProof
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
 
+    from pyk.proof.show import APRProofShow
     from pyk.utils import BugReport
 
 
@@ -41,6 +42,27 @@ class SymTools:
     @cached_property
     def kprove(self) -> KProve:
         return KProve(definition_dir=self.haskell_dir, use_directory=self.proof_dir, bug_report=self.bug_report)
+
+    @cached_property
+    def proof_show(self) -> APRProofShow:
+        from pyk.cterm.show import CTermShow
+        from pyk.kast.formatter import Formatter
+        from pyk.kcfg.show import NodePrinter
+        from pyk.proof.show import APRProofShow
+
+        show = APRProofShow(
+            definition=self.kprove.definition,
+            node_printer=NodePrinter(
+                cterm_show=CTermShow(
+                    printer=Formatter(
+                        definition=self.kprove.definition,
+                    ),
+                    minimize=False,
+                ),
+                full_printer=True,
+            ),
+        )
+        return show
 
     @contextmanager
     def explore(self, *, id: str) -> Iterator[KCFGExplore]:
@@ -105,23 +127,3 @@ class SymTools:
             prover.advance_proof(proof, max_iterations=max_iterations)
 
         return proof
-
-    def show_proof(self, proof: APRProof) -> str:
-        from pyk.cterm.show import CTermShow
-        from pyk.kast.formatter import Formatter
-        from pyk.kcfg.show import NodePrinter
-        from pyk.proof.show import APRProofShow
-
-        show = APRProofShow(
-            definition=self.kprove.definition,
-            node_printer=NodePrinter(
-                cterm_show=CTermShow(
-                    printer=Formatter(
-                        definition=self.kprove.definition,
-                    ),
-                    minimize=False,
-                ),
-                full_printer=True,
-            ),
-        )
-        return '\n'.join(show.show(proof))
