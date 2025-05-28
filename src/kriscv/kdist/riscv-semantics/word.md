@@ -114,7 +114,7 @@ The logical right shift (`>>lWord`) is implemented using the arithmetic right sh
 2. `>>Int` arithmetically shifts by padding with the infinitely repeated sign bit
 3. For a word, only the least-significant `XLEN`-bits are populated, so the infinitely repeated sign bit is always `0`
 
-Therefore, applying `>>Int` to a `Word` value will always pad with `0`s, correctly implementing a logical right shift.
+Therefore, applying `>>Int` to a word will always pad with `0`s, correctly implementing a logical right shift.
 ```k
   rule W1 >>lWord W2 => W1 >>Int W2 requires 0 <=Int W2
   rule _  >>lWord W2 => 0           requires W2 <Int 0
