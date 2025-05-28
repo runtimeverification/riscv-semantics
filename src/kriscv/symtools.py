@@ -11,11 +11,15 @@ from pyk.cterm.symbolic import CTermSymbolic
 from pyk.kcfg.explore import KCFGExplore
 from pyk.ktool.kprove import KProve
 from pyk.proof.reachability import APRProof
+from pyk.proof.show import APRProofShow
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
 
-    from pyk.proof.show import APRProofShow
+    from pyk.kast import KInner
+    from pyk.kcfg.kcfg import NodeIdLike
+    from pyk.kcfg.show import KCFGShow
+    from pyk.ktool.kprint import KPrint
     from pyk.utils import BugReport
 
 
@@ -45,24 +49,7 @@ class SymTools:
 
     @cached_property
     def proof_show(self) -> APRProofShow:
-        from pyk.cterm.show import CTermShow
-        from pyk.kast.formatter import Formatter
-        from pyk.kcfg.show import NodePrinter
-        from pyk.proof.show import APRProofShow
-
-        show = APRProofShow(
-            definition=self.kprove.definition,
-            node_printer=NodePrinter(
-                cterm_show=CTermShow(
-                    printer=Formatter(
-                        definition=self.kprove.definition,
-                    ),
-                    minimize=False,
-                ),
-                full_printer=True,
-            ),
-        )
-        return show
+        return _APRProofShow(self.kprove)
 
     @contextmanager
     def explore(self, *, id: str) -> Iterator[KCFGExplore]:
@@ -127,3 +114,66 @@ class SymTools:
             prover.advance_proof(proof, max_iterations=max_iterations)
 
         return proof
+
+
+class _APRProofShow(APRProofShow):
+    kprint: KPrint
+
+    def __init__(self, kprint: KPrint):
+        self.kprint = kprint
+
+    def show(
+        self,
+        proof: APRProof,
+        nodes: Iterable[NodeIdLike] = (),
+        node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
+        to_module: bool = False,
+        minimize: bool = False,
+        omit_cells: Iterable[str] = (),
+    ) -> list[str]:
+        if node_deltas or to_module or minimize or omit_cells:
+            # These potentially produce ill-typed terms that kore-print cannot handle
+            raise ValueError('Unsupported feature')
+
+        return super().show(
+            proof=proof,
+            nodes=nodes,
+            node_deltas=node_deltas,
+            to_module=to_module,
+            minimize=minimize,
+            omit_cells=omit_cells,
+        )
+
+    @cached_property
+    def kcfg_show(self) -> KCFGShow:  # type: ignore [override]
+        from types import SimpleNamespace
+
+        from pyk.cterm.show import CTermShow
+        from pyk.kcfg.show import KCFGShow, NodePrinter
+
+        res = KCFGShow(
+            defn=self.kprint.definition,
+            node_printer=NodePrinter(
+                cterm_show=CTermShow(
+                    printer=self._print,
+                    minimize=False,
+                    break_cell_collections=False,
+                ),
+                full_printer=False,
+            ),
+        )
+
+        # Patch res.pretty_printer
+        res.pretty_printer = SimpleNamespace(
+            definition=self.kprint.definition,
+            print=self._print,
+        )  # type: ignore [assignment]
+
+        return res
+
+    def _print(self, kast: KInner) -> str:
+        from pyk.konvert import kast_to_kore
+        from pyk.kore.tools import kore_print
+
+        kore = kast_to_kore(self.kprint.definition, kast)
+        return kore_print(kore, definition_dir=self.kprint.definition_dir)
