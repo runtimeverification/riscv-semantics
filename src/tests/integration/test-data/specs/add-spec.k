@@ -10,10 +10,10 @@ module ADD-SPEC
       2 |-> Y
       3 |-> (_ => Y +Word X)
     </regs>
-    <pc> W ( 0 => 4 ) </pc>
+    <pc> 0 => 4 </pc>
     <mem>
       #bytes ( b"\xb3\x01\x11\x00" )  // add x3, x2, x1
       .SparseBytes
     </mem>
-    <haltCond> ADDRESS ( W ( 4 ) ) </haltCond>
+    <haltCond> ADDRESS ( 4 ) </haltCond>
 endmodule
