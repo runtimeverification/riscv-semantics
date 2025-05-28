@@ -112,7 +112,7 @@ For right shifts, we provide both arithmetic and logical variants.
 The logical right shift (`>>lWord`) is implemented using the arithmetic right shift operator `>>Int` because:
 1. `Int` values are infinitely sign-extended two's complement integers
 2. `>>Int` arithmetically shifts by padding with the infinitely repeated sign bit
-3. For a `Word` value, only the least-significant `XLEN`-bits are populated, so the infinitely repeated sign bit is always `0`
+3. For a word, only the least-significant `XLEN`-bits are populated, so the infinitely repeated sign bit is always `0`
 
 Therefore, applying `>>Int` to a `Word` value will always pad with `0`s, correctly implementing a logical right shift.
 ```k
