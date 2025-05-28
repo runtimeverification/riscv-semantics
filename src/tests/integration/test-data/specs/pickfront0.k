@@ -8,11 +8,11 @@ module PICKFRONT0
     <regs>
         .Map
     </regs>
-    <pc> W ( 0 ) </pc>
+    <pc> 0 </pc>
     <mem>
     #bytes(pickFront ( #bytes ( substrBytes ( W0:Bytes , 16 , 32 ) +Bytes W1:Bytes +Bytes b"\x00\x00\x00\x00\x00" ) .SparseBytes , 4 )) .SparseBytes
     => #bytes ( substrBytes ( W0:Bytes , 16 , 20 ) ) .SparseBytes
     </mem>
-    <haltCond> ADDRESS ( W ( 0 ) ) </haltCond>
+    <haltCond> ADDRESS ( 0 ) </haltCond>
 requires lengthBytes(W0) ==Int 32 andBool lengthBytes(W1) ==Int 32
 endmodule

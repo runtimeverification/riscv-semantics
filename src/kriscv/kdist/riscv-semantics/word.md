@@ -1,5 +1,5 @@
-# `XLEN`-bit Word Datatype
-In this file, we define a `Word` datatype representing a sequence of `XLEN` bits, where `XLEN=32` for `RV32*` ISAs and `XLEN=64` for `RV64*` ISAs.
+# XLEN-bit Word Datatype
+In this file, we define a word datatype representing a sequence of `XLEN` bits, where `XLEN=32` for `RV32*` ISAs and `XLEN=64` for `RV64*` ISAs.
 ```k
 module WORD
   imports BOOL
@@ -9,19 +9,12 @@ module WORD
   syntax Int ::= "XLEN" [macro]
   rule XLEN => 32
 ```
-Throughout the semantics, we use K's arbitrary-precision, infinitely sign-extended, two's-complement integer type `Int` to store arbitrary bit sequences. A `Word` consists of a single `Int`, with the `XLEN` least-signficant bits storing the desired bit sequence and all other bits zeroed.
+In our semantics, we represent bit sequences using K's `Int` type, which supports arbitrary precision and infinite sign extension in two's complement format. A word is essentially an unsigned integer wrapper around `Int`, where only the XLEN least significant bits contain meaningful data and all higher bits are set to zero.
+
+A word can be interpreted as an `XLEN`-bit signed two's complement integer by infinitely sign extending.
 ```k
-  syntax Word ::= W(Int) [symbol(W)]
-```
-A `Word` can be interpreted as an unsigned integer by directly returning the underlying `Int`,
-```k
-  syntax Int ::= Word2UInt(Word) [function, total]
-  rule Word2UInt(W(I)) => I
-```
-or interpreted as an `XLEN`-bit signed two's complement integer by infinitely sign extending.
-```k
-  syntax Int ::= Word2SInt(Word) [function, total]
-  rule Word2SInt(W(I)) => infSignExtend(I, XLEN)
+  syntax Int ::= Word2SInt(Int) [function, total]
+  rule Word2SInt(I) => infSignExtend(I, XLEN)
 
   syntax Int ::= infSignExtend(bits: Int, signBitIdx: Int) [function, total]
   rule infSignExtend(B, L) => (-1 <<Int L) |Int B requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
@@ -29,106 +22,106 @@ or interpreted as an `XLEN`-bit signed two's complement integer by infinitely si
 ```
 `N`-bit signed two's complement integers with `N <= XLEN` can also be sign extended to `XLEN`-bits.
 ```k
-  syntax Word ::= signExtend(bits: Int, signBitIdx: Int) [function, total]
-  rule signExtend(B, L) => W(((2 ^Int (XLEN -Int L) -Int 1) <<Int L) |Int B) requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
-  rule signExtend(B, _) => W(B) [owise]
+  syntax Int ::= signExtend(bits: Int, signBitIdx: Int) [function, total]
+  rule signExtend(B, L) => ((2 ^Int (XLEN -Int L) -Int 1) <<Int L) |Int B requires (B >>Int (L -Int 1)) &Int 1 ==Int 1
+  rule signExtend(B, _) => B [owise]
 ```
-Booleans can be encoded as `Word`s in the obvious way
+Booleans can be encoded as words in the obvious way
 ```k
-  syntax Word ::= Bool2Word(Bool) [function, total]
-  rule Bool2Word(false) => W(0)
-  rule Bool2Word(true ) => W(1)
+  syntax Int ::= Bool2Word(Bool) [function, total]
+  rule Bool2Word(false) => 0
+  rule Bool2Word(true ) => 1
 ```
-The rest of this file defines various numeric and bitwise operations over `Word`. Most of these are straightforwad operations on the underlying `Int`.
+The rest of this file defines various numeric and bitwise operations over words. Most of these are straightforward operations on the underlying `Int`.
 ```k
-  syntax Bool ::= Word "==Word" Word [function, total]
-  rule W(I1) ==Word W(I2) => I1 ==Int I2
+  syntax Bool ::= Int "==Word" Int [function, total]
+  rule W1 ==Word W2 => W1 ==Int W2
 
-  syntax Bool ::= Word "=/=Word" Word [function, total]
-  rule W(I1) =/=Word W(I2) => I1 =/=Int I2
+  syntax Bool ::= Int "=/=Word" Int [function, total]
+  rule W1 =/=Word W2 => W1 =/=Int W2
 ```
 The `s` prefix denotes a signed operation while `u` denotes an unsigned operation.
 ```k
-  syntax Bool ::= Word "<sWord" Word [function, total]
+  syntax Bool ::= Int "<sWord" Int [function, total]
   rule W1 <sWord W2 => Word2SInt(W1) <Int Word2SInt(W2)
 
-  syntax Bool ::= Word ">=sWord" Word [function, total]
+  syntax Bool ::= Int ">=sWord" Int [function, total]
   rule W1 >=sWord W2 => Word2SInt(W1) >=Int Word2SInt(W2)
 
-  syntax Bool ::= Word "<uWord" Word [function, total]
-  rule W(I1) <uWord W(I2) => I1 <Int I2
+  syntax Bool ::= Int "<uWord" Int [function, total]
+  rule W1 <uWord W2 => W1 <Int W2
 
-  syntax Bool ::= Word ">=uWord" Word [function, total]
-  rule W(I1) >=uWord W(I2) => I1 >=Int I2
+  syntax Bool ::= Int ">=uWord" Int [function, total]
+  rule W1 >=uWord W2 => W1 >=Int W2
 ```
 To avoid syntax conflicts, we define the following syntax with `left` associativity and clear precedence over the bitwise operations.
 ```k
-  syntax Word ::= left:
-                  Word "*Word"    Word [function, total, symbol(mulWord)]
-                | Word "*hWord"   Word [function, total, symbol(mulhWord)]
-                | Word "*huWord"  Word [function, total, symbol(mulhuWord)]
-                | Word "*hsuWord" Word [function, total, symbol(mulhsuWord)]
+  syntax Int ::= left:
+                  Int "*Word"    Int [function, total, symbol(mulWord)]
+                | Int "*hWord"   Int [function, total, symbol(mulhWord)]
+                | Int "*huWord"  Int [function, total, symbol(mulhuWord)]
+                | Int "*hsuWord" Int [function, total, symbol(mulhsuWord)]
                 > left:
-                  Word "+Word"    Word [function, total, symbol(addWord)]
-                | Word "-Word"    Word [function, total, symbol(subWord)]
+                  Int "+Word"    Int [function, total, symbol(addWord)]
+                | Int "-Word"    Int [function, total, symbol(subWord)]
                 > left:
-                  Word ">>lWord"  Word [function, total, symbol(rshWord)]
-                | Word ">>aWord"  Word [function, total, symbol(ashWord)]
-                | Word "<<Word"   Word [function, total, symbol(lshWord)]
+                  Int ">>lWord"  Int [function, total, symbol(rshWord)]
+                | Int ">>aWord"  Int [function, total, symbol(ashWord)]
+                | Int "<<Word"   Int [function, total, symbol(lshWord)]
                 > left:
-                  Word "&Word"    Word [function, total, symbol(andWord)]
+                  Int "&Word"    Int [function, total, symbol(andWord)]
                 > left:
-                  Word "xorWord"  Word [function, total, symbol(xorWord)]
+                  Int "xorWord"  Int [function, total, symbol(xorWord)]
                 > left:
-                  Word "|Word"    Word [function, total, symbol(orWord)]
+                  Int "|Word"    Int [function, total, symbol(orWord)]
 ```
 
 Note that two's complement enables us to use a single addition or subtraction operation for both signed and unsigned values.
 ```k
-  rule W(I1) +Word W(I2) => chop(I1 +Int I2)
-  rule W(I1) -Word W(I2) => chop(I1 -Int I2)
+  rule W1 +Word W2 => chop(W1 +Int W2)
+  rule W1 -Word W2 => chop(W1 -Int W2)
 ```
 The same is true for the `XLEN` least-significant bits of the result of multiplication.
 ```k
-  rule W(I1) *Word W(I2) => chop(I1 *Int I2)
+  rule W1 *Word W2 => chop(W1 *Int W2)
 ```
-The value of the upper `XLEN` bits however depends on signedness of the operands, as reflected by the followig functions.
+The value of the upper `XLEN` bits however depends on signedness of the operands, as reflected by the following functions.
 ```k
   rule W1 *hWord W2 => chop((Word2SInt(W1) *Int Word2SInt(W2)) >>Int XLEN)
-  rule W(I1) *huWord W(I2) => chop((I1 *Int I2) >>Int XLEN)
-  rule W1 *hsuWord W(I2) => chop((Word2SInt(W1) *Int I2) >>Int XLEN)
+  rule W1 *huWord W2 => chop((W1 *Int W2) >>Int XLEN)
+  rule W1 *hsuWord W2 => chop((Word2SInt(W1) *Int W2) >>Int XLEN)
 ```
 Above, the `chop` utility function
 ```k
-  syntax Word ::= chop(Int) [function, total]
-  rule chop(I) => W(I &Int (2 ^Int XLEN -Int 1))
+  syntax Int ::= chop(Int) [function, total]
+  rule chop(I) => I &Int (2 ^Int XLEN -Int 1)
 ```
 is used to zero-out all but the least-significant `XLEN`-bits in case of overflow.
 ```k
-  rule W(I1) &Word W(I2) => W(I1 &Int I2)
+  rule W1 &Word W2 => W1 &Int W2
 
-  rule W(I1) |Word W(I2) => W(I1 |Int I2)
+  rule W1 |Word W2 => W1 |Int W2
 
-  rule W(I1) xorWord W(I2) => W(I1 xorInt I2)
+  rule W1 xorWord W2 => W1 xorInt W2
 
-  rule W(I1) <<Word W(I2) => chop(I1 <<Int I2) requires 0 <=Int I2
-  rule _     <<Word W(I2) => W(0)              requires I2 <Int 0
+  rule W1 <<Word W2 => chop(W1 <<Int W2) requires 0 <=Int W2
+  rule _     <<Word W2 => 0              requires W2 <Int 0
 ```
 For right shifts, we provide both arithmetic and logical variants.
 
-Counterintuitively, we use the arithmetic right shift operator `>>Int` for `Int` to implement the logical right shift operator `>>lWord` for `Word`. Indeed, note the following:
-- `Int` values are infinitely sign-extended two's complement integers.
-- `>>Int` arithmetically shifts by padding with the infinitely repeated sign bit.
-- For an `I:Int` underlying `W(I):Word`, only the least-significant `XLEN`-bits of `I` are populated, so the infinitely repeated sign bit is always `0`.
+The logical right shift (`>>lWord`) is implemented using the arithmetic right shift operator `>>Int` because:
+1. `Int` values are infinitely sign-extended two's complement integers
+2. `>>Int` arithmetically shifts by padding with the infinitely repeated sign bit
+3. For a word, only the least-significant `XLEN`-bits are populated, so the infinitely repeated sign bit is always `0`
 
-That is, for any `I:Int` underlying some `W(I):Word`, applying `>>Int` will always pad with `0`s, correctly implementing a logical right shift.
+Therefore, applying `>>Int` to a word will always pad with `0`s, correctly implementing a logical right shift.
 ```k
-  rule W(I1) >>lWord W(I2) => W(I1 >>Int I2) requires 0 <=Int I2
-  rule _     >>lWord W(I2) => W(0)           requires I2 <Int 0
+  rule W1 >>lWord W2 => W1 >>Int W2 requires 0 <=Int W2
+  rule _  >>lWord W2 => 0           requires W2 <Int 0
 ```
-To actually perform an arithmetic shift over `Word`, we first convert to an infinitely sign-extended `Int` of equal value using `Word2SInt`, ensuring `>>Int` will pad with `1`s for a negative `Word`. The final result will still be infinitely sign-extended, so we must `chop` it back to a `Word`.
+For arithmetic right shift (`>>aWord`), we first convert to an infinitely sign-extended `Int` using `Word2SInt`, ensuring `>>Int` will pad with `1`s for a negative word. The result is then chopped back to a word.
 ```k
-  rule W1 >>aWord W(I2) => chop(Word2SInt(W1) >>Int I2) requires 0 <=Int I2
-  rule _  >>aWord W(I2) => W(0)                         requires I2 <Int 0
+  rule W1 >>aWord W2 => chop(Word2SInt(W1) >>Int W2) requires 0 <=Int W2
+  rule _  >>aWord W2 => 0                         requires W2 <Int 0
 endmodule
 ```

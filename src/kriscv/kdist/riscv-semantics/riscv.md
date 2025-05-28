@@ -27,7 +27,7 @@ module RISCV-CONFIGURATION
     <riscv>
       <instrs> #EXECUTE ~> .K </instrs>
       <regs> $REGS:Map </regs> // Map{Register, Word}
-      <pc> $PC:Word </pc>
+      <pc> $PC:Int </pc>
       <mem> $MEM:SparseBytes </mem>
       <haltCond> $HALT:HaltCondition </haltCond>
     </riscv>
@@ -56,7 +56,7 @@ module RISCV-TERMINATION
 
   syntax HaltCondition ::=
       "NEVER"                [symbol(HaltNever)]
-    | "ADDRESS" "(" Word ")" [symbol(HaltAtAddress)]
+    | "ADDRESS" "(" Int ")" [symbol(HaltAtAddress)]
 ```
 The `NEVER` condition indicates that we should never halt.
 ```k
@@ -93,26 +93,26 @@ module RISCV-MEMORY
 ```
 We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions. For multi-byte loads and stores, we presume a little-endian architecture.
 ```k
-  syntax Int ::= loadBytes(memory: Memory, address: Word, numBytes: Int) [function, total, symbol(Memory:loadBytes)]
-  rule loadBytes(MEM, W(ADDR), NUM) => readBytes(MEM, ADDR, NUM)
+  syntax Int ::= loadBytes(memory: Memory, address: Int, numBytes: Int) [function, total, symbol(Memory:loadBytes)]
+  rule loadBytes(MEM, ADDR, NUM) => readBytes(MEM, ADDR, NUM)
 
-  syntax Memory ::= storeBytes(memory: Memory, address: Word, bytes: Int, numBytes: Int) [function, total, symbol(Memory:storeBytes)]
-  rule storeBytes(MEM, W(ADDR), BS, NUM) => writeBytes(MEM, ADDR, BS, NUM)
+  syntax Memory ::= storeBytes(memory: Memory, address: Int, bytes: Int, numBytes: Int) [function, total, symbol(Memory:storeBytes)]
+  rule storeBytes(MEM, ADDR, BS, NUM) => writeBytes(MEM, ADDR, BS, NUM)
 ```
 Instructions are always 32-bits, and are stored in little-endian format regardless of the endianness of the overall architecture.
 ```k
-  syntax Instruction ::= fetchInstr(memory: Memory, address: Word) [function, total]
+  syntax Instruction ::= fetchInstr(memory: Memory, address: Int) [function, total]
   rule fetchInstr(MEM, ADDR) => disassemble(loadBytes(MEM, ADDR, 4))
 ```
 Registers should be manipulated with the `writeReg` and `readReg` functions, which account for `x0` always being hard-wired to contain all `0`s.
 ```k
-  syntax Map ::= writeReg(regs: Map, rd: Int, value: Word) [function, total]
+  syntax Map ::= writeReg(regs: Map, rd: Int, value: Int) [function, total]
   rule writeReg(REGS, 0 , _  ) => REGS
   rule writeReg(REGS, RD, VAL) => REGS[RD <- VAL] [owise]
 
-  syntax Word ::= readReg(regs: Map, rs: Int) [function, total]
-  rule readReg(_   , 0 ) => W(0)
-  rule readReg(REGS, RS) => { REGS[RS] } :>Word [owise]
+  syntax Int ::= readReg(regs: Map, rs: Int) [function, total]
+  rule readReg(_   , 0 ) => 0
+  rule readReg(REGS, RS) => { REGS[RS] } :>Int [owise]
 endmodule
 ```
 
@@ -147,16 +147,16 @@ module RISCV
   rule <instrs> #PC[ I ] => .K ...</instrs>
        <pc> PC => PC +Word pcIncrAmount(I) </pc>
 
-  syntax Word ::= pcIncrAmount(Instruction) [function, total]
-  rule pcIncrAmount(BEQ _ , _ , _   ) => W(0)
-  rule pcIncrAmount(BNE _ , _ , _   ) => W(0)
-  rule pcIncrAmount(BLT _ , _ , _   ) => W(0)
-  rule pcIncrAmount(BLTU _ , _ , _  ) => W(0)
-  rule pcIncrAmount(BGE _ , _ , _   ) => W(0)
-  rule pcIncrAmount(BGEU _ , _ , _  ) => W(0)
-  rule pcIncrAmount(JAL _ , _       ) => W(0)
-  rule pcIncrAmount(JALR _ , _ ( _ )) => W(0)
-  rule pcIncrAmount(_)                => W(4) [owise]
+  syntax Int ::= pcIncrAmount(Instruction) [function, total]
+  rule pcIncrAmount(BEQ _ , _ , _   ) => 0
+  rule pcIncrAmount(BNE _ , _ , _   ) => 0
+  rule pcIncrAmount(BLT _ , _ , _   ) => 0
+  rule pcIncrAmount(BLTU _ , _ , _  ) => 0
+  rule pcIncrAmount(BGE _ , _ , _   ) => 0
+  rule pcIncrAmount(BGEU _ , _ , _  ) => 0
+  rule pcIncrAmount(JAL _ , _       ) => 0
+  rule pcIncrAmount(JALR _ , _ ( _ )) => 0
+  rule pcIncrAmount(_)                => 4 [owise]
 ```
 We then provide rules to consume and execute each instruction from the top of the pipeline.
 
@@ -189,15 +189,15 @@ We then provide rules to consume and execute each instruction from the top of th
 `SLLI`, `SRLI`, and `SRAI` perform logical left, logical right, and arithmetic right shifts respectively.
 ```k
   rule <instrs> SLLI RD , RS , SHAMT => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) <<Word W(SHAMT)) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) <<Word SHAMT) </regs>
     requires 0 <=Int SHAMT
 
   rule <instrs> SRLI RD , RS , SHAMT => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>lWord W(SHAMT)) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>lWord SHAMT) </regs>
     requires 0 <=Int SHAMT
 
   rule <instrs> SRAI RD , RS , SHAMT => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>aWord W(SHAMT)) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS) >>aWord SHAMT) </regs>
     requires 0 <=Int SHAMT
 ```
 `LUI` builds a 32-bit constant from the 20-bit immediate by setting the 12 least-significant bits to `0`, then sign extends to `XLEN` bits and places the result in register `RD`.
@@ -253,34 +253,34 @@ The following instructions behave analogously to their `I`-suffixed counterparts
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word (readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) <<Word (readReg(REGS, RS2) &Word (XLEN -Int 1))) </regs>
 
   rule <instrs> SRL RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord (readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>lWord (readReg(REGS, RS2) &Word (XLEN -Int 1))) </regs>
 
   rule <instrs> SRA RD , RS1 , RS2 => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord (readReg(REGS, RS2) &Word W(XLEN -Int 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) >>aWord (readReg(REGS, RS2) &Word (XLEN -Int 1))) </regs>
 ```
 `JAL` stores `PC + 4` in `RD`, then increments `PC` by `OFFSET`.
 ```k
   rule <instrs> JAL RD, OFFSET => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
+       <regs> REGS => writeReg(REGS, RD, PC +Word 4) </regs>
        <pc> PC => PC +Word chop(OFFSET) </pc>
 ```
 `JALR` stores `PC + 4` in `RD`, sets `PC` to the value in register `RS1` plus `OFFSET`, then sets the least-significant bit of this new `PC` to `0`.
 ```k
   rule <instrs> JALR RD, OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, PC +Word W(4)) </regs>
+       <regs> REGS => writeReg(REGS, RD, PC +Word 4) </regs>
        <pc> PC => (readReg(REGS, RS1) +Word chop(OFFSET)) &Word chop(-1 <<Int 1) </pc>
 ```
 `BEQ` increments `PC` by `OFFSET` so long as the values in registers `RS1` and `RS2` are equal. Otherwise, `PC` is incremented by `4`.
 ```k
   syntax KItem ::= "#PC_BRANCH" "(" Int "," Bool ")"
   rule <instrs> #PC_BRANCH(OFFSET, COND) => .K ...</instrs>
-       <pc> PC => PC +Word W(OFFSET) </pc>
+       <pc> PC => PC +Word OFFSET </pc>
        requires COND
   rule <instrs> #PC_BRANCH(_, COND) => .K ...</instrs>
-       <pc> PC => PC +Word W(4) </pc>
+       <pc> PC => PC +Word 4 </pc>
        requires notBool COND
 
   rule <instrs> BEQ RS1 , RS2 , OFFSET => #PC_BRANCH(OFFSET, readReg(REGS, RS1) ==Word readReg(REGS, RS2)) ...</instrs>
@@ -320,26 +320,26 @@ The remaining branch instructions proceed analogously, but performing different 
 `LBU` and `LHU` are analogous to `LB` and `LH`, but zero-extending rather than sign-extending.
 ```k
    rule <instrs> LBU RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, W(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 1))) </regs>
+       <regs> REGS => writeReg(REGS, RD, loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 1)) </regs>
        <mem> MEM </mem>
 
   rule <instrs> LHU RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, W(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2))) </regs>
+       <regs> REGS => writeReg(REGS, RD, loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2)) </regs>
        <mem> MEM </mem>
 ```
 Dually, `SB`, `SH`, and `SW` store the least-significant `1`, `2`, and `4` bytes respectively from `RS2` to the memory address which is `OFFSET` greater than the value in register `RS1`.
 ```k
   rule <instrs> SB RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 255, 1) </mem>
+       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 255, 1) </mem>
 
   rule <instrs> SH RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 65535, 2) </mem>
+       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 65535, 2) </mem>
 
   rule <instrs> SW RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), Word2UInt(readReg(REGS, RS2)) &Int 4294967295, 4) </mem>
+       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 4294967295, 4) </mem>
 ```
 We presume a single hart with exclusive access to memory, so `FENCE` and `FENCE.TSO` are no-ops.
 ```k
