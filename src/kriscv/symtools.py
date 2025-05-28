@@ -108,6 +108,7 @@ class SymTools:
 
     def show_proof(self, proof: APRProof) -> str:
         from pyk.cterm.show import CTermShow
+        from pyk.kast.formatter import Formatter
         from pyk.kcfg.show import NodePrinter
         from pyk.proof.show import APRProofShow
 
@@ -115,7 +116,9 @@ class SymTools:
             definition=self.kprove.definition,
             node_printer=NodePrinter(
                 cterm_show=CTermShow(
-                    printer=self.kprove.pretty_print,
+                    printer=Formatter(
+                        definition=self.kprove.definition,
+                    ),
                     minimize=False,
                 ),
                 full_printer=True,
