@@ -6,6 +6,8 @@ from pyk.proof import ProofStatus
 
 from kriscv.elf_parser import ELF, Symbol
 
+from .utils import TEST_DATA_DIR
+
 if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
@@ -54,8 +56,6 @@ def test_symbolic_config_from_elf(tools: Tools, symtools: SymTools, tmp_path: Pa
     from pyk.kast.prelude.kint import addInt, andInt
     from pyk.kast.prelude.utils import token
 
-    from kriscv.term_builder import word
-
     OP1 = KVariable('OP1', 'Bytes')  # noqa: N806
     OP2 = KVariable('OP2', 'Bytes')  # noqa: N806
     LE = KApply('littleEndianBytes')  # noqa: N806
@@ -68,9 +68,9 @@ def test_symbolic_config_from_elf(tools: Tools, symtools: SymTools, tmp_path: Pa
     init_config = tools.config_from_elf(_ELF, end_symbol='END', symbolic_names=['OP1', 'OP2'])
     empty_config = tools.krun.definition.empty_config(KSort('GeneratedTopCell'))
     regs: dict[KInner, KInner] = {
-        token(1): word(Bytes2Int(OP1, LE, Unsigned)),
-        token(2): word(Bytes2Int(OP2, LE, Unsigned)),
-        token(3): word(andInt(addInt(Bytes2Int(OP1, LE, Unsigned), Bytes2Int(OP2, LE, Unsigned)), token(4294967295))),
+        token(1): Bytes2Int(OP1, LE, Unsigned),
+        token(2): Bytes2Int(OP2, LE, Unsigned),
+        token(3): andInt(addInt(Bytes2Int(OP1, LE, Unsigned), Bytes2Int(OP2, LE, Unsigned)), token(4294967295)),
     }
     final_config = Subst(
         {
@@ -88,6 +88,15 @@ def test_symbolic_config_from_elf(tools: Tools, symtools: SymTools, tmp_path: Pa
 
     # Then
     assert proof.status == ProofStatus.PASSED
+
+    # And given
+    show_expected = (TEST_DATA_DIR / 'symbolic-config-from-elf.golden').read_text()
+
+    # When
+    show_actual = '\n'.join(symtools.proof_show.show(proof, nodes=[node.id for node in proof.kcfg.nodes]))
+
+    # Then
+    assert show_actual == show_expected
 
 
 def _claim_from_configs(init_config: KInner, final_config: KInner) -> KClaim:

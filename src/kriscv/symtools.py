@@ -11,10 +11,15 @@ from pyk.cterm.symbolic import CTermSymbolic
 from pyk.kcfg.explore import KCFGExplore
 from pyk.ktool.kprove import KProve
 from pyk.proof.reachability import APRProof
+from pyk.proof.show import APRProofShow
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
 
+    from pyk.kast import KInner
+    from pyk.kcfg.kcfg import NodeIdLike
+    from pyk.kcfg.show import KCFGShow
+    from pyk.ktool.kprint import KPrint
     from pyk.utils import BugReport
 
 
@@ -41,6 +46,10 @@ class SymTools:
     @cached_property
     def kprove(self) -> KProve:
         return KProve(definition_dir=self.haskell_dir, use_directory=self.proof_dir, bug_report=self.bug_report)
+
+    @cached_property
+    def proof_show(self) -> APRProofShow:
+        return _APRProofShow(self.kprove)
 
     @contextmanager
     def explore(self, *, id: str) -> Iterator[KCFGExplore]:
@@ -106,19 +115,63 @@ class SymTools:
 
         return proof
 
-    def show_proof(self, proof: APRProof) -> str:
-        from pyk.cterm.show import CTermShow
-        from pyk.kcfg.show import NodePrinter
-        from pyk.proof.show import APRProofShow
 
-        show = APRProofShow(
-            definition=self.kprove.definition,
+class _APRProofShow(APRProofShow):
+    kprint: KPrint
+
+    def __init__(self, kprint: KPrint):
+        self.kprint = kprint
+
+    def show(
+        self,
+        proof: APRProof,
+        nodes: Iterable[NodeIdLike] = (),
+        node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
+        to_module: bool = False,
+        minimize: bool = False,
+        omit_cells: Iterable[str] = (),
+    ) -> list[str]:
+        if node_deltas or to_module or minimize or omit_cells:
+            # These potentially produce ill-typed terms that kore-print cannot handle
+            raise ValueError('Unsupported feature')
+
+        return super().show(
+            proof=proof,
+            nodes=nodes,
+            node_deltas=node_deltas,
+            to_module=to_module,
+            minimize=minimize,
+            omit_cells=omit_cells,
+        )
+
+    @cached_property
+    def kcfg_show(self) -> KCFGShow:  # type: ignore [override]
+        from types import SimpleNamespace
+
+        from pyk.cterm.show import CTermShow
+        from pyk.kcfg.show import KCFGShow, NodePrinter
+
+        res = KCFGShow(
+            defn=self.kprint.definition,
             node_printer=NodePrinter(
                 cterm_show=CTermShow(
-                    printer=self.kprove.pretty_print,
+                    printer=self._print,
                     minimize=False,
+                    break_cell_collections=False,
                 ),
-                full_printer=True,
+                full_printer=False,
             ),
         )
-        return '\n'.join(show.show(proof))
+
+        # Patch res.pretty_printer
+        res.pretty_printer = SimpleNamespace(
+            definition=self.kprint.definition,
+            print=self._print,
+        )  # type: ignore [assignment]
+
+        return res
+
+    def _print(self, kast: KInner) -> str:
+        from . import utils
+
+        return utils.kast_print(kast, kprint=self.kprint)
