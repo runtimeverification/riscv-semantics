@@ -1,0 +1,121 @@
+
+┌─ 1 (root)
+│
+│  (15 steps)
+├─ 3
+│
+┊  constraint: true
+┊  subst:
+┊      ?_HALTCOND_CELL <- ADDRESS ( 20 )
+┊      ?_MEM_CELL <- #bytes ( OP1:Bytes +Bytes OP2:Bytes +Bytes b"\x83 \x00\x00\x03!@\x00\xb3\x81 \x00" ) .SparseBytes
+┊      ?_PC_CELL <- 20
+┊      GENERATEDCOUNTER_CELL_6de8d71b <- GENERATEDCOUNTER_CELL_c84b0b5f:Int
+└─ 2 (leaf)
+
+
+
+Node 1:
+
+<riscv>
+    <instrs>
+      #EXECUTE ~> .K
+    </instrs>
+    <regs>
+      .Map
+    </regs>
+    <pc>
+      8
+    </pc>
+    <mem>
+      #bytes ( OP1:Bytes +Bytes OP2:Bytes +Bytes b"\x83 \x00\x00\x03!@\x00\xb3\x81 \x00" ) .SparseBytes
+    </mem>
+    <haltCond>
+      ADDRESS ( 20 )
+    </haltCond>
+  </riscv>
+#And
+  {
+    true
+  #Equals
+    lengthBytes ( OP1:Bytes ) ==Int 4
+  }
+#And
+  {
+    true
+  #Equals
+    lengthBytes ( OP2:Bytes ) ==Int 4
+  }
+
+
+
+Node 2:
+
+<riscv>
+    <instrs>
+      #HALT ~> #EXECUTE ~> .K
+    </instrs>
+    <regs>
+      1 |-> Bytes2Int ( OP1:Bytes , LE , Unsigned )
+      2 |-> Bytes2Int ( OP2:Bytes , LE , Unsigned )
+      3 |-> Bytes2Int ( OP1:Bytes , LE , Unsigned ) +Int Bytes2Int ( OP2:Bytes , LE , Unsigned ) &Int 4294967295
+    </regs>
+    <pc>
+      ?_PC_CELL:Int
+    </pc>
+    <mem>
+      ?_MEM_CELL:SparseBytes
+    </mem>
+    <haltCond>
+      ?_HALTCOND_CELL:HaltCondition
+    </haltCond>
+  </riscv>
+#And
+  {
+    true
+  #Equals
+    lengthBytes ( OP1:Bytes ) ==Int 4
+  }
+#And
+  {
+    true
+  #Equals
+    lengthBytes ( OP2:Bytes ) ==Int 4
+  }
+
+
+
+Node 3:
+
+<riscv>
+    <instrs>
+      #HALT ~> #EXECUTE ~> .K
+    </instrs>
+    <regs>
+      1 |-> Bytes2Int ( OP1:Bytes , LE , Unsigned )
+      2 |-> Bytes2Int ( OP2:Bytes , LE , Unsigned )
+      3 |-> Bytes2Int ( OP1:Bytes , LE , Unsigned ) +Int Bytes2Int ( OP2:Bytes , LE , Unsigned ) &Int 4294967295
+    </regs>
+    <pc>
+      20
+    </pc>
+    <mem>
+      #bytes ( OP1:Bytes +Bytes OP2:Bytes +Bytes b"\x83 \x00\x00\x03!@\x00\xb3\x81 \x00" ) .SparseBytes
+    </mem>
+    <haltCond>
+      ADDRESS ( 20 )
+    </haltCond>
+  </riscv>
+#And
+  {
+    true
+  #Equals
+    4 ==Int lengthBytes ( OP1:Bytes )
+  }
+#And
+  {
+    true
+  #Equals
+    4 ==Int lengthBytes ( OP2:Bytes )
+  }
+
+
