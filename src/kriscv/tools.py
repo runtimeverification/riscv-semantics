@@ -109,6 +109,11 @@ class Tools:
             raise
         return self.krun.kore_to_kast(final_config_kore)
 
+    def pretty(self, config: KInner) -> str:
+        from . import utils
+
+        return utils.kast_print(config, kprint=self.kprint)
+
     def get_registers(self, config: KInner) -> dict[int, int]:
         _, cells = split_config_from(config)
         regs_kore = self.krun.kast_to_kore(cells['REGS_CELL'], sort=KSort('Map'))
