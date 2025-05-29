@@ -172,8 +172,6 @@ class _APRProofShow(APRProofShow):
         return res
 
     def _print(self, kast: KInner) -> str:
-        from pyk.konvert import kast_to_kore
-        from pyk.kore.tools import kore_print
+        from . import utils
 
-        kore = kast_to_kore(self.kprint.definition, kast)
-        return kore_print(kore, definition_dir=self.kprint.definition_dir)
+        return utils.kast_print(kast, kprint=self.kprint)
