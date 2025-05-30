@@ -26,13 +26,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v9
-      - name: 'Update Poetry files'
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v6
+      - name: 'Update uv files'
         run: |
           K_VERSION=$(cat deps/k_release)
-          sed -i 's!kframework = "[0-9\.]*"!kframework = "'${K_VERSION}'"!' pyproject.toml
-          poetry update
-          git add . && git commit -m "pyproject.toml: sync pyk version ${K_VERSION}" || true
+          sed -i 's!    "kframework==[0-9\.]*"!    "kframework=='${K_VERSION}'"!' pyproject.toml
+          uv lock --upgrade
+          git add pyproject.toml uv.lock && git commit -m "pyproject.toml: sync pyk version ${K_VERSION}" || true
       - name: 'Push updates'
         run: git push
