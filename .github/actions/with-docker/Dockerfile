@@ -35,5 +35,5 @@ ENV PATH=/home/user/riscv/bin:${PATH}
 COPY --from=SAIL /usr/bin/riscv_sim_RV32 /usr/bin/riscv_sim_RV32
 COPY --from=SAIL /usr/bin/riscv_sim_RV64 /usr/bin/riscv_sim_RV64
 
-RUN    curl -sSL https://install.python-poetry.org | python3 - \
-    && poetry --version
+RUN    curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && uv --version
