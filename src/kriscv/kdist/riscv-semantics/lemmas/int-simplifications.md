@@ -21,10 +21,20 @@ module INT-SIMPLIFICATIONS [symbolic]
     requires 0 <=Int X andBool 0 <=Int Y [simplification]
 ```
 
-## Chop Lemmas
+## &Int Lemmas
 
 ```k
   rule [chop-32bits]: X &Int 4294967295 => X requires 0 <=Int X andBool X <Int 4294967296 [simplification]
+  rule [int-and-assoc]: (X &Int Y) &Int Z => X &Int (Y &Int Z) [simplification, symbolic(X), concrete(Y,Z)]
+  rule [int-and-add-assoc-8]: ((X &Int 255) +Int Y) &Int 255 => (X +Int Y) &Int 255
+    requires 0 <=Int X andBool 0 <=Int Y
+    [simplification]
+  rule [int-and-add-assoc-16]: ((X &Int 65535) +Int Y) &Int 65535 => (X +Int Y) &Int 65535
+    requires 0 <=Int X andBool 0 <=Int Y
+    [simplification]
+  rule [int-and-add-assoc-32]: ((X &Int 4294967295) +Int Y) &Int 4294967295 => (X +Int Y) &Int 4294967295
+    requires 0 <=Int X andBool 0 <=Int Y
+    [simplification]
 ```
 
 ## Int Expression Simplifications for Bytes
