@@ -1,5 +1,3 @@
-requires "riscv-semantics/riscv.md"
-
 module PICKFRONT0
   imports RISCV
 

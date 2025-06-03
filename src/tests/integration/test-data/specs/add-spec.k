@@ -1,5 +1,3 @@
-requires "riscv-semantics/riscv.md"
-
 module ADD-SPEC
   imports RISCV
 
