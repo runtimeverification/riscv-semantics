@@ -1,5 +1,3 @@
-requires "riscv-semantics/riscv.md"
-
 module SW-SPEC
   imports RISCV
 

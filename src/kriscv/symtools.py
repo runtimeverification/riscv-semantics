@@ -28,7 +28,6 @@ class SymTools:
     haskell_dir: Path
     llvm_lib_dir: Path
     proof_dir: Path
-    source_dirs: tuple[Path, ...]
     bug_report: BugReport | None
 
     @staticmethod
@@ -38,7 +37,6 @@ class SymTools:
         return SymTools(
             haskell_dir=kdist.get('riscv-semantics.haskell'),
             llvm_lib_dir=kdist.get('riscv-semantics.llvm-lib'),
-            source_dirs=(kdist.get('riscv-semantics.source'),),
             proof_dir=proof_dir,
             bug_report=bug_report_arg(bug_report) if bug_report else None,
         )
@@ -88,7 +86,7 @@ class SymTools:
         from pyk.proof.reachability import APRProver
 
         spec_file = Path(spec_file)
-        include_dirs = self.source_dirs + (tuple(Path(include) for include in includes) if includes is not None else ())
+        include_dirs = [Path(include) for include in includes] if includes else []
 
         claims = ClaimLoader(self.kprove).load_claims(
             spec_file=spec_file,
