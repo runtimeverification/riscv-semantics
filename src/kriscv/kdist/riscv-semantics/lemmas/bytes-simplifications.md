@@ -70,6 +70,8 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   rule [bytes-length-concat]: lengthBytes(A +Bytes B) => lengthBytes(A) +Int lengthBytes(B) 
     [simplification]
+  rule [bytes-length-reverse]: lengthBytes(reverseBytes(B)) => lengthBytes(B)
+    [simplification]
 ```
 
 ## Bytes Substr Lemmas
@@ -96,6 +98,23 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   rule [substr-int2bytes]: substrBytes(Int2Bytes(Num, V, LE), SI, EI) => Int2Bytes(EI -Int SI, V >>Int (SI *Int 8), LE)
     requires 0 <=Int SI andBool SI <=Int EI andBool EI <=Int Num andBool 0 <=Int V
+    [simplification, preserves-definedness]
+  
+  rule [substr-reverse-concat-0]: substrBytes(B, I1, I2) +Bytes substrBytes(B, I0, I1) => reverseBytes(substrBytes(B, I0, I2))
+    requires 0 <=Int I0 andBool I0 <=Int I1 andBool I1 <=Int I2 andBool I2 <=Int lengthBytes(B)
+     andBool I0 +Int 1 ==Int I1 andBool I1 +Int 1 ==Int I2
+    [simplification, preserves-definedness]
+  rule [substr-reverse-concat-1]: substrBytes(B, I1, I2) +Bytes reverseBytes(substrBytes(B, I0, I1)) => reverseBytes(substrBytes(B, I0, I2))
+    requires 0 <=Int I0 andBool I0 <=Int I1 andBool I1 <=Int I2 andBool I2 <=Int lengthBytes(B) andBool I0 +Int 1 ==Int I1
+    [simplification, preserves-definedness]
+  rule [substr-reverse-concat-2]: reverseBytes(substrBytes(B, I1, I2)) +Bytes substrBytes(B, I0, I1) => reverseBytes(substrBytes(B, I0, I2))
+    requires 0 <=Int I0 andBool I0 <=Int I1 andBool I1 <=Int I2 andBool I2 <=Int lengthBytes(B) andBool I0 +Int 1 ==Int I1
+    [simplification, preserves-definedness]
+  rule [substr-reverse-concat-3]: reverseBytes(substrBytes(B, I1, I2)) +Bytes substrBytes(B, I0, I1) +Bytes C => reverseBytes(substrBytes(B, I0, I2)) +Bytes C
+    requires 0 <=Int I0 andBool I0 <=Int I1 andBool I1 <=Int I2 andBool I2 <=Int lengthBytes(B) andBool I0 +Int 1 ==Int I1
+    [simplification, preserves-definedness]
+  rule [substr-reverse-concat-4]: reverseBytes(substrBytes(B, I1, I2)) +Bytes reverseBytes(substrBytes(B, I0, I1)) => reverseBytes(substrBytes(B, I0, I2))
+    requires 0 <=Int I0 andBool I0 <=Int I1 andBool I1 <=Int I2 andBool I2 <=Int lengthBytes(B)
     [simplification, preserves-definedness]
 ```
 
