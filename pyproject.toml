@@ -1,48 +1,60 @@
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "kriscv"
-version = "0.1.95"
+version = "0.1.96"
 description = "K tooling for the RISC-V architecture"
-authors = [
-    "Runtime Verification, Inc. <contact@runtimeverification.com>",
+readme = "README.md"
+requires-python = "~=3.10"
+dependencies = [
+    "kframework==7.1.263",
+    "filelock>=3.14.0,<4",
+    "pyelftools>=0.26",
+    "pyyaml>=6.0.1,<7",
+    "riscof>=1.25.3,<2",
+    "riscv-assembler>=1.2.1,<2",
 ]
 
-[tool.poetry.scripts]
+[[project.authors]]
+name = "Runtime Verification, Inc."
+email = "contact@runtimeverification.com"
+
+[project.scripts]
 kriscv = "kriscv.__main__:main"
 kriscv-asm = "kriscv.devtools:kriscv_asm"
 
-[tool.poetry.plugins.kdist]
+[project.entry-points.kdist]
 riscv-semantics = "kriscv.kdist.plugin"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-kframework = "7.1.263"
-filelock = "^3.14.0"
-pyelftools = "^0.26"
-pyyaml = "^6.0.1"
-riscof = "^1.25.3"
-riscv-assembler = "^1.2.1"
+[dependency-groups]
+dev = [
+    "autoflake",
+    "black",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "flake8-quotes",
+    "flake8-type-checking",
+    "isort",
+    "mypy",
+    "pep8-naming",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist",
+    "pyupgrade",
+    "types-pyyaml>=6.0.12.20240311",
+]
 
-[tool.poetry.group.dev.dependencies]
-autoflake = "*"
-black = "*"
-flake8 = "*"
-flake8-bugbear = "*"
-flake8-comprehensions = "*"
-flake8-quotes = "*"
-flake8-type-checking = "*"
-isort = "*"
-mypy = "*"
-pep8-naming = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-mock = "*"
-pytest-xdist = "*"
-pyupgrade = "*"
-types-pyyaml = "^6.0.12.20240311"
+[tool.uv]
+override-dependencies = [
+    "gitpython>3.1.17,<4",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.isort]
 profile = "black"

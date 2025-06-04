@@ -16,17 +16,17 @@ The following files constitute the KRISC-V semantics:
 - [riscv.md](src/kriscv/kdist/riscv-semantics/riscv.md) is the main KRISC-V semantics, defining the configuration and transition rules to fetch and execute instructions.
 
 ## Installation
-Prerequsites: `python >= 3.10`, `pip >= 20.0.2`, `poetry >= 1.3.2`.
+
+Prerequsites: `python >= 3.10`, [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-poetry install
-make kdist-build
+make kdist
 ```
 
 ## Usage
 Execute a compiled RISC-V ELF file with the following command:
 ```bash
-poetry -C kriscv run kriscv run test.elf
+uv run kriscv run test.elf
 ```
 The output shows the final K configuration, including the state of memory, all registers, and any encountered errors. Execution can also be halted at a particular global symbol by providing the `--end-symbol` flag.
 
@@ -39,7 +39,6 @@ Use `make` to run common tasks (see the [Makefile](Makefile) for a complete list
 * `make test-unit`: Run unit tests
 * `make test-integration`: Run integration tests
 * `make test-architectural`: Run the RISC-V Architectural Test Suite
-For interactive use, spawn a shell with `poetry shell` (after `poetry install`), then run an interpreter.
 
 ### Running Tests
 The integration and architectural tests require the [RISC-V GNU Toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain). During installation, follow instructions to build the Newlib-based cross-compiler. The `riscv64-unknown-elf-*` binaries must be available on your `PATH`.
