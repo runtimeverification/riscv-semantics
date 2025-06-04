@@ -1,5 +1,3 @@
-requires "riscv-semantics/riscv.md"
-
 module SIGNEXTEND
   imports RISCV
 

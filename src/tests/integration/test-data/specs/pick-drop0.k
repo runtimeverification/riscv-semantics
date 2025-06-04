@@ -1,5 +1,3 @@
-requires "riscv-semantics/riscv.md"
-
 module PICK-DROP0
   imports RISCV
 
