@@ -42,6 +42,7 @@ module INT-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [int-and-ineq]: 0 <=Int A &Int B => true requires 0 <=Int A orBool 0 <=Int B [simplification]
+  rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
 ```
 
 ## Int Expression Simplifications for Bytes
