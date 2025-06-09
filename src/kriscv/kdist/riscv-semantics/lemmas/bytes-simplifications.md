@@ -101,7 +101,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   
   rule [substr-reverse-concat-0]: substrBytes(B, I1, I2) +Bytes substrBytes(B, I0, I1) => reverseBytes(substrBytes(B, I0, I2))
-    requires 0 <=Int I0 andBool I0 <=Int I1 andBool I1 <=Int I2 andBool I2 <=Int lengthBytes(B)
+    requires 0 <=Int I0 andBool I2 <=Int lengthBytes(B)
      andBool I0 +Int 1 ==Int I1 andBool I1 +Int 1 ==Int I2
     [simplification, preserves-definedness]
   rule [substr-reverse-concat-1]: substrBytes(B, I1, I2) +Bytes reverseBytes(substrBytes(B, I0, I1)) => reverseBytes(substrBytes(B, I0, I2))
