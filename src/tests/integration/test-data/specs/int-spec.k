@@ -20,8 +20,8 @@ module INT-SPEC
      13 |-> ((Bytes2Int(b"\x00" +Bytes substrBytes(W3, 5, 6), LE, Unsigned) <<Int 8 &Int 4294967295) => Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 5 , 6 ), LE, Unsigned))
      14 |-> ((Bytes2Int(b"\x00\x12", LE, Unsigned) |Int Bytes2Int(b"\x34", LE, Unsigned)) => 4660)
      15 |-> ((Bytes2Int(reverseBytes(b"\x12\x34"), LE, Unsigned)) => 4660)
-     16 |-> ((Bytes2Int(b"\x00" +Bytes substrBytes(W3, 6, 7), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8), LE, Unsigned)) => Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7), LE, Unsigned))
-     17 |-> ((Bytes2Int(b"\x00\x00\x00" +Bytes substrBytes(W3, 4, 8), LE, Unsigned) |Int Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 5, 6), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7), LE, Unsigned)) => Bytes2Int(substrBytes(W3, 7, 8) +Bytes substrBytes(W3, 6, 7) +Bytes substrBytes(W3, 5, 6) +Bytes substrBytes(W3, 4, 8), LE, Unsigned))
+     16 |-> ((Bytes2Int(b"\x00" +Bytes substrBytes(W3, 6, 7), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 7, 8), LE, Unsigned)) => Bytes2Int(reverseBytes(substrBytes(W3, 6, 8)), LE, Unsigned))
+     // 17 |-> ((Bytes2Int(b"\x00\x00\x00" +Bytes substrBytes(W3, 4, 8), LE, Unsigned) |Int Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 5, 6), LE, Unsigned) |Int Bytes2Int(substrBytes(W3, 6, 7) +Bytes substrBytes(W3, 7, 8), LE, Unsigned)) => Bytes2Int(reverseBytes(substrBytes(W3, 5, 8) +Bytes substrBytes(W3, 4, 8)), LE, Unsigned))
      18 |-> ((W1 &Int 255) &Int 4294967295 => W1 &Int 255)
      19 |-> (((W1 &Int 255) +Int W2) &Int 255 => (W1 +Int W2) &Int 255)
     </regs>
