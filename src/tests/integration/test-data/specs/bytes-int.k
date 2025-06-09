@@ -18,8 +18,11 @@ module BYTES-INT
      11 |-> (Bytes2Int(substrBytes(b"\x00", 1, 1), LE, Unsigned) => 0)
      12 |-> (Bytes2Int(Int2Bytes ( 4 , Bytes2Int (W1, LE, Unsigned), LE ), LE, Unsigned) => Bytes2Int(W1, LE, Unsigned))
      13 |-> (Bytes2Int(Int2Bytes ( 4 , Bytes2Int ( substrBytes ( W0:Bytes , 31 , 32 ) +Bytes substrBytes ( W0:Bytes , 30 , 31 ) +Bytes substrBytes ( W0:Bytes , 29 , 30 ) +Bytes substrBytes ( W0:Bytes , 28 , 32 ) , LE , Unsigned ) , LE ), LE, Unsigned) => Bytes2Int(substrBytes ( W0:Bytes , 31 , 32 ) +Bytes substrBytes ( W0:Bytes , 30 , 31 ) +Bytes substrBytes ( W0:Bytes , 29 , 30 ) +Bytes substrBytes ( W0:Bytes , 28 , 29), LE, Unsigned))
-     14 |-> (Bytes2Int(substrBytes(Int2Bytes(4, 256, LE), 1, 2), LE, Unsigned) => 1)
-     15 |-> (Bytes2Int(substrBytes(Int2Bytes(4, (X +Int Y) &Int 4294967295, LE), 1, 2), LE, Unsigned) => (((X +Int Y) &Int 4294967295) <<Int 8) modInt 256)
+     14 |-> (Bytes2Int(substrBytes(Int2Bytes(2, 65535, LE), 1, 2), LE, Unsigned) => 255)
+     15 |-> (Bytes2Int(Int2Bytes(2 -Int 1, (65535 >>Int (1 *Int 8)), LE), LE, Unsigned) => 255)
+     16 |-> (Bytes2Int(substrBytes(Int2Bytes(4, 256, LE), 1, 2), LE, Unsigned) => 1)
+     17 |-> (Bytes2Int(Int2Bytes(1, 256 >>Int 8, LE), LE, Unsigned) => 1)
+     18 |-> (Bytes2Int(substrBytes(Int2Bytes(4, (X +Int Y) &Int 4294967295, LE), 1, 2), LE, Unsigned) => (((X +Int Y) &Int 4294967295) >>Int 8) &Int 255)
     </regs>
     <haltCond> ADDRESS ( 0 ) </haltCond>
 requires lengthBytes(W0) ==Int 32
