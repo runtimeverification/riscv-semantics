@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 from pyk.proof import ProofStatus
-from pyk.proof.show import APRProofShow
 
 from .utils import TEST_DATA_DIR
 
@@ -60,9 +59,7 @@ def test_specs(
     )
 
     proof_show_file = temp_dir / f'{spec_file.stem}-proof.txt'
-    proof_show_lines = APRProofShow(symtools.kprove.definition).show(
-        proof, nodes=[node.id for node in proof.kcfg.nodes]
-    )
+    proof_show_lines = symtools.proof_show.show(proof, nodes=[node.id for node in proof.kcfg.nodes])
     proof_show_file.write_text('\n'.join(proof_show_lines))
 
     # Then
