@@ -94,6 +94,9 @@ module BYTES-SIMPLIFICATIONS [symbolic]
   rule [substr-concat-2]: substrBytes(A +Bytes B, I, J) => substrBytes(B, I -Int lengthBytes(A), J -Int lengthBytes(A))
     requires lengthBytes(A) <=Int I
     [simplification, preserves-definedness]
+  rule [substr-int2bytes]: substrBytes(Int2Bytes(Num, V, LE), SI, EI) => Int2Bytes(EI -Int SI, V >>Int (SI *Int 8), LE)
+    requires 0 <=Int SI andBool SI <=Int EI andBool EI <=Int Num andBool 0 <=Int V
+    [simplification, preserves-definedness]
 ```
 
 ## Bytes2Int Lemmas
@@ -125,6 +128,8 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     requires 0 <=Int LEN
      andBool LEN <=Int lengthBytes(B)
     [simplification, preserves-definedness]
+  rule [bytes2int-int2bytes]: Bytes2Int(Int2Bytes(LEN, V, LE), LE, Unsigned) => V &Int (2 ^Int (LEN *Int 8) -Int 1)
+    requires 0 <=Int LEN andBool 0 <=Int V [simplification, preserves-definedness]
 ```
 
 ```k
