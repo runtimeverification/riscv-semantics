@@ -28,4 +28,5 @@ module BYTES-INT
 requires lengthBytes(W0) ==Int 32
  andBool lengthBytes(W1) ==Int 4
  andBool lengthBytes(W3) ==Int 32
+ andBool 0 <=Int X andBool 0 <=Int Y
 endmodule
