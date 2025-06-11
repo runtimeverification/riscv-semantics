@@ -36,5 +36,5 @@ COPY --from=SAIL /usr/bin/riscv_sim_RV32 /usr/bin/riscv_sim_RV32
 COPY --from=SAIL /usr/bin/riscv_sim_RV64 /usr/bin/riscv_sim_RV64
 
 ARG UV_VERSION
-RUN    curl -LsSf https://astral.sh/uv/$UV_VERSION/install.sh | sh \
+RUN    curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh \
     && uv --version
