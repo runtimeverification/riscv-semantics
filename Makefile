@@ -1,5 +1,5 @@
 UV     := uv
-UV_RUN := $(UV) run --
+UV_RUN := $(UV) run --frozen  --
 
 
 default: check test-unit
