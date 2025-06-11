@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kriscv"
-version = "0.1.100"
+version = "0.1.101"
 description = "K tooling for the RISC-V architecture"
 readme = "README.md"
 requires-python = "~=3.10"
@@ -27,6 +27,9 @@ kriscv-asm = "kriscv.devtools:kriscv_asm"
 
 [project.entry-points.kdist]
 riscv-semantics = "kriscv.kdist.plugin"
+
+[project.entry-points.kprovex]
+riscv = "kriscv.symtools:KRiscVPlugin"
 
 [dependency-groups]
 dev = [
