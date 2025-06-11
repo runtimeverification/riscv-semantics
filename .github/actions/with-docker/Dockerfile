@@ -35,5 +35,6 @@ ENV PATH=/home/user/riscv/bin:${PATH}
 COPY --from=SAIL /usr/bin/riscv_sim_RV32 /usr/bin/riscv_sim_RV32
 COPY --from=SAIL /usr/bin/riscv_sim_RV64 /usr/bin/riscv_sim_RV64
 
-RUN    curl -LsSf https://astral.sh/uv/install.sh | sh \
+ARG UV_VERSION
+RUN    curl -LsSf https://astral.sh/uv/$UV_VERSION/install.sh | sh \
     && uv --version
