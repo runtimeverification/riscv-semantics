@@ -27,7 +27,7 @@ module BYTES-INT
      20 |-> (Bytes2Int(reverseBytes(substrBytes(W0, 10, 12)) +Bytes substrBytes(W0, 9, 10) +Bytes substrBytes(W0, 8, 12), LE, Unsigned) => Bytes2Int(reverseBytes(substrBytes(W0, 9, 12)) +Bytes substrBytes(W0, 8, 12), LE, Unsigned))
      21 |-> (Bytes2Int(reverseBytes(substrBytes(W0, 8, 13)) +Bytes reverseBytes(substrBytes(W0, 5, 8)) +Bytes reverseBytes(substrBytes(W0, 0, 5)) +Bytes reverseBytes(substrBytes(W3, 29, 32)) +Bytes reverseBytes(substrBytes(W3, 24, 29)) +Bytes reverseBytes(substrBytes(W3, 21, 24)) +Bytes reverseBytes(substrBytes(W3, 16, 21)) +Bytes reverseBytes(substrBytes(W3, 13, 16)) +Bytes reverseBytes(substrBytes(W3, 8, 13)) +Bytes reverseBytes(substrBytes(W3, 5, 8)) +Bytes reverseBytes(substrBytes(W3, 0, 5)), LE, Unsigned) => Bytes2Int(reverseBytes(substrBytes(W0, 0, 13)) +Bytes reverseBytes(W3), LE, Unsigned))
      22 |-> (Bytes2Int(substrBytes(reverseBytes(W0), 16, 20), LE, Unsigned) &Int 4294967295 => Bytes2Int(substrBytes(reverseBytes(W0), 16, 20), LE, Unsigned))
-     23 |-> (Bool2Word(Bytes2Int(substrBytes(reverseBytes(W3), 0, 4), LE, Unsigned) +Int Bytes2Int(substrBytes(reverseBytes(W0), 0, 4), LE, Unsigned) &Int 4294967295 <Int Bytes2Int(substrBytes(reverseBytes(W3), 0, 4), LE, Unsigned)) => 0)
+     23 |-> (Bool2Word(Bytes2Int(substrBytes(reverseBytes(W3), 0, 4), LE, Unsigned) +Int Bytes2Int(substrBytes(reverseBytes(W0), 0, 4), LE, Unsigned) &Int 4294967295 <Int Bytes2Int(substrBytes(reverseBytes(W3), 0, 4), LE, Unsigned)) => Bool2Word(4294967295 <Int Bytes2Int(substrBytes(reverseBytes(W3), 0, 4), LE, Unsigned) +Int Bytes2Int(substrBytes(reverseBytes(W0), 0, 4), LE, Unsigned)))
     </regs>
     <haltCond> ADDRESS ( 0 ) </haltCond>
 requires lengthBytes(W0) ==Int 32
