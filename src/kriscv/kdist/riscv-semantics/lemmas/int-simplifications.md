@@ -43,7 +43,7 @@ module INT-SIMPLIFICATIONS [symbolic]
   rule [int-and-ineq]: 0 <=Int A &Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
   rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
   rule [int-add-ineq-4294967295]: X &Int 4294967295 <Int A => 4294967295 <Int X
-    requires 0 <=Int A andBool 0 <=Int X -Int A [simplification]
+    requires 0 <=Int A andBool A <=Int X [simplification]
 ```
 
 ## Int Expression Simplifications for Bytes
