@@ -94,6 +94,7 @@ class SymTools:
         max_depth: int | None = None,
         max_iterations: int | None = None,
         includes: Iterable[str | Path] | None = None,
+        optimize_kcfg: bool = False,
     ) -> APRProof:
         from pyk.ktool.claim_loader import ClaimLoader
         from pyk.proof.reachability import APRProver
@@ -121,6 +122,7 @@ class SymTools:
             prover = APRProver(
                 kcfg_explore=kcfg_explore,
                 execute_depth=max_depth,
+                optimize_kcfg=optimize_kcfg,
             )
             prover.advance_proof(proof, max_iterations=max_iterations)
 
