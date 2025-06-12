@@ -12,7 +12,7 @@ module INT-SPEC
      5  |-> ((W2 <<Int 16 &Int 4294967295) => W2 <<Int 16)
      6  |-> ((b"\x12"[0] <<Int 16 &Int 4294967295) => 1179648)
      7  |-> ((Bytes2Int(b"\x00\x00\x12", LE, Unsigned)) => 1179648)
-     8  |-> ((Bytes2Int(W3, LE, Unsigned) &Int 4294967295) => Bytes2Int(W3, LE, Unsigned))
+     8  |-> ((Bytes2Int(substrBytes(W3, 0, 4), LE, Unsigned) &Int 4294967295) => Bytes2Int(substrBytes(W3, 0, 4), LE, Unsigned))
      9  |-> ((W3[0] <<Int 16 &Int 4294967295) => Bytes2Int(b"\x00\x00" +Bytes substrBytes(W3, 0, 1 ), LE, Unsigned))
      10 |-> ((Bytes2Int(b"\x12\x34\x56\x78", LE, Unsigned) >>Int 8) => 7886388)
      11 |-> ((Bytes2Int(b"\x34\x56\x78", LE, Unsigned)) => 7886388)
