@@ -15,6 +15,14 @@ module WORD-SIMPLIFICATIONS
     requires NumBits ==Int lengthBytes(B) *Int 8 [simplification(45), preserves-definedness]
 ```
 
+## Bool2Word
+
+```k
+  rule [bool2word-geq-0]: 0 <=Int Bool2Word(_) => true [simplification]
+```
+
+## Word2Bool
+
 ```k
 endmodule
 ```
