@@ -94,7 +94,7 @@ class SymTools:
         max_depth: int | None = None,
         max_iterations: int | None = None,
         includes: Iterable[str | Path] | None = None,
-        optimize_kcfg: bool = False,
+        optimize_kcfg: bool | None = None,
     ) -> APRProof:
         from pyk.ktool.claim_loader import ClaimLoader
         from pyk.proof.reachability import APRProver
