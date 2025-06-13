@@ -122,7 +122,7 @@ class SymTools:
             prover = APRProver(
                 kcfg_explore=kcfg_explore,
                 execute_depth=max_depth,
-                optimize_kcfg=optimize_kcfg,
+                optimize_kcfg=bool(optimize_kcfg),
             )
             prover.advance_proof(proof, max_iterations=max_iterations)
 
