@@ -64,7 +64,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [bytes-length-int2bytes]: lengthBytes(Int2Bytes(N, _:Int, _:Endianness)) => N 
-    [simplification]   
+    [simplification]
   rule [bytes-length-substr]: lengthBytes(substrBytes(B, I, J)) => J -Int I
     requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
     [simplification, preserves-definedness]
@@ -143,7 +143,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
   rule [bytes2int-upperbound]: Bytes2Int(B, _, Unsigned) <Int X => true
     requires 2 ^Int (lengthBytes(B) *Int 8) <=Int X
     [simplification]
-  rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, _, Unsigned) => true [simplification]
+  rule [bytes2int-lowerbound]: 0 <=Int Bytes2Int(_, _, Unsigned) => true [simplification(40)]
 ```
 
 ## PadBytes
@@ -161,7 +161,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
      andBool LEN <=Int lengthBytes(B)
     [simplification, preserves-definedness]
   rule [bytes2int-int2bytes]: Bytes2Int(Int2Bytes(LEN, V, LE), LE, Unsigned) => V &Int (2 ^Int (LEN *Int 8) -Int 1)
-    requires 0 <=Int LEN andBool 0 <=Int V [simplification, preserves-definedness]
+    requires 0 <=Int LEN andBool 0 <=Int V [simplification(45), preserves-definedness]
 ```
 
 ```k

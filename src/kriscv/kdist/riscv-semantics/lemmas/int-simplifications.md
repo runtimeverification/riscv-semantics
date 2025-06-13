@@ -21,6 +21,14 @@ module INT-SIMPLIFICATIONS [symbolic]
     requires 0 <=Int X andBool 0 <=Int Y [simplification]
 ```
 
+## >>Int Lemmas
+
+```k
+  rule [int-rsh-and-distrib]: (A &Int B) >>Int C => (A >>Int C) &Int (B >>Int C) [simplification(45), concrete(C)]
+  rule [int-rsh-add-distrib]: (A +Int B) >>Int C => (A >>Int C) +Int (B >>Int C) [simplification(45), concrete(C)]
+```
+
+
 ## &Int Lemmas
 
 ```k
@@ -41,8 +49,9 @@ module INT-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [int-and-ineq]: 0 <=Int A &Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
-  rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
+  rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification(45)]
   rule [int-add-ineq]: A <=Int A +Int B => true requires 0 <=Int B [simplification]
+  rule [int-add-neq-0]: 0 <=Int A +Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
   rule [int-add-ineq-4294967295]: X &Int 4294967295 <Int A => 4294967295 <Int X
     requires 0 <=Int A andBool A <=Int X [simplification]
 ```
