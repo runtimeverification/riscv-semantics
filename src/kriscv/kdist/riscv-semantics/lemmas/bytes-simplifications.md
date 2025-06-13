@@ -137,6 +137,9 @@ module BYTES-SIMPLIFICATIONS [symbolic]
   rule [bytes2int-substr-ff00-1]: Bytes2Int (substrBytes(B, I, J), LE, Unsigned) &Int 65280 => B[I +Int 1] <<Int 8
     requires 0 <=Int I andBool I +Int 1 <Int J andBool J <=Int lengthBytes(B)
     [simplification, preserves-definedness]
+  rule [bytes2int-ffffffff]: Bytes2Int(B, LE, Unsigned) &Int 4294967295 => Bytes2Int(substrBytes(B, 0, 4), LE, Unsigned)
+    requires 4 <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
   rule [bytes2int-upperbound]: Bytes2Int(B, _, Unsigned) <Int X => true
     requires 2 ^Int (lengthBytes(B) *Int 8) <=Int X
     [simplification]
