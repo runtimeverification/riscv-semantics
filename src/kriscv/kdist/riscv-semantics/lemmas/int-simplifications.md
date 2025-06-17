@@ -48,10 +48,10 @@ module INT-SIMPLIFICATIONS [symbolic]
 ## Inequality Lemmas
 
 ```k
-  rule [int-and-ineq]: 0 <=Int A &Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
-  rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification(45)]
-  rule [int-add-ineq]: A <=Int A +Int B => true requires 0 <=Int B [simplification]
-  rule [int-add-neq-0]: 0 <=Int A +Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
+  rule [int-and-ineq]: 0 <=Int _ &Int B => true requires 0 <=Int B [simplification, smt-lemma]
+  rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification(45), smt-lemma]
+  rule [int-add-ineq]: A <=Int A +Int B => true requires 0 <=Int B [simplification, smt-lemma]
+  rule [int-add-neq-0]: 0 <=Int A +Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification, smt-lemma]
   rule [int-add-ineq-4294967295]: X &Int 4294967295 <Int A => 4294967295 <Int X
     requires 0 <=Int A andBool A <=Int X [simplification]
 ```
