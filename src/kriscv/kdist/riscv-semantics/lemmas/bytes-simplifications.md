@@ -161,7 +161,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
      andBool LEN <=Int lengthBytes(B)
     [simplification, preserves-definedness]
   rule [bytes2int-int2bytes]: Bytes2Int(Int2Bytes(LEN, V, LE), LE, Unsigned) => V &Int (2 ^Int (LEN *Int 8) -Int 1)
-    requires 0 <=Int LEN andBool 0 <=Int V [simplification, preserves-definedness]
+    requires 0 <=Int LEN [simplification, preserves-definedness]
 ```
 
 ```k
