@@ -19,6 +19,7 @@ module INT-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   rule [int-lsh-non-negative]: 0 <=Int (X <<Int Y) => true
     requires 0 <=Int X andBool 0 <=Int Y [simplification]
+  rule [rsh-0]: X >>Int 0 => X [simplification]
 ```
 
 ## &Int Lemmas
