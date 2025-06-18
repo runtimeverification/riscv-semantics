@@ -2,3 +2,5 @@
 __pycache__/
 .coverage
 tests/riscv-arch-test-compiled
+debug*/
+.DS_Store
