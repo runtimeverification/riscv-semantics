@@ -97,7 +97,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     requires lengthBytes(A) <=Int I
     [simplification, preserves-definedness]
   rule [substr-int2bytes]: substrBytes(Int2Bytes(Num, V, LE), SI, EI) => Int2Bytes(EI -Int SI, V >>Int (SI *Int 8), LE)
-    requires 0 <=Int SI andBool SI <=Int EI andBool EI <=Int Num andBool 0 <=Int V
+    requires 0 <=Int SI andBool SI <=Int EI andBool EI <=Int Num
     [simplification, preserves-definedness]
   
   rule [substr-reverse-concat-0]: substrBytes(B, I1, I2) +Bytes substrBytes(B, I0, I1) => reverseBytes(substrBytes(B, I0, I2))
