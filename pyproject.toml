@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kriscv"
-version = "0.1.109"
+version = "0.1.108"
 description = "K tooling for the RISC-V architecture"
 readme = "README.md"
 requires-python = "~=3.10"
