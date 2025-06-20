@@ -61,6 +61,8 @@ To avoid syntax conflicts, we define the following syntax with `left` associativ
                 | Int "*hWord"   Int [function, total, symbol(mulhWord)]
                 | Int "*huWord"  Int [function, total, symbol(mulhuWord)]
                 | Int "*hsuWord" Int [function, total, symbol(mulhsuWord)]
+                | Int "/Word"    Int [function, total, symbol(divWord)]
+                | Int "/uWord"   Int [function, total, symbol(divuWord)]
                 > left:
                   Int "+Word"    Int [function, total, symbol(addWord)]
                 | Int "-Word"    Int [function, total, symbol(subWord)]
@@ -75,7 +77,6 @@ To avoid syntax conflicts, we define the following syntax with `left` associativ
                 > left:
                   Int "|Word"    Int [function, total, symbol(orWord)]
 ```
-
 Note that two's complement enables us to use a single addition or subtraction operation for both signed and unsigned values.
 ```k
   rule W1 +Word W2 => chop(W1 +Int W2)
@@ -90,6 +91,28 @@ The value of the upper `XLEN` bits however depends on signedness of the operands
   rule W1 *hWord W2 => chop((Word2SInt(W1) *Int Word2SInt(W2)) >>Int XLEN)
   rule W1 *huWord W2 => chop((W1 *Int W2) >>Int XLEN)
   rule W1 *hsuWord W2 => chop((Word2SInt(W1) *Int W2) >>Int XLEN)
+```
+Division operations follow RISC-V specification requirements for handling special cases.
+
+For signed division (`/Word`):
+- Division by zero returns -1 (all bits set)
+- Signed overflow (most negative number divided by -1) returns the dividend unchanged
+- Normal case performs signed division with truncation towards zero
+```k
+  rule _  /Word W2 => chop(-1) requires W2 ==Word 0
+  rule W1 /Word W2 => W1 
+    requires W1 ==Word 2 ^Int (XLEN -Int 1)
+     andBool W2 ==Word chop(-1)
+  rule W1 /Word W2 => chop(Word2SInt(W1) /Int Word2SInt(W2)) 
+    requires W2 =/=Word 0 
+     andBool notBool (W1 ==Word chop(2 ^Int (XLEN -Int 1)) andBool W2 ==Word chop(-1))
+```
+For unsigned division (`/uWord`):
+- Division by zero returns 2^XLEN - 1 (all bits set)
+- Normal case performs unsigned division with truncation towards zero
+```k
+  rule _  /uWord W2 => chop((2 ^Int XLEN) -Int 1) requires W2 ==Word 0
+  rule W1 /uWord W2 => chop(W1 /Int W2) requires W2 =/=Word 0
 ```
 Above, the `chop` utility function
 ```k
