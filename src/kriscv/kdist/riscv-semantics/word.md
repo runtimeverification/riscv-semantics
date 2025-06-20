@@ -101,7 +101,7 @@ For signed division (`/Word`):
 ```k
   rule _  /Word W2 => chop(-1) requires W2 ==Word 0
   rule W1 /Word W2 => W1 
-    requires W1 ==Word chop(2 ^Int (XLEN -Int 1))
+    requires W1 ==Word 2 ^Int (XLEN -Int 1)
      andBool W2 ==Word chop(-1)
   rule W1 /Word W2 => chop(Word2SInt(W1) /Int Word2SInt(W2)) 
     requires W2 =/=Word 0 
