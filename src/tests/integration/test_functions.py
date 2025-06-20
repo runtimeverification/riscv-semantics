@@ -176,17 +176,14 @@ DIV_TEST_DATA: Final = (
     (0x80000000, 2),  # -2^31 / 2 = -2^30
     (15, 4),
     (0x7FFFFFFF, 3),  # 2^31-1 / 3
-    
     # Division by zero cases
     (0, 0),
     (1, 0),
     (0xFFFFFFFF, 0),  # -1 / 0
     (0x80000000, 0),  # -2^31 / 0
     (0x7FFFFFFF, 0),  # 2^31-1 / 0
-    
     # Signed overflow case: -2^31 / -1
     (0x80000000, 0xFFFFFFFF),  # -2^31 / -1 should return -2^31
-    
     # Additional edge cases
     (0x80000001, 0xFFFFFFFF),  # (-2^31+1) / -1 = 2^31-1
     (0x7FFFFFFF, 0xFFFFFFFF),  # (2^31-1) / -1 = -(2^31-1)
@@ -194,9 +191,6 @@ DIV_TEST_DATA: Final = (
 
 
 assert all(is_32bit(op1) and is_32bit(op2) for op1, op2 in DIV_TEST_DATA)
-
-
-
 
 
 @pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
@@ -212,7 +206,7 @@ def test_div(definition_dir: Path, op1: int, op2: int) -> None:
         # Normal signed division with truncation towards zero
         result = signed(op1) // signed(op2)
         expected = chop(result)
-    
+
     _test_binary_op(
         definition_dir=definition_dir,
         symbol='LbldivWord',
@@ -231,7 +225,7 @@ def test_divu(definition_dir: Path, op1: int, op2: int) -> None:
     else:
         # Normal unsigned division with truncation towards zero
         expected = op1 // op2
-    
+
     _test_binary_op(
         definition_dir=definition_dir,
         symbol='LbldivuWord',
