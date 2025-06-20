@@ -162,6 +162,18 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification, preserves-definedness]
   rule [bytes2int-int2bytes]: Bytes2Int(Int2Bytes(LEN, V, LE), LE, Unsigned) => V &Int (2 ^Int (LEN *Int 8) -Int 1)
     requires 0 <=Int LEN [simplification, preserves-definedness]
+  
+  rule [substr-reverse-bytes]:
+    substrBytes(reverseBytes(B), START, END)
+    => substrBytes(B, lengthBytes(B) -Int END, lengthBytes(B) -Int START)
+    requires 0 <=Int START andBool START +Int 1 ==Int END andBool END <=Int lengthBytes(B)
+    [simplification, preserves-definedness]
+  
+  rule [int2bytes-bytes2int-pad-zeros]:
+    Int2Bytes(LEN, Bytes2Int(B, LE, Unsigned), LE)
+    => B +Bytes Int2Bytes(LEN -Int lengthBytes(B), 0, LE)
+    requires lengthBytes(B) <=Int LEN
+    [simplification]
 ```
 
 ```k
