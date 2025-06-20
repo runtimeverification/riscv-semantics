@@ -193,8 +193,7 @@ DIV_TEST_DATA: Final = (
 assert all(is_32bit(op1) and is_32bit(op2) for op1, op2 in DIV_TEST_DATA)
 
 
-@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
-def test_div(definition_dir: Path, op1: int, op2: int) -> None:
+def div_expected(op1: int, op2: int) -> int:
     # Calculate expected result according to RISC-V specification
     if op2 == 0:
         # Division by zero returns -1 (all bits set)
@@ -205,18 +204,21 @@ def test_div(definition_dir: Path, op1: int, op2: int) -> None:
     else:
         # Normal signed division with truncation towards zero
         expected = chop(signed(op1) // signed(op2))
+    return expected
 
+
+@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
+def test_div(definition_dir: Path, op1: int, op2: int) -> None:
     _test_binary_op(
         definition_dir=definition_dir,
         symbol='LbldivWord',
         op1=op1,
         op2=op2,
-        res=expected,
+        res=div_expected(op1, op2),
     )
 
 
-@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
-def test_divu(definition_dir: Path, op1: int, op2: int) -> None:
+def divu_expected(op1: int, op2: int) -> int:
     # Calculate expected result according to RISC-V specification
     if op2 == 0:
         # Division by zero returns 2^32 - 1 (all bits set)
@@ -224,11 +226,15 @@ def test_divu(definition_dir: Path, op1: int, op2: int) -> None:
     else:
         # Normal unsigned division with truncation towards zero
         expected = op1 // op2
+    return expected
 
+
+@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
+def test_divu(definition_dir: Path, op1: int, op2: int) -> None:
     _test_binary_op(
         definition_dir=definition_dir,
         symbol='LbldivuWord',
         op1=op1,
         op2=op2,
-        res=expected,
+        res=divu_expected(op1, op2),
     )
