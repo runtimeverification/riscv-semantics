@@ -109,7 +109,7 @@ MUL_TEST_DATA: Final = (
 assert all(is_32bit(op1) and is_32bit(op2) for op1, op2 in MUL_TEST_DATA)
 
 
-def _test_mul(
+def _test_binary_op(
     definition_dir: Path,
     symbol: str,
     op1: int,
@@ -125,7 +125,7 @@ def _test_mul(
 
 @pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
 def test_mul(definition_dir: Path, op1: int, op2: int) -> None:
-    _test_mul(
+    _test_binary_op(
         definition_dir=definition_dir,
         symbol='LblmulWord',
         op1=op1,
@@ -136,7 +136,7 @@ def test_mul(definition_dir: Path, op1: int, op2: int) -> None:
 
 @pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
 def test_mulh(definition_dir: Path, op1: int, op2: int) -> None:
-    _test_mul(
+    _test_binary_op(
         definition_dir=definition_dir,
         symbol='LblmulhWord',
         op1=op1,
@@ -147,7 +147,7 @@ def test_mulh(definition_dir: Path, op1: int, op2: int) -> None:
 
 @pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
 def test_mulhu(definition_dir: Path, op1: int, op2: int) -> None:
-    _test_mul(
+    _test_binary_op(
         definition_dir=definition_dir,
         symbol='LblmulhuWord',
         op1=op1,
@@ -158,10 +158,84 @@ def test_mulhu(definition_dir: Path, op1: int, op2: int) -> None:
 
 @pytest.mark.parametrize('op1,op2', MUL_TEST_DATA, ids=count())
 def test_mulhsu(definition_dir: Path, op1: int, op2: int) -> None:
-    _test_mul(
+    _test_binary_op(
         definition_dir=definition_dir,
         symbol='LblmulhsuWord',
         op1=op1,
         op2=op2,
         res=chop((signed(op1) * op2) >> 32),
+    )
+
+
+DIV_TEST_DATA: Final = (
+    # Normal division cases
+    (10, 3),
+    (100, 7),
+    (0xFFFFFFFF, 1),  # -1 / 1 = -1
+    (0xFFFFFFFE, 2),  # -2 / 2 = -1
+    (0x80000000, 2),  # -2^31 / 2 = -2^30
+    (15, 4),
+    (0x7FFFFFFF, 3),  # 2^31-1 / 3
+    
+    # Division by zero cases
+    (0, 0),
+    (1, 0),
+    (0xFFFFFFFF, 0),  # -1 / 0
+    (0x80000000, 0),  # -2^31 / 0
+    (0x7FFFFFFF, 0),  # 2^31-1 / 0
+    
+    # Signed overflow case: -2^31 / -1
+    (0x80000000, 0xFFFFFFFF),  # -2^31 / -1 should return -2^31
+    
+    # Additional edge cases
+    (0x80000001, 0xFFFFFFFF),  # (-2^31+1) / -1 = 2^31-1
+    (0x7FFFFFFF, 0xFFFFFFFF),  # (2^31-1) / -1 = -(2^31-1)
+)
+
+
+assert all(is_32bit(op1) and is_32bit(op2) for op1, op2 in DIV_TEST_DATA)
+
+
+
+
+
+@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
+def test_div(definition_dir: Path, op1: int, op2: int) -> None:
+    # Calculate expected result according to RISC-V specification
+    if op2 == 0:
+        # Division by zero returns -1 (all bits set)
+        expected = 0xFFFFFFFF
+    elif op1 == 0x80000000 and op2 == 0xFFFFFFFF:
+        # Signed overflow: -2^31 / -1 returns the dividend (-2^31)
+        expected = 0x80000000
+    else:
+        # Normal signed division with truncation towards zero
+        result = signed(op1) // signed(op2)
+        expected = chop(result)
+    
+    _test_binary_op(
+        definition_dir=definition_dir,
+        symbol='LbldivWord',
+        op1=op1,
+        op2=op2,
+        res=expected,
+    )
+
+
+@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
+def test_divu(definition_dir: Path, op1: int, op2: int) -> None:
+    # Calculate expected result according to RISC-V specification
+    if op2 == 0:
+        # Division by zero returns 2^32 - 1 (all bits set)
+        expected = 0xFFFFFFFF
+    else:
+        # Normal unsigned division with truncation towards zero
+        expected = op1 // op2
+    
+    _test_binary_op(
+        definition_dir=definition_dir,
+        symbol='LbldivuWord',
+        op1=op1,
+        op2=op2,
+        res=expected,
     )

@@ -250,6 +250,14 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> MULHSU RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) *hsuWord readReg(REGS, RS2)) </regs>
 ```
+`DIV` and `DIVU` perform signed and unsigned division, respectively.
+```k
+  rule <instrs> DIV RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) /Word readReg(REGS, RS2)) </regs>
+
+  rule <instrs> DIVU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) /uWord readReg(REGS, RS2)) </regs>
+```
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
