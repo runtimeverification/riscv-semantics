@@ -204,8 +204,7 @@ def test_div(definition_dir: Path, op1: int, op2: int) -> None:
         expected = 0x80000000
     else:
         # Normal signed division with truncation towards zero
-        result = signed(op1) // signed(op2)
-        expected = chop(result)
+        expected = chop(signed(op1) // signed(op2))
 
     _test_binary_op(
         definition_dir=definition_dir,
