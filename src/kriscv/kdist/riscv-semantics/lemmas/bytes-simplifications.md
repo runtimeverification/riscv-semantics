@@ -173,7 +173,7 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     Int2Bytes(LEN, Bytes2Int(B, LE, Unsigned), LE)
     => B +Bytes Int2Bytes(LEN -Int lengthBytes(B), 0, LE)
     requires lengthBytes(B) <=Int LEN
-    [simplification, preserves-definedness]
+    [simplification]
 ```
 
 ```k
