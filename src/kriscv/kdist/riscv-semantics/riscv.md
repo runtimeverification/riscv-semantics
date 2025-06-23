@@ -93,16 +93,16 @@ module RISCV-MEMORY
 ```
 We abstract the particular memory representation behind `loadBytes` and `storeBytes` functions. For multi-byte loads and stores, we presume a little-endian architecture.
 ```k
-  syntax Int ::= loadBytes(memory: Memory, address: Int, numBytes: Int) [function, total, symbol(Memory:loadBytes)]
-  rule loadBytes(MEM, ADDR, NUM) => readBytes(MEM, ADDR, NUM)
+  syntax Int ::= loadBytes(address: Int, numBytes: Int, memory: Memory) [function, total, symbol(Memory:loadBytes)]
+  rule loadBytes(ADDR, NUM, MEM) => readBytes(ADDR, NUM, MEM)
 
-  syntax Memory ::= storeBytes(memory: Memory, address: Int, bytes: Int, numBytes: Int) [function, total, symbol(Memory:storeBytes)]
-  rule storeBytes(MEM, ADDR, BS, NUM) => writeBytes(MEM, ADDR, BS, NUM)
+  syntax Memory ::= storeBytes(address: Int, bytes: Int, numBytes: Int, memory: Memory) [function, total, symbol(Memory:storeBytes)]
+  rule storeBytes(ADDR, BS, NUM, MEM) => writeBytes(ADDR, BS, NUM, MEM)
 ```
 Instructions are always 32-bits, and are stored in little-endian format regardless of the endianness of the overall architecture.
 ```k
   syntax Instruction ::= fetchInstr(memory: Memory, address: Int) [function, total]
-  rule fetchInstr(MEM, ADDR) => disassemble(loadBytes(MEM, ADDR, 4))
+  rule fetchInstr(MEM, ADDR) => disassemble(loadBytes(ADDR, 4, MEM))
 ```
 Registers should be manipulated with the `writeReg` and `readReg` functions, which account for `x0` always being hard-wired to contain all `0`s.
 ```k
@@ -314,40 +314,40 @@ The remaining branch instructions proceed analogously, but performing different 
 `LB`, `LH`, and `LW` load `1`, `2`, and `4` bytes respectively from the memory address which is `OFFSET` greater than the value in register `RS1`, then sign extends the loaded bytes and places them in register `RD`.
 ```k
   rule <instrs> LB RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 1), 8)) </regs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(readReg(REGS, RS1) +Word chop(OFFSET), 1, MEM), 8)) </regs>
        <mem> MEM </mem>
 
   rule <instrs> LH RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2), 16)) </regs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(readReg(REGS, RS1) +Word chop(OFFSET), 2, MEM), 16)) </regs>
        <mem> MEM </mem>
 
   rule <instrs> LW RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 4), 32)) </regs>
+       <regs> REGS => writeReg(REGS, RD, signExtend(loadBytes(readReg(REGS, RS1) +Word chop(OFFSET), 4, MEM), 32)) </regs>
        <mem> MEM </mem>
 ```
 `LBU` and `LHU` are analogous to `LB` and `LH`, but zero-extending rather than sign-extending.
 ```k
    rule <instrs> LBU RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 1)) </regs>
+       <regs> REGS => writeReg(REGS, RD, loadBytes(readReg(REGS, RS1) +Word chop(OFFSET), 1, MEM)) </regs>
        <mem> MEM </mem>
 
   rule <instrs> LHU RD , OFFSET ( RS1 ) => .K ...</instrs>
-       <regs> REGS => writeReg(REGS, RD, loadBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), 2)) </regs>
+       <regs> REGS => writeReg(REGS, RD, loadBytes(readReg(REGS, RS1) +Word chop(OFFSET), 2, MEM)) </regs>
        <mem> MEM </mem>
 ```
 Dually, `SB`, `SH`, and `SW` store the least-significant `1`, `2`, and `4` bytes respectively from `RS2` to the memory address which is `OFFSET` greater than the value in register `RS1`.
 ```k
   rule <instrs> SB RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 255, 1) </mem>
+       <mem> MEM => storeBytes(readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 255, 1, MEM) </mem>
 
   rule <instrs> SH RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 65535, 2) </mem>
+       <mem> MEM => storeBytes(readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 65535, 2, MEM) </mem>
 
   rule <instrs> SW RS2 , OFFSET ( RS1 ) => .K ...</instrs>
        <regs> REGS </regs>
-       <mem> MEM => storeBytes(MEM, readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 4294967295, 4) </mem>
+       <mem> MEM => storeBytes(readReg(REGS, RS1) +Word chop(OFFSET), readReg(REGS, RS2) &Int 4294967295, 4, MEM) </mem>
 ```
 We presume a single hart with exclusive access to memory, so `FENCE` and `FENCE.TSO` are no-ops.
 ```k
