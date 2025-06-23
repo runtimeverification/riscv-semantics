@@ -30,6 +30,34 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
     requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
 ```
 
+## writeBytes
+
+```k
+  rule writeBytes(I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification, concrete(I)]
+  rule writeBytes(I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification, concrete(I)]
+
+  syntax SparseBytes ::= #WB(Bool, Int, Int, Int, SparseBytes) [function, total]
+  rule #WB(_, I, V, NUM, B:SparseBytes) => writeBytes(I, V, NUM, B) [concrete]
+  rule writeBytes(I, V, NUM, B:SparseBytes) => #WB(false, I, V, NUM, B) [simplification, symbolic(I)]
+
+  // termination
+  rule #WB(false, I, V, NUM, BF:SparseBytesBF) => #WB(true, I, V, NUM, BF) [simplification]
+  rule #WB(false, I, V, NUM, EF:SparseBytesEF) => #WB(true, I, V, NUM, EF) [simplification]
+
+  // down to the terminal case
+  rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I1, V1, NUM1, #WB(false, I0, V0, NUM0, B)) [simplification]
+  rule #WB(false, I, V0, NUM0, #WB(true, I, V1, NUM1, B:SparseBytes)) => #WB(true, I, V0, NUM0, #WB(true, I, V1, NUM1, B)) [simplification]
+
+  // Merge write operations with the same index
+  rule #WB(false, I, V, NUM, #WB(_, I, _, NUM, B:SparseBytes)) => #WB(false, I, V, NUM, B) [simplification(45)]
+  rule #WB(false, I, V0, NUM0, #WB(_, I, V1, NUM1, B:SparseBytes)) => 
+    #WB(false, I, V0, NUM0, #WB(false, I +Int NUM0, V1 >>Int (NUM0 *Int 8), NUM1 -Int NUM0, B))
+    requires NUM0 <Int NUM1 [simplification(45)]
+  rule #WB(false, I, V0, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V0, NUM0, B)
+    requires NUM1 <Int NUM0 [simplification(45)]
+
+  
+```
 
 ## writeByteBF
 

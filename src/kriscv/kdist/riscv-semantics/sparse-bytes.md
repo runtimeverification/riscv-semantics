@@ -87,8 +87,8 @@ We provide helpers to prepend either data or an empty region to an existing `Spa
     | writeBytesEF(Int, Int, Int, SparseBytesEF) [function, total]
     | writeBytesBF(Int, Int, Int, SparseBytesBF) [function, total]
 
-  rule writeBytes(I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF)
-  rule writeBytes(I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF)
+  rule writeBytes(I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [concrete]
+  rule writeBytes(I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [concrete]
 
   rule writeBytesEF(I, _, _  , _           ) => .SparseBytes    requires I <Int 0 // error case for totality
   rule writeBytesEF(I, V, NUM, .SparseBytes) => prependEmpty(I, #bytes(Int2Bytes(NUM, V, LE)) .SparseBytes)    requires I >=Int 0
