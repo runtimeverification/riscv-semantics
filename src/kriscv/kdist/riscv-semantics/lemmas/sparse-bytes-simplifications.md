@@ -49,8 +49,8 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
   rule #WB(false, I, V0, NUM0, #WB(true, I, V1, NUM1, B:SparseBytes)) => #WB(true, I, V0, NUM0, #WB(true, I, V1, NUM1, B)) [simplification]
 
   // Merge write operations with the same index
-  rule #WB(false, I, V, NUM, #WB(_, I, _, NUM, B:SparseBytes)) => #WB(false, I, V, NUM, B) [simplification(45)]
-  rule #WB(false, I, V0, NUM0, #WB(_, I, V1, NUM1, B:SparseBytes)) => 
+  rule #WB(false, I, V, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V, NUM0, B) 
+    requires NUM0 ==Int NUM1 [simplification(45)]
   rule #WB(false, I, V0, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V0, NUM0, B)
     requires NUM1 <Int NUM0 [simplification(45)]
 
