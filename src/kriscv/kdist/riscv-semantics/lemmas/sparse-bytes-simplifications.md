@@ -52,9 +52,7 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
   rule #WB(false, I, V, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V, NUM0, B) 
     requires NUM0 ==Int NUM1 [simplification(45)]
   rule #WB(false, I, V0, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V0, NUM0, B)
-    requires NUM1 <Int NUM0 [simplification(45)]
-
-  
+    requires NUM1 <Int NUM0 [simplification(45)]  
 ```
 
 ## writeByteBF
