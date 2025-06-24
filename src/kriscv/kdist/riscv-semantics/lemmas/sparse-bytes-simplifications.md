@@ -33,16 +33,18 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
 ## writeBytes
 
 ```k
-  rule writeBytes(I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification, concrete(I)]
-  rule writeBytes(I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification, concrete(I)]
+  rule writeBytes(I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification(45), concrete(I)]
+  rule writeBytes(I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification(45), concrete(I)]
 
   syntax SparseBytes ::= #WB(Bool, Int, Int, Int, SparseBytes) [function, total]
-  rule #WB(_, I, V, NUM, B:SparseBytes) => writeBytes(I, V, NUM, B) [concrete]
-  rule writeBytes(I, V, NUM, B:SparseBytes) => #WB(false, I, V, NUM, B) [simplification, symbolic(I)]
+  rule #WB(_, I, V, NUM, B:SparseBytes) => writeBytes(I, V, NUM, B)     [concrete]
+  rule writeBytes(I, V, NUM, B:SparseBytes) => #WB(false, I, V, NUM, B) [simplification]
 
   // termination
-  rule #WB(false, I, V, NUM, BF:SparseBytesBF) => #WB(true, I, V, NUM, BF) [simplification]
-  rule #WB(false, I, V, NUM, EF:SparseBytesEF) => #WB(true, I, V, NUM, EF) [simplification]
+  rule #WB(false, I, V, NUM, BF:SparseBytesBF) => #WB(true, I, V, NUM, BF)    [simplification]
+  rule #WB(false, I, V, NUM, EF:SparseBytesEF) => #WB(true, I, V, NUM, EF)    [simplification]
+  rule #WB(true,  I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification, concrete(I)]
+  rule #WB(true,  I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification, concrete(I)]
 
   // down to the terminal case
   rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I1, V1, NUM1, #WB(false, I0, V0, NUM0, B)) [simplification]
@@ -52,7 +54,7 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
   rule #WB(false, I, V, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V, NUM0, B) 
     requires NUM0 ==Int NUM1 [simplification(45)]
   rule #WB(false, I, V0, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V0, NUM0, B)
-    requires NUM1 <Int NUM0 [simplification(45)]  
+    requires NUM1 <Int NUM0  [simplification(45)]  
 ```
 
 ## writeByteBF
