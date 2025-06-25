@@ -39,6 +39,9 @@ module INT-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [int-and-ineq]: 0 <=Int A &Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
+  rule [int-and-ineq-4294967295]: 0 <=Int _ &Int 4294967295 => true [simplification(45)]
+  rule [int-and-ineq-65535]: 0 <=Int _ &Int 65535 => true [simplification(45)]
+  rule [int-and-ineq-255]: 0 <=Int _ &Int 255 => true [simplification(45)]
   rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
   rule [int-add-ineq]: A <=Int A +Int B => true requires 0 <=Int B [simplification]
   rule [int-add-ineq-0]: 0 <=Int A +Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
