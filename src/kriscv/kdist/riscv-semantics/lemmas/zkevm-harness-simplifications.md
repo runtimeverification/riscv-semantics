@@ -36,6 +36,12 @@ rule A <Int B +Int C => A -Int C <Int B [simplification, concrete(A,C), symbolic
 rule 0 |Int X => X [simplification]
 ```
 
+To handle the 6-th and 7-th registers in the zkevm-mstore claim, we need the following rules:
+```k
+rule Bool2Word(B) ==Int 0 => notBool B [simplification]
+rule Bool2Word(B) ==Int 1 => B [simplification]
+```
+
 ```k
 endmodule
 ```
