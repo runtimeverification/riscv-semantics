@@ -60,13 +60,14 @@ The `#WB` wrapper serves several purposes:
 
   // Reordering for Optimization
   rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I1, V1, NUM1, #WB(false, I0, V0, NUM0, B)) [simplification]
-  rule #WB(false, I, V0, NUM0, #WB(true, I, V1, NUM1, B:SparseBytes)) => #WB(true, I, V0, NUM0, #WB(true, I, V1, NUM1, B)) [simplification]
+  rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B)) 
+    requires I0 ==Int I1 [simplification]
 
   // Write Consolidation
-  rule #WB(false, I, V, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V, NUM0, B) 
-    requires NUM0 ==Int NUM1 [simplification(45)]
-  rule #WB(false, I, V0, NUM0, #WB(_, I, _, NUM1, B:SparseBytes)) => #WB(false, I, V0, NUM0, B)
-    requires NUM1 <Int NUM0  [simplification(45)]  
+  rule #WB(false, I0, V0, NUM0, #WB(_, I1, _, NUM1, B:SparseBytes)) => #WB(false, I0, V0, NUM0, B) 
+    requires NUM0 ==Int NUM1 andBool I0 ==Int I1 [simplification(45)]
+  rule #WB(false, I0, V0, NUM0, #WB(_, I1, _, NUM1, B:SparseBytes)) => #WB(false, I0, V0, NUM0, B)
+    requires NUM1 <Int NUM0 andBool I0 ==Int I1 [simplification(45)]  
 ```
 
 ## writeByteBF
