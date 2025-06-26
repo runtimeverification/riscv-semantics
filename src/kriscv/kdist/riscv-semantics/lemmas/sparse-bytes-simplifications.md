@@ -56,10 +56,15 @@ If the write index is symbolic, we use `#WB` to wrap the write operation. Unlike
   rule #WB(true,  I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification, concrete(I)]
 ```
 
-**Reordering for Optimization**: When multiple `#WB` operations are nested, the rules bring incomplete `#WB` operations (with `false` flag) to the terminal position, allowing them to traverse and find all possible merge opportunities. There is a special case when indices are the same but `NUM0 < NUM1`: in this situation, merging would introduce additional terms, so the operation is directly marked as completed to avoid complexity.
+**Reordering for Optimization**: When multiple `#WB` operations are nested, the rules bring incomplete `#WB` operations (with `false` flag) to the terminal position, allowing them to traverse and find all possible merge opportunities. 
 
 ```k
   rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I1, V1, NUM1, #WB(false, I0, V0, NUM0, B)) [simplification]
+```
+
+The following rule tackles a special case when indices are the same but `NUM0 < NUM1`: in this situation, merging would introduce additional terms, so the operation is directly marked as completed to avoid complexity.
+
+```k
   rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B)) 
     requires I0 ==Int I1 [simplification]
 ```
