@@ -28,6 +28,23 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
     requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45), preserves-definedness]
   rule dropFront(I, #bytes(B +Bytes BS) EF) => dropFront(I -Int lengthBytes(B), #bytes(BS) EF) 
     requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
+  
+  // pickFront and dropFront for #WB
+  rule pickFront(PICK, #WB(_, _, _, _, B:SparseBytes)) => pickFront(PICK, B) 
+    // omit this condition to make it easy to simplify: requires 0 =/=Int I 
+    [simplification(45)]
+  rule pickFront(PICK, #WB(_, I, V, NUM, B:SparseBytes)) => Int2Bytes(minInt(PICK, NUM), V, LE) +Bytes pickFront(maxInt(0, PICK -Int NUM), B >>SparseBytes minInt(PICK, NUM))
+    requires 0 ==Int I [simplification(40)]
+  rule dropFront(DROP, #WB(FLAG, I, V, NUM, B:SparseBytes)) => #WB(FLAG, I -Int DROP, V, NUM, dropFront(DROP, B)) 
+    [simplification(45)]
+
+  
+  syntax SparseBytes ::= SparseBytes ">>SparseBytes" Int  [function, total]
+  // It's not correct, but just make this function total
+  rule B >>SparseBytes _ => B [concrete]
+  rule #WB(FLAG, I, V, NUM, B:SparseBytes) >>SparseBytes SHIFT => #WB(FLAG, I, (V &Int (2 ^Int (NUM *Int 8)) -Int 1) >>Int (SHIFT *Int 8), NUM, B >>SparseBytes SHIFT)
+    requires SHIFT >=Int 0 [simplification(45), preserves-definedness]
+  rule B:SparseBytes >>SparseBytes _ => B [simplification]
 ```
 
 ## writeBytes
