@@ -46,7 +46,8 @@ module INT-SIMPLIFICATIONS [symbolic]
     (X &Int ((1 <<Int (lengthBytes(B0) *Int 8)) -Int 1)) ==Int Bytes2Int(B0, LE, Unsigned)
     andBool
     (X >>Int (lengthBytes(B0) *Int 8)) ==Int Bytes2Int(B1, LE, Unsigned)
-    [simplification, concrete(B0)]
+    [simplification, concrete(B0), preserves-definedness]
+    // without preserves-definedness, the rule is not applicable to B1 == substrBytes(B2, I, J)
 ```
 
 ## Inequality Lemmas
