@@ -39,6 +39,16 @@ module INT-SIMPLIFICATIONS [symbolic]
     requires Y <Int 256 [simplification, concrete(Y)]
 ```
 
+## Equality Lemmas
+
+```k
+  rule [int-eq-bytes2int]: X ==Int Bytes2Int(B0 +Bytes B1, LE, Unsigned) => 
+    (X &Int ((1 <<Int (lengthBytes(B0) *Int 8)) -Int 1)) ==Int Bytes2Int(B0, LE, Unsigned)
+    andBool
+    (X >>Int (lengthBytes(B0) *Int 8)) ==Int Bytes2Int(B1, LE, Unsigned)
+    [simplification, concrete(B0)]
+```
+
 ## Inequality Lemmas
 
 ```k
