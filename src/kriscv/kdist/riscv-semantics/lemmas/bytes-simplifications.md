@@ -47,6 +47,9 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     rule [bytes-concat-substr]: substrBytes(A, I0, J0) +Bytes substrBytes(A, I1, J1) => substrBytes(A, I0, J1)
       requires I0 <=Int J0 andBool I1 <=Int J1 andBool J0 ==Int I1 andBool J1 <=Int lengthBytes(A)
       [simplification, preserves-definedness]
+    rule [bytes-concat-substr-cxt]: substrBytes(A, I0, J0) +Bytes substrBytes(A, I1, J1) +Bytes B => substrBytes(A, I0, J1) +Bytes B
+      requires I0 <=Int J0 andBool I1 <=Int J1 andBool J0 ==Int I1 andBool J1 <=Int lengthBytes(A)
+      [simplification, preserves-definedness]
 ```
 
 ## Bytes Update Lemmas
