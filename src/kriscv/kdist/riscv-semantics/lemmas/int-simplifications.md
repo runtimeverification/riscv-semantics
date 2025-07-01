@@ -33,6 +33,10 @@ module INT-SIMPLIFICATIONS [symbolic]
     [simplification]
   rule [int-and-add-assoc-32]: ((X &Int 4294967295) +Int Y) &Int 4294967295 => (X +Int Y) &Int 4294967295
     [simplification]
+  rule [bytes2int-and-255]: Bytes2Int(X, LE, Unsigned) &Int 255 => Bytes2Int(X, LE, Unsigned)
+    requires lengthBytes(X) <=Int 1 [simplification]
+  rule [bytes2int-or-under-255]: Bytes2Int(b"\x00" +Bytes X, LE, Unsigned) |Int Y => Bytes2Int(Int2Bytes(Y, LE, Unsigned) +Bytes X, LE, Unsigned)
+    requires Y <Int 256 [simplification, concrete(Y)]
 ```
 
 ## Inequality Lemmas
