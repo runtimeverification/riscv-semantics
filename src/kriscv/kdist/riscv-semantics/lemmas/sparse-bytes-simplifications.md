@@ -15,18 +15,18 @@ module SPARSE-BYTES-SIMPLIFICATIONS
 For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _` and `#bytes(B +Bytes BS) EF` to obtain as exact as possible values for `pickFront`.
 
 ```k
-  rule pickFront(#bytes(substrBytes(B, I, J) +Bytes _) _ , J0) => substrBytes(substrBytes(B, I, J), 0, J0)
+  rule pickFront(J0, #bytes(substrBytes(B, I, J) +Bytes _) _) => substrBytes(substrBytes(B, I, J), 0, J0)
     requires 0 <=Int I andBool I <=Int J andBool J <=Int lengthBytes(B)
      andBool J0 <=Int lengthBytes(substrBytes(B, I, J))
   [simplification(44), preserves-definedness]
-  rule pickFront(#bytes(B +Bytes _) _ , I) => substrBytes(B, 0, I)
+  rule pickFront(I, #bytes(B +Bytes _) _) => substrBytes(B, 0, I)
     requires I >Int 0 andBool I <=Int lengthBytes(B)    [simplification(45), preserves-definedness]
-  rule pickFront(#bytes(B +Bytes BS) EF, I) => B +Bytes pickFront(#bytes(BS) EF, I -Int lengthBytes(B))
+  rule pickFront(I, #bytes(B +Bytes BS) EF) => B +Bytes pickFront(I -Int lengthBytes(B), #bytes(BS) EF)
     requires I >Int lengthBytes(B)                      [simplification(45), preserves-definedness]
 
-  rule dropFront(#bytes(B +Bytes BS) EF , I) => dropFront(#bytes(substrBytes(B, I, lengthBytes(B)) +Bytes BS) EF, 0) 
+  rule dropFront(I, #bytes(B +Bytes BS) EF) => dropFront(0, #bytes(substrBytes(B, I, lengthBytes(B)) +Bytes BS) EF) 
     requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45), preserves-definedness]
-  rule dropFront(#bytes(B +Bytes BS) EF, I) => dropFront(#bytes(BS) EF, I -Int lengthBytes(B)) 
+  rule dropFront(I, #bytes(B +Bytes BS) EF) => dropFront(I -Int lengthBytes(B), #bytes(BS) EF) 
     requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
 ```
 
@@ -36,11 +36,11 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
 To write a byte to a symbolic sparse byte region, we need to:
 
 ```k
-  rule writeBytesBF(#bytes(B +Bytes BS) EF, I, V, NUM) => #bytes(replaceAtBytes(B, I, Int2Bytes(NUM, V, LE)) +Bytes BS) EF
+  rule writeBytesBF(I, V, NUM, #bytes(B +Bytes BS) EF) => #bytes(replaceAtBytes(B, I, Int2Bytes(NUM, V, LE)) +Bytes BS) EF
     requires I >=Int 0 andBool I +Int NUM <=Int lengthBytes(B)  [simplification(45)]
-  rule writeBytesBF(#bytes(B +Bytes BS) EF, I, V, NUM) => prepend(substrBytes(B, 0, I) +Bytes Int2Bytes(NUM, V, LE), dropFront(#bytes(BS) EF, I +Int NUM -Int lengthBytes(B)))
+  rule writeBytesBF(I, V, NUM, #bytes(B +Bytes BS) EF) => prepend(substrBytes(B, 0, I) +Bytes Int2Bytes(NUM, V, LE), dropFront(I +Int NUM -Int lengthBytes(B), #bytes(BS) EF))
     requires I <Int lengthBytes(B) andBool I +Int NUM >Int lengthBytes(B)    [simplification(45)]
-  rule writeBytesBF(#bytes(B +Bytes BS) EF, I, V, NUM) => prepend(B, writeBytesBF(#bytes(BS) EF, I -Int lengthBytes(B), V, NUM))
+  rule writeBytesBF(I, V, NUM, #bytes(B +Bytes BS) EF) => prepend(B, writeBytesBF(I -Int lengthBytes(B), V, NUM, #bytes(BS) EF))
     requires I >=Int lengthBytes(B)                             [simplification(45)]
 ```
 

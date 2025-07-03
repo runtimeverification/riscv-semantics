@@ -278,11 +278,11 @@ def sort_memory() -> KSort:
 
 
 def load_bytes(mem: KInner, addr: KInner, num_bytes: KInner) -> KInner:
-    return KApply('Memory:loadBytes', mem, addr, num_bytes)
+    return KApply('Memory:loadBytes', addr, num_bytes, mem)
 
 
 def store_bytes(mem: KInner, addr: KInner, value: KInner, num_bytes: KInner) -> KInner:
-    return KApply('Memory:storeBytes', mem, addr, value, num_bytes)
+    return KApply('Memory:storeBytes', addr, value, num_bytes, mem)
 
 
 def regs(dct: dict[int, int]) -> KInner:

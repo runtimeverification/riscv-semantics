@@ -1,4 +1,4 @@
-module STORE-SYMBOLIC-BYTES
+module STORE-SYMBOLIC-VALUE
   imports RISCV
 
   claim [id]:
@@ -9,10 +9,10 @@ module STORE-SYMBOLIC-BYTES
     <pc> 0 </pc>
     <mem>
     storeBytes(
-        #bytes ( b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" ) .SparseBytes, 
         0, 
         X:Int,
-        4
+        4,
+        #bytes ( b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" ) .SparseBytes
     ) =>
     #bytes ( Int2Bytes ( 4 , X , LE ) +Bytes b"\x00\x00\x00\x00\x00\x00\x00\x00" ) .SparseBytes
     </mem>
