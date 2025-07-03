@@ -60,6 +60,7 @@ If the write index is symbolic, we use `#WB` to wrap the write operation. Unlike
 
 ```k
   rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I1, V1, NUM1, #WB(false, I0, V0, NUM0, B)) [simplification]
+  requires I0 =/=Int I1
 ```
 
 The following rule tackles a special case when indices are the same but `NUM0 < NUM1`: in this situation, merging would introduce additional terms, so the operation is directly marked as completed to avoid complexity.
