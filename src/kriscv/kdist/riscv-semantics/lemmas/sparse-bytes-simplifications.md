@@ -72,10 +72,8 @@ The rule below handles a termination edge case: it immediately marks the operati
 **Write Consolidation**: When multiple write operations target the same symbolic index with equal byte counts (`NUM0 == NUM1`), the rules merge them by eliminating the older write operation. When the new write has fewer bytes than the existing one (`NUM1 < NUM0`), the smaller write is also eliminated to maintain simplicity.
 
 ```k
-  rule #WB(false, I0, V0, NUM0, #WB(_, I1, _, NUM1, B:SparseBytes)) => #WB(false, I0, V0, NUM0, B) 
-    requires NUM0 ==Int NUM1 andBool I0 ==Int I1 [simplification(45)]
   rule #WB(false, I0, V0, NUM0, #WB(_, I1, _, NUM1, B:SparseBytes)) => #WB(false, I0, V0, NUM0, B)
-    requires NUM1 <Int NUM0 andBool I0 ==Int I1 [simplification(45)]  
+    requires I0 <=Int I1 andBool I1 +Int NUM1 <=Int I0 +Int NUM0  [simplification(45)]  
 ```
 
 ## writeByteBF
