@@ -63,11 +63,10 @@ If the write index is symbolic, we use `#WB` to wrap the write operation. Unlike
     requires I0 +Int NUM0 <=Int I1 orBool I1 +Int NUM1 <=Int I0 [simplification]
 ```
 
-The following rule tackles a special case when indices are the same but `NUM0 < NUM1`: in this situation, merging would introduce additional terms, so the operation is directly marked as completed to avoid complexity.
+The rule below handles a termination edge case: it immediately marks the operation as complete with reduced priority to avoid infinite rewriting cycles.
 
 ```k
-  rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B)) 
-    requires I0 ==Int I1 [simplification]
+  rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B)) [simplification(60)]
 ```
 
 **Write Consolidation**: When multiple write operations target the same symbolic index with equal byte counts (`NUM0 == NUM1`), the rules merge them by eliminating the older write operation. When the new write has fewer bytes than the existing one (`NUM1 < NUM0`), the smaller write is also eliminated to maintain simplicity.
