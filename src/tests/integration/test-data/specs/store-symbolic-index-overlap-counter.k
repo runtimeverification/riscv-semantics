@@ -8,15 +8,14 @@ module STORE-SYMBOLIC-INDEX-OVERLAP-COUNTER
     </regs>
     <pc> 0 </pc>
     <mem>
-    // Overlapping writes - should preserve original order when indices overlap
+    // Perfect overlapping writes - I0's write completely covers I1's write
     storeBytes(I0, V1, 2,
     storeBytes(I1, V0, 1, #bytes ( b"\x00\x00" ) .SparseBytes))
     => 
-    // Keep original order when overlapping - no simplification
-    #WB(true, I0, V1, 2, 
-    #WB(true, I1, V0, 1, #bytes ( b"\x00\x00" ) .SparseBytes))
+    // Only I0's write remains since it completely covers I1's write
+    #WB(true, I0, V1, 2, #bytes ( b"\x00\x00" ) .SparseBytes)
     </mem>
     <haltCond> ADDRESS ( 0 ) </haltCond>
-    requires // Overlapping case: I0 [I0, I0+2) overlaps with I1 [I1, I1+1)
-        I0 <=Int I1 andBool I1 <Int I0 +Int 2 // I1 is within the range of I0's write
+    requires // Perfect overlapping case: I1 is completely within I0's write range
+        I0 <=Int I1 andBool I1 +Int 1 <=Int I0 +Int 2 // I1's write [I1, I1+1) is within I0's write [I0, I0+2)
 endmodule 
