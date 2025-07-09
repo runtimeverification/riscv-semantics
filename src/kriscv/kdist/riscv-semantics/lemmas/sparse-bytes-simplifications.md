@@ -30,6 +30,51 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
     requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
 ```
 
+## writeBytes
+
+If the write index is concrete, we can directly call `writeBytesBF` or `writeBytesEF`.
+
+```k
+  rule writeBytes(I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification(45), concrete(I)]
+  rule writeBytes(I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification(45), concrete(I)]
+```
+
+If the write index is symbolic, we use `#WB` to wrap the write operation. Unlike `writeBytes`, `#WB` contains a boolean value to determine whether the write operation has been completed. `true` means completed, `false` means not completed.
+
+```k
+  syntax SparseBytes ::= #WB(Bool, Int, Int, Int, SparseBytes) [function, total]
+  rule #WB(_, I, V, NUM, B:SparseBytes) => writeBytes(I, V, NUM, B)     [concrete]
+  rule writeBytes(I, V, NUM, B:SparseBytes) => #WB(false, I, V, NUM, B) [simplification]
+```
+
+**Termination Control**: The boolean flag ensures that symbolic write operations eventually terminate by transitioning from `false` to `true` state, at which point concrete write functions can be applied when the index becomes concrete.
+
+```k
+  rule #WB(false, I, V, NUM, BF:SparseBytesBF) => #WB(true, I, V, NUM, BF)    [simplification]
+  rule #WB(false, I, V, NUM, EF:SparseBytesEF) => #WB(true, I, V, NUM, EF)    [simplification]
+  rule #WB(true,  I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification, concrete(I)]
+  rule #WB(true,  I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification, concrete(I)]
+```
+
+**Reordering for Optimization**: When multiple `#WB` operations are nested, the rules bring incomplete `#WB` operations (with `false` flag) to the terminal position, allowing them to traverse and find all possible merge opportunities. 
+
+```k
+  rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I1, V1, NUM1, #WB(false, I0, V0, NUM0, B)) 
+    requires I0 +Int NUM0 <=Int I1 orBool I1 +Int NUM1 <=Int I0 [simplification]
+```
+
+The rule below handles a termination edge case: it immediately marks the operation as complete with reduced priority to avoid infinite rewriting cycles.
+
+```k
+  rule #WB(false, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B:SparseBytes)) => #WB(true, I0, V0, NUM0, #WB(true, I1, V1, NUM1, B)) [simplification(60)]
+```
+
+**Write Consolidation**: When multiple write operations target the same symbolic index with equal byte counts (`NUM0 == NUM1`), the rules merge them by eliminating the older write operation. When the new write has fewer bytes than the existing one (`NUM1 < NUM0`), the smaller write is also eliminated to maintain simplicity.
+
+```k
+  rule #WB(false, I0, V0, NUM0, #WB(_, I1, _, NUM1, B:SparseBytes)) => #WB(false, I0, V0, NUM0, B)
+    requires I0 <=Int I1 andBool I1 +Int NUM1 <=Int I0 +Int NUM0  [simplification(45)]  
+```
 
 ## writeByteBF
 
