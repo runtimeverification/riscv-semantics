@@ -1,4 +1,4 @@
-module ZKEVM-SLOAD
+module INT-OR-BYTES-2S
   imports RISCV
 
   claim [id]:
