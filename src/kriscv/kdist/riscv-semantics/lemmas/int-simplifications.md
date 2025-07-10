@@ -33,16 +33,16 @@ module INT-SIMPLIFICATIONS [symbolic]
     [simplification]
   rule [int-and-add-assoc-32]: ((X &Int 4294967295) +Int Y) &Int 4294967295 => (X +Int Y) &Int 4294967295
     [simplification]
-  rule [bytes2int-and-255]: Bytes2Int(X, LE, Unsigned) &Int 255 => Bytes2Int(X, LE, Unsigned)
+  rule [bytes2int-and-255-noop]: Bytes2Int(X, LE, Unsigned) &Int 255 => Bytes2Int(X, LE, Unsigned)
     requires lengthBytes(X) <=Int 1 [simplification]
-  rule [bytes2int-or-under-255]: Bytes2Int(b"\x00" +Bytes X, LE, Unsigned) |Int Y => Bytes2Int(Int2Bytes(Y, LE, Unsigned) +Bytes X, LE, Unsigned)
+  rule [bytes2int-zero-prefix-or-to-concat]: Bytes2Int(b"\x00" +Bytes X, LE, Unsigned) |Int Y => Bytes2Int(Int2Bytes(Y, LE, Unsigned) +Bytes X, LE, Unsigned)
     requires Y <Int 256 [simplification, concrete(Y)]
 ```
 
 ## Equality Lemmas
 
 ```k
-  rule [int-eq-bytes2int]: X ==Int Bytes2Int(B0 +Bytes B1, LE, Unsigned) => 
+  rule [int-eq-bytes-concat-split]: X ==Int Bytes2Int(B0 +Bytes B1, LE, Unsigned) => 
     (X &Int ((1 <<Int (lengthBytes(B0) *Int 8)) -Int 1)) ==Int Bytes2Int(B0, LE, Unsigned)
     andBool
     (X >>Int (lengthBytes(B0) *Int 8)) ==Int Bytes2Int(B1, LE, Unsigned)
