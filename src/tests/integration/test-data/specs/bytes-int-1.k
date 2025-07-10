@@ -1,4 +1,4 @@
-module BYTES-INT-SIMPLIFICATION
+module BYTES-INT-1
   imports RISCV
 
   claim [id]:
