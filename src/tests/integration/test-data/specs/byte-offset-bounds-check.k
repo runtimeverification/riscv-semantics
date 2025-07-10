@@ -1,4 +1,4 @@
-module ZKEVM-MSTORE-0
+module BYTE-OFFSET-BOUNDS-CHECK
   imports RISCV
 
   claim [id]:
