@@ -1,4 +1,4 @@
-module ZKEVM-PUSH
+module BYTES-INT-SIMPLIFICATION
   imports RISCV
 
   claim [id]:
