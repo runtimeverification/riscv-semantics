@@ -28,23 +28,41 @@ For symbolic execution, we need to tackle the patterns of `#bytes(B +Bytes _) _`
     requires I >Int 0 andBool I <Int lengthBytes(B)     [simplification(45), preserves-definedness]
   rule dropFront(I, #bytes(B +Bytes BS) EF) => dropFront(I -Int lengthBytes(B), #bytes(BS) EF) 
     requires I >=Int lengthBytes(B)                     [simplification(45), preserves-definedness]
-  
-  // pickFront and dropFront for #WB
-  rule pickFront(PICK, #WB(_, _, _, _, B:SparseBytes)) => pickFront(PICK, B) 
-    // omit this condition to make it easy to simplify: requires 0 =/=Int I 
+```
+
+Simplification rules for pickFront and dropFront operations on symbolic write blocks (#WB)
+- Default case: For most symbolic write operations, we can bypass the #WB wrapper and apply pickFront directly to the underlying byte structure
+```k
+  rule pickFront(PICK, #WB(_, I, _, _, B:SparseBytes)) => pickFront(PICK, B) 
+    requires PICK <=Int I
     [simplification(45)]
+```
+- Special case for zero-indexed writes: When a write starts at position 0, we must combine bytes from both the written value and the remaining underlying structure
+```k
   rule pickFront(PICK, #WB(_, I, V, NUM, B:SparseBytes)) => Int2Bytes(minInt(PICK, NUM), V, LE) +Bytes pickFront(maxInt(0, PICK -Int NUM), B >>SparseBytes minInt(PICK, NUM))
     requires 0 ==Int I [simplification(40)]
+```
+- Front-dropping with symbolic writes: Adjust both the write offset and apply dropFront to the underlying structure to maintain correct relative positioning
+```k
   rule dropFront(DROP, #WB(FLAG, I, V, NUM, B:SparseBytes)) => #WB(FLAG, I -Int DROP, V, NUM, dropFront(DROP, B)) 
     [simplification(45)]
+```
 
-  
+## Right Shift Operations
+
+The `>>SparseBytes` operator performs a right shift operation on SparseBytes, effectively dropping the first N bytes from the sparse byte structure while maintaining the integer value semantics of the remaining bytes. Unlike `dropFront`, which simply removes N bytes from the beginning, `>>SparseBytes` performs a byte-level right shift that preserves the underlying integer representation of the data.
+
+This is primarily used in `pickFront` operations when we need to extract bytes from a specific offset within the sparse byte structure.
+
+```k
   syntax SparseBytes ::= SparseBytes ">>SparseBytes" Int  [function, total]
-  // It's not correct, but just make this function total
-  rule B >>SparseBytes _ => B [concrete]
-  rule #WB(FLAG, I, V, NUM, B:SparseBytes) >>SparseBytes SHIFT => #WB(FLAG, I, (V &Int (2 ^Int (NUM *Int 8)) -Int 1) >>Int (SHIFT *Int 8), NUM, B >>SparseBytes SHIFT)
+
+  // For concrete sparse bytes, we can directly use dropFront to simplify the operation
+  rule SBS >>SparseBytes SHIFT => dropFront(SHIFT, SBS) [concrete]
+  
+  // Symbolic write case: Adjust the written value by right-shifting and recursively apply to underlying structure
+  rule #WB(FLAG, I, V, NUM, B:SparseBytes) >>SparseBytes SHIFT => #WB(FLAG, maxInt(0, I -Int SHIFT), V >>Int (SHIFT *Int 8), NUM, B >>SparseBytes SHIFT)
     requires SHIFT >=Int 0 [simplification(45), preserves-definedness]
-  rule B:SparseBytes >>SparseBytes _ => B [simplification]
 ```
 
 ## writeBytes
@@ -67,10 +85,11 @@ If the write index is symbolic, we use `#WB` to wrap the write operation. Unlike
 **Termination Control**: The boolean flag ensures that symbolic write operations eventually terminate by transitioning from `false` to `true` state, at which point concrete write functions can be applied when the index becomes concrete.
 
 ```k
-  rule #WB(false, I, V, NUM, BF:SparseBytesBF) => #WB(true, I, V, NUM, BF)    [simplification]
-  rule #WB(false, I, V, NUM, EF:SparseBytesEF) => #WB(true, I, V, NUM, EF)    [simplification]
-  rule #WB(true,  I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF) [simplification, concrete(I)]
-  rule #WB(true,  I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF) [simplification, concrete(I)]
+  rule #WB(_, I, _, NUM, B:SparseBytes) => B requires I <Int 0 orBool NUM <=Int 0 [simplification(40)]
+  rule #WB(false, I, V, NUM, BF:SparseBytesBF) => #WB(true, I, V, NUM, BF)        [simplification]
+  rule #WB(false, I, V, NUM, EF:SparseBytesEF) => #WB(true, I, V, NUM, EF)        [simplification]
+  rule #WB(true,  I, V, NUM, BF:SparseBytesBF) => writeBytesBF(I, V, NUM, BF)     [simplification, concrete(I)]
+  rule #WB(true,  I, V, NUM, EF:SparseBytesEF) => writeBytesEF(I, V, NUM, EF)     [simplification, concrete(I)]
 ```
 
 **Reordering for Optimization**: When multiple `#WB` operations are nested, the rules bring incomplete `#WB` operations (with `false` flag) to the terminal position, allowing them to traverse and find all possible merge opportunities. 
@@ -93,7 +112,7 @@ The rule below handles a termination edge case: it immediately marks the operati
     requires I0 <=Int I1 andBool I1 +Int NUM1 <=Int I0 +Int NUM0  [simplification(45)]  
 ```
 
-## writeByteBF
+## writeBytesBF
 
 To write a byte to a symbolic sparse byte region, we need to:
 

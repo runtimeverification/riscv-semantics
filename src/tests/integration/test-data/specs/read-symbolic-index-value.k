@@ -36,7 +36,7 @@ module READ-SYMBOLIC-INDEX-VALUE
           #WB(true, I0, V2, 4,
           #WB(true, I2, V3, 4, 
           #bytes (Int2Bytes(4, V4, LE) +Bytes b"\x00\x00\x00\x00\x00\x00\x00\x00") .SparseBytes)))))
-          => V0 &Int 65535)
+          => V0)
     // read I1 with 4 bytes
         5 |-> (readBytes(I1, 4,
           #WB(true, I1, V0, 2,
@@ -48,10 +48,7 @@ module READ-SYMBOLIC-INDEX-VALUE
     </regs>
     <pc> 0 </pc>
     <haltCond> ADDRESS ( 0 ) </haltCond>
-    // index not equal to 0
-    requires 4 =/=Int I0 andBool 4 =/=Int I1 andBool 4 =/=Int I2
-    // different indices
-    andBool  I0 =/=Int I1 andBool I0 =/=Int I2 andBool  I1 =/=Int I2
+    requires 8 <Int I0 andBool I0 +Int 4 <Int I1 andBool I1 +Int 4 <Int I2
     // values are within range
     andBool  0 <=Int V0 andBool V0 <=Int 65535
     andBool  0 <=Int V1 andBool V1 <=Int 4294967295

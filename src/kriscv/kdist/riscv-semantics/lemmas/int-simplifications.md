@@ -26,6 +26,7 @@ module INT-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [chop-32bits]: X &Int 4294967295 => X requires 0 <=Int X andBool X <Int 4294967296 [simplification]
+  rule [chop-16bits]: X &Int 65535 => X requires 0 <=Int X andBool X <Int 65536 [simplification]
   rule [int-and-assoc]: (X &Int Y) &Int Z => X &Int (Y &Int Z) [simplification, symbolic(X), concrete(Y,Z)]
   rule [int-and-add-assoc-8]: ((X &Int 255) +Int Y) &Int 255 => (X +Int Y) &Int 255
     [simplification]
