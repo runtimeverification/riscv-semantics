@@ -53,8 +53,6 @@ module INT-SIMPLIFICATIONS [symbolic]
 ## Additional Int Simplifications
 
 ```k
-  rule [int-bool2word-or-ineq]: 0 <Int (0 -Int Bool2Word(4294967295 <Int X)) &Int 4294967295 |Int X &Int 4294967295 => true 
-    requires 0 <Int X [simplification(45)]
   rule [int-add-ineq-pos-1]: 0 <Int A +Int B => true 
     requires 0 <=Int A andBool 0 <Int B [simplification(45)]
   rule [int-add-ineq-pos-2]: 0 <Int A +Int B => true 
