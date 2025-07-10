@@ -1,4 +1,4 @@
-module ZKEVM-SSTORE
+module BYTES-CONCAT-CONSECUTIVE
   imports RISCV
 
   claim [id]:
