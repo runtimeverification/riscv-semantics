@@ -54,11 +54,24 @@ module INT-SIMPLIFICATIONS [symbolic]
 
 ```k
   rule [int-and-ineq]: 0 <=Int A &Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
+  rule [int-and-ineq-4294967295]: 0 <=Int _ &Int 4294967295 => true [simplification(45)]
+  rule [int-and-ineq-65535]: 0 <=Int _ &Int 65535 => true [simplification(45)]
+  rule [int-and-ineq-255]: 0 <=Int _ &Int 255 => true [simplification(45)]
+  rule [int-or-gt]: 0 <Int A |Int B => true requires 0 <Int A orBool 0 <Int B [simplification]
   rule [int-rhs-ineq]: 0 <=Int A >>Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
   rule [int-add-ineq]: A <=Int A +Int B => true requires 0 <=Int B [simplification]
   rule [int-add-ineq-0]: 0 <=Int A +Int B => true requires 0 <=Int A andBool 0 <=Int B [simplification]
   rule [int-add-ineq-4294967295]: X &Int 4294967295 <Int A => 4294967295 <Int X
     requires 0 <=Int A andBool A <=Int X [simplification]
+```
+
+## Additional Int Simplifications
+
+```k
+  rule [int-add-ineq-pos-1]: 0 <Int A +Int B => true 
+    requires 0 <=Int A andBool 0 <Int B [simplification(45)]
+  rule [int-add-ineq-pos-2]: 0 <Int A +Int B => true 
+    requires 0 <Int A andBool 0 <=Int B [simplification]
 ```
 
 ## Int Expression Simplifications for Bytes

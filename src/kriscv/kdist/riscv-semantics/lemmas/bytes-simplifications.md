@@ -183,6 +183,13 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     [simplification]
 ```
 
+## Additional Bytes Simplifications
+
+```k
+  rule [bytes2int-pad-trailing-zeros]: Bytes2Int (B:Bytes +Bytes b"\x00\x00\x00" , LE , Unsigned ) => Bytes2Int (B, LE, Unsigned) 
+    [simplification(45)]
+```
+
 ```k
 endmodule
 ```
