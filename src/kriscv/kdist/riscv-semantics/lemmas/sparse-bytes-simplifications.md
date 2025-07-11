@@ -39,7 +39,7 @@ Simplification rules for pickFront and dropFront operations on symbolic write bl
 ```
 - Special case for zero-indexed writes: When a write starts at position 0, we must combine bytes from both the written value and the remaining underlying structure
 ```k
-  rule pickFront(PICK, #WB(_, I, V, NUM, B:SparseBytes)) => Int2Bytes(minInt(PICK, NUM), V, LE) +Bytes pickFront(maxInt(0, PICK -Int NUM), B >>SparseBytes minInt(PICK, NUM))
+  rule pickFront(PICK, #WB(_, I, V, NUM, B:SparseBytes)) => Int2Bytes(minInt(PICK, NUM), V, LE) +Bytes pickFront(maxInt(0, PICK -Int NUM), B >>SparseBytes NUM)
     requires 0 ==Int I [simplification(40)]
 ```
 - Front-dropping with symbolic writes: Adjust both the write offset and apply dropFront to the underlying structure to maintain correct relative positioning
