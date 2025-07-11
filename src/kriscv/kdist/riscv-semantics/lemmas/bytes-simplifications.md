@@ -43,6 +43,13 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     rule [bytes-concat-right-assoc-symb-l]: (B1:Bytes +Bytes B2:Bytes) +Bytes B3:Bytes => B1 +Bytes (B2 +Bytes B3) [symbolic(B1), simplification(40)]
     rule [bytes-concat-right-assoc-symb-r]: (B1:Bytes +Bytes B2:Bytes) +Bytes B3:Bytes => B1 +Bytes (B2 +Bytes B3) [symbolic(B2), simplification(40)]
     rule [bytes-concat-left-assoc-conc]:    B1:Bytes +Bytes (B2:Bytes +Bytes B3:Bytes) => (B1 +Bytes B2) +Bytes B3 [concrete(B1, B2), symbolic(B3), simplification(40)]
+
+    rule [bytes-concat-substr]: substrBytes(A, I0, J0) +Bytes substrBytes(A, I1, J1) => substrBytes(A, I0, J1)
+      requires I0 <=Int J0 andBool I1 <=Int J1 andBool J0 ==Int I1 andBool J1 <=Int lengthBytes(A)
+      [simplification, preserves-definedness]
+    rule [bytes-concat-substr-cxt]: substrBytes(A, I0, J0) +Bytes substrBytes(A, I1, J1) +Bytes B => substrBytes(A, I0, J1) +Bytes B
+      requires I0 <=Int J0 andBool I1 <=Int J1 andBool J0 ==Int I1 andBool J1 <=Int lengthBytes(A)
+      [simplification, preserves-definedness]
 ```
 
 ## Bytes Update Lemmas
@@ -174,6 +181,13 @@ module BYTES-SIMPLIFICATIONS [symbolic]
     => B +Bytes Int2Bytes(LEN -Int lengthBytes(B), 0, LE)
     requires lengthBytes(B) <=Int LEN
     [simplification]
+```
+
+## Additional Bytes Simplifications
+
+```k
+  rule [bytes2int-pad-trailing-zeros]: Bytes2Int (B:Bytes +Bytes b"\x00\x00\x00" , LE , Unsigned ) => Bytes2Int (B, LE, Unsigned) 
+    [simplification(45)]
 ```
 
 ```k
