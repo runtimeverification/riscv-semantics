@@ -643,7 +643,7 @@ wheels = [
 
 [[package]]
 name = "kriscv"
-version = "0.1.117"
+version = "0.1.118"
 source = { editable = "." }
 dependencies = [
     { name = "filelock" },
