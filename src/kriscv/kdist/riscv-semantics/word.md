@@ -63,6 +63,8 @@ To avoid syntax conflicts, we define the following syntax with `left` associativ
                 | Int "*hsuWord" Int [function, total, symbol(mulhsuWord)]
                 | Int "/Word"    Int [function, total, symbol(divWord)]
                 | Int "/uWord"   Int [function, total, symbol(divuWord)]
+                | Int "%Word"    Int [function, total, symbol(remWord)]
+                | Int "%uWord"   Int [function, total, symbol(remuWord)]
                 > left:
                   Int "+Word"    Int [function, total, symbol(addWord)]
                 | Int "-Word"    Int [function, total, symbol(subWord)]
@@ -113,6 +115,26 @@ For unsigned division (`/uWord`):
 ```k
   rule _  /uWord W2 => chop((2 ^Int XLEN) -Int 1) requires W2 ==Word 0
   rule W1 /uWord W2 => chop(W1 /Int W2) requires W2 =/=Word 0
+```
+For signed remainder (`%Word`):
+- Division by zero returns the dividend
+- Signed overflow (most negative number divided by -1) returns 0
+- Normal case performs signed remainder with truncation towards zero
+```k
+  rule W1 %Word W2 => W1 requires W2 ==Word 0
+  rule W1 %Word W2 => 0 
+    requires W1 ==Word 2 ^Int (XLEN -Int 1)
+     andBool W2 ==Word chop(-1)
+  rule W1 %Word W2 => chop(Word2SInt(W1) %Int Word2SInt(W2)) 
+    requires W2 =/=Word 0 
+     andBool notBool (W1 ==Word chop(2 ^Int (XLEN -Int 1)) andBool W2 ==Word chop(-1))
+```
+For unsigned remainder (`%uWord`):
+- Division by zero returns the dividend
+- Normal case performs unsigned remainder with truncation towards zero
+```k
+  rule W1 %uWord W2 => W1 requires W2 ==Word 0
+  rule W1 %uWord W2 => chop(W1 %Int W2) requires W2 =/=Word 0
 ```
 Above, the `chop` utility function
 ```k
