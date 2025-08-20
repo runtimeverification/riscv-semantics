@@ -123,12 +123,14 @@ def _test_simple(tools: Tools, elf_file: Path, assert_file: Path, final_config_o
 )
 def test_simple(asm_file: Path, save_final_config: bool, temp_dir: Path) -> None:
     elf_file = Path(temp_dir) / (asm_file.stem + '.elf')
+    # Use rv32em for tests that require M extension (mul/div/rem instructions)
+    arch = 'rv32em' if asm_file.stem in ['rem', 'remu'] else 'rv32e'
     compile_cmd = [
         'riscv64-unknown-elf-gcc',
         '-nostdlib',
         '-nostartfiles',
         '-static',
-        '-march=rv32e',
+        f'-march={arch}',
         '-mabi=ilp32e',
         '-mno-relax',
         '-mlittle-endian',

@@ -258,6 +258,14 @@ The following instructions behave analogously to their `I`-suffixed counterparts
   rule <instrs> DIVU RD , RS1 , RS2 => .K ...</instrs>
        <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) /uWord readReg(REGS, RS2)) </regs>
 ```
+`REM` and `REMU` perform signed and unsigned remainder, respectively.
+```k
+  rule <instrs> REM RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) %Word readReg(REGS, RS2)) </regs>
+
+  rule <instrs> REMU RD , RS1 , RS2 => .K ...</instrs>
+       <regs> REGS => writeReg(REGS, RD, readReg(REGS, RS1) %uWord readReg(REGS, RS2)) </regs>
+```
 `SLL`, `SRL`, and `SRA` read their shift amount fom the lowest `log_2(XLEN)` bits of `RS2`.
 ```k
   rule <instrs> SLL RD , RS1 , RS2 => .K ...</instrs>
