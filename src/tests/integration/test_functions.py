@@ -238,3 +238,50 @@ def test_divu(definition_dir: Path, op1: int, op2: int) -> None:
         op2=op2,
         res=divu_expected(op1, op2),
     )
+
+
+def rem_expected(op1: int, op2: int) -> int:
+    # Calculate expected result according to RISC-V specification for signed remainder
+    if op2 == 0:
+        # Division by zero returns the dividend
+        expected = op1
+    elif op1 == 0x80000000 and op2 == 0xFFFFFFFF:
+        # Signed overflow: -2^31 % -1 returns 0
+        expected = 0
+    else:
+        # Normal signed remainder with truncation towards zero
+        expected = chop(signed(op1) % signed(op2))
+    return expected
+
+
+@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
+def test_rem(definition_dir: Path, op1: int, op2: int) -> None:
+    _test_binary_op(
+        definition_dir=definition_dir,
+        symbol='LblremWord',
+        op1=op1,
+        op2=op2,
+        res=rem_expected(op1, op2),
+    )
+
+
+def remu_expected(op1: int, op2: int) -> int:
+    # Calculate expected result according to RISC-V specification for unsigned remainder
+    if op2 == 0:
+        # Division by zero returns the dividend
+        expected = op1
+    else:
+        # Normal unsigned remainder with truncation towards zero
+        expected = op1 % op2
+    return expected
+
+
+@pytest.mark.parametrize('op1,op2', DIV_TEST_DATA, ids=count())
+def test_remu(definition_dir: Path, op1: int, op2: int) -> None:
+    _test_binary_op(
+        definition_dir=definition_dir,
+        symbol='LblremuWord',
+        op1=op1,
+        op2=op2,
+        res=remu_expected(op1, op2),
+    )
