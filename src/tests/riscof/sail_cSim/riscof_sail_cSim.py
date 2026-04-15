@@ -45,16 +45,9 @@ class sail_cSim(pluginTemplate):  # noqa N801
         self.env = env
         self.compile_cmd = 'riscv64-unknown-elf-gcc -march={0} \
          -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
-        self.compile_cmd += (
-            ' -T '
-            + self.pluginpath
-            + '/env/link.ld\
-            -I '
-            + self.pluginpath
-            + '/env/\
-            -I '
-            + env
-        )
+        self.compile_cmd += ' -T ' + self.pluginpath + '/env/link.ld\
+            -I ' + self.pluginpath + '/env/\
+            -I ' + env
 
     def build(self, isa_yaml: str, platform_yaml: str) -> None:
         ispec = utils.load_yaml(isa_yaml)['hart0']
